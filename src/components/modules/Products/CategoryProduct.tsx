@@ -37,7 +37,7 @@ export default async function CategoryProductPage({ slug, categoryData, showAll 
     const products: Post[] = data.products.map((item: any) => item.product) ?? [];
 
     // Show all products on category page, or just 6 on home page
-    const displayProducts = showAll ? products : products.slice(0, 6);
+    const displayProducts = showAll ? products : products.slice(0, 5);
 
     return (
         <div className="mb-10">
@@ -74,7 +74,7 @@ export default async function CategoryProductPage({ slug, categoryData, showAll 
 
             {/* Products Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {displayProducts.slice(0, 5).map((product: Post) => (
+                {displayProducts.map((product: Post) => (
                     <ProductCard key={product.id} post={product} />
                 ))}
             </div>

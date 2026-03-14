@@ -9,6 +9,7 @@ export default async function HomePage() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/product`, {
     next: {
       tags: ["PRODUCTS"],
+
     },
   });
   const { data: products } = await res.json();
