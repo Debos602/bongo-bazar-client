@@ -1,6 +1,6 @@
 import Loading from "@/components/ui/Loading";
 
-const BlogsLoadingPage = () => {
+const ProductsLoadingPage = () => {
     return (
         <div className="py-32">
             <Loading />
@@ -8,4 +8,4 @@ const BlogsLoadingPage = () => {
     );
 };
 
-export default BlogsLoadingPage;
+export default ProductsLoadingPage;

@@ -8,19 +8,13 @@ export const create = async (data: FormData) => {
 
     const session = await getUserSession();
 
-    // console.log("create-action", data);
-    const blogInfo = Object.fromEntries(data.entries());  //its converts as plain object
+    const productInfo = Object.fromEntries(data.entries());
     const modifiedData = {
-        ...blogInfo,
-        tags: blogInfo.tags
-            .toString()
-            .split(",")
-            .map((tag) => tag.trim()),
-        authorId: session?.user?.id,
-        isFeatured: Boolean(blogInfo.isFeatured),
+        ...productInfo,
+        vendorId: session?.user?.id
     };
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/post`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/product`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -28,13 +22,11 @@ export const create = async (data: FormData) => {
         body: JSON.stringify(modifiedData),
     });
 
-    console.log("result", res);
-
     const result = await res.json();
 
     if (result?.id) {
-        revalidateTag("BLOGS");
-        revalidatePath("/blogs");
+        revalidateTag("PRODUCTS");
+        revalidatePath("/products");
         redirect("/");
     }
     return result;

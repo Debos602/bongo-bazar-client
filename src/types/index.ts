@@ -22,16 +22,31 @@ export interface User {
 
 export interface Post {
     id: number;
-    title: string;
-    content: string;
-    thumbnail: string;
-    isFeatured: boolean;
-    tags: string[];
-    views: number;
-    authorId: number;
-    createdAt: string;   // চাইলে Date ব্যবহার করতে পারো
-    updatedAt: string;   // চাইলে Date ব্যবহার করতে পারো
-    author: User;
+    // Blog-style fields
+    title?: string;
+    content?: string;
+    thumbnail?: string;
+    isFeatured?: boolean;
+    tags?: string[];
+    views?: number;
+    authorId?: number;
+    createdAt?: string;   // চাইলে Date ব্যবহার করতে পারো
+    updatedAt?: string;   // চাইলে Date ব্যবহার করতে পারো
+    author?: User;
+
+    // Product-style fields
+    name?: string;
+    description?: string;
+    image?: string;
+    price?: number;
+    oldPrice?: number;
+    discount?: number;
+    stock?: number;
+    sku?: string;
+    rating?: number;
+    reviewCount?: number;
+    isPublished?: boolean;
+    vendorId?: number;
 }
 
 export interface Blog {
@@ -40,5 +55,11 @@ export interface Blog {
     content: string;
     author: string;
     createdAt: string;
+}
 
+export interface Category {
+    id: number;
+    name: string;
+    slug: string;
+    products?: Array<{ productId: number; categoryId: number; product: Post; }>;
 }
