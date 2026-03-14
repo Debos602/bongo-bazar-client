@@ -8,11 +8,15 @@ export const metadata: Metadata = {
     description: "Browse all products available in the store. Find deals, prices and stock information."
 };
 
-const AllProductsPage = async ({ searchParams }: { searchParams?: { page?: string; limit?: string; }; }) => {
+const AllProductsPage = async ({ searchParams }: { searchParams?: { page?: string; limit?: string; searchTerm?: string; }; }) => {
     const page = parseInt(searchParams?.page || "1");
     const limit = parseInt(searchParams?.limit || "10");
+    const searchTerm = searchParams?.searchTerm?.toString() || "";
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/product?page=${page}&limit=${limit}`, {
+    let url = `${process.env.NEXT_PUBLIC_BASE_API}/product?page=${page}&limit=${limit}`;
+    if (searchTerm) url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+
+    const res = await fetch(url, {
         cache: "no-store",
     });
     const { data: products, meta } = await res.json();

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import {
   Phone, Mail, Home, ShoppingCart, Search,
@@ -43,6 +44,7 @@ export default function Navbar() {
   const [catOpen, setCatOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -152,6 +154,10 @@ export default function Navbar() {
                 style={{ borderColor: "#16a34a", borderRight: "none" }}
               />
               <button
+                onClick={() => {
+                  if (searchQuery.trim()) router.push(`/products?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
+                  else router.push(`/products`);
+                }}
                 className="px-5 text-white font-semibold rounded-r-md transition-all hover:opacity-90 active:scale-95"
                 style={{ background: "linear-gradient(135deg,#16a34a,#15803d)", border: "2px solid #15803d", borderLeft: "none" }}
               >
@@ -199,10 +205,18 @@ export default function Navbar() {
 
                   {/* Mobile search */}
                   <div className="flex p-3 border-b">
-                    <Input placeholder="সার্চ করুন..."
+                    <Input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="সার্চ করুন..."
                       className="rounded-r-none text-sm border-2 focus-visible:ring-0"
                       style={{ borderColor: "#16a34a", borderRight: "none" }} />
-                    <button className="rounded-r-md px-3 text-white"
+                    <button
+                      onClick={() => {
+                        if (searchQuery.trim()) router.push(`/products?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
+                        setMobileOpen(false);
+                      }}
+                      className="rounded-r-md px-3 text-white"
                       style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}>
                       <Search className="w-4 h-4" />
                     </button>
@@ -245,7 +259,12 @@ export default function Navbar() {
               className="rounded-r-none border-2 focus-visible:ring-0 text-sm"
               style={{ borderColor: "#16a34a", borderRight: "none" }}
             />
-            <button className="px-4 rounded-r-md text-white"
+            <button
+              onClick={() => {
+                if (searchQuery.trim()) router.push(`/products?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
+                else router.push(`/products`);
+              }}
+              className="px-4 rounded-r-md text-white"
               style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}>
               <Search className="w-4 h-4" />
             </button>
