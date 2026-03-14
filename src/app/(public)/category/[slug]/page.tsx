@@ -2,22 +2,22 @@ import CategoryProductPage from "@/components/modules/Products/CategoryProduct";
 import { Metadata } from "next";
 
 interface Props {
-    params: { slug: string; };
+    params: Promise<{ slug: string; }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { slug } = await params;
     return {
-        title: `${params.slug} — Category | Bongo Bazar`,
-        description: `Products in ${params.slug} category.`,
+        title: `${slug} — Category | Bongo Bazar`,
+        description: `Products in ${slug} category.`,
     };
 }
 
 export default async function CategoryPage({ params }: Props) {
-    const { slug } = params;
+    const { slug } = await params;
     return (
         <div className="container mx-auto py-6">
-
-            <CategoryProductPage slug={slug} />
+            <CategoryProductPage slug={slug} showAll={true} />
         </div>
     );
 }

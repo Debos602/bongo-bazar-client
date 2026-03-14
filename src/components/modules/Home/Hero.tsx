@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ShoppingBag, Tag, Zap, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Category } from "@/types";
 
 /* ─── Slide data ─────────────────────────────────────────────── */
 const slides = [
@@ -63,22 +64,35 @@ const slides = [
   },
 ];
 
-/* ─── Category quick-access ─────────────────────────────────── */
-const categories = [
-  { icon: "👟", label: "Baby Shoes", href: "/category/baby-shoes", color: "#16a34a" },
-  { icon: "👗", label: "Baby Cloth", href: "/category/baby-cloth", color: "#2563eb" },
-  { icon: "🏠", label: "Home Appliance", href: "/category/home-appliance", color: "#9333ea" },
-  { icon: "🧸", label: "Toys & Games", href: "/category/toys", color: "#f59e0b" },
-  { icon: "📱", label: "Electronics", href: "/category/electronics", color: "#0891b2" },
-  { icon: "💄", label: "Beauty", href: "/category/beauty", color: "#ec4899" },
-  { icon: "🍼", label: "Baby Care", href: "/category/baby-care", color: "#10b981" },
-  { icon: "🔥", label: "হট ডিল", href: "/hot-deals", color: "#dc2626" },
-];
+interface HeroProps {
+  categories?: Category[];
+}
 
-export default function Hero() {
+// Map category slugs to emoji icons
+const categoryIcons: Record<string, string> = {
+  laptop: "💻",
+  phone: "📱",
+  tablet: "📱",
+  monitor: "🖥️",
+  tv: "📺",
+  headphones: "🎧",
+  earbuds: "🎧",
+  speaker: "🔊",
+  smartwatch: "⌚",
+  camera: "📷",
+  // Fallback for other categories
+};
+
+const getCategoryIcon = (slug: string): string => {
+  return categoryIcons[slug] || "📦";
+};
+
+export default function Hero({ categories = [] }: HeroProps) {
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ h: 5, m: 59, s: 47 });
+
+
 
   /* auto-slide */
   useEffect(() => {
@@ -126,19 +140,19 @@ export default function Hero() {
           </div>
           {categories.map((cat) => (
             <Link
-              key={cat.href}
-              href={cat.href}
+              key={cat.slug}
+              href={`/category/${cat.slug}`}
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 border-b border-gray-50 last:border-0 transition-all hover:pl-6 group"
-              style={{ "--hover-color": cat.color } as React.CSSProperties}
+              style={{ "--hover-color": "#1d4ed8" } as React.CSSProperties}
             >
               <span
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0 transition-transform group-hover:scale-110"
-                style={{ background: `${cat.color}18` }}
+                style={{ background: "#1d4ed818" }}
               >
-                {cat.icon}
+                {getCategoryIcon(cat.slug)}
               </span>
               <span className="font-medium group-hover:text-[var(--hover-color)] transition-colors">
-                {cat.label}
+                {cat.name}
               </span>
             </Link>
           ))}

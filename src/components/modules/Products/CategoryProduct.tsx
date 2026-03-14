@@ -2,46 +2,42 @@
 
 import ProductCard from "@/components/modules/Products/ProductCard";
 import Link from "next/link";
-import { Post } from "@/types";
+import { Post, Category } from "@/types";
 
 interface Props {
     slug: string;
+    categoryData?: Category;
+    showAll?: boolean; // When true, shows all products (for category page)
 }
 
-async function getCategoryProducts(slug: string) {
-    try {
-        const res = await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_API}/category/slug/${slug}`,
-            {
-                cache: "force-cache",
+export default async function CategoryProductPage({ slug, categoryData, showAll = false }: Props) {
+    let data = categoryData;
+
+    // If categoryData not provided, fetch it by slug
+    if (!data) {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category/slug/${slug}`, {
+                next: { tags: ["CATEGORY_PRODUCTS"] },
+            });
+            if (res.ok) {
+                const response = await res.json();
+                data = response?.data;
             }
-        );
-
-        if (!res.ok) {
-            console.error(
-                `getCategoryProducts: API returned ${res.status} for slug "${slug}"`
-            );
-            return null; // ✅ graceful — don't throw
+        } catch (error) {
+            console.error(`Error fetching category ${slug}:`, error);
         }
+    }
 
-        const json = await res.json();
-        return json?.data ?? null;
-    } catch (err) {
-        console.error("getCategoryProducts: network error →", err);
+    // Guard against null or missing data
+    if (!data || !data.products || data.products.length === 0) {
         return null;
     }
-}
 
-export default async function CategoryProductPage({ slug }: Props) {
-    const data = await getCategoryProducts(slug);
+    // Extract products from the nested structure
+    const products: Post[] = data.products.map((item: any) => item.product) ?? [];
 
-    // ✅ FIX 4: guard against null data (API down, bad slug, 500, etc.)
-    if (!data) return null;
-
-    const products: Post[] =
-        data?.products?.map((item: any) => item.product) ?? [];
-
-    if (products.length === 0) return null;
+    // Show all products on category page, or just 6 on home page
+    const displayProducts = showAll ? products : products.slice(0, 6);
 
     return (
         <div className="mb-10">
@@ -60,21 +56,23 @@ export default async function CategoryProductPage({ slug }: Props) {
                     📦 {data?.name}
                 </h2>
 
-                <Link
-                    href={`/category/${slug}`}
-                    className="text-sm font-semibold hover:underline"
-                    style={{
-                        color: "#fbbf24",
-                        fontFamily: "'Hind Siliguri', sans-serif",
-                    }}
-                >
-                    সবগুলো দেখুন →
-                </Link>
+                {!showAll && (
+                    <Link
+                        href={`/category/${slug}`}
+                        className="text-sm font-semibold hover:underline"
+                        style={{
+                            color: "#fbbf24",
+                            fontFamily: "'Hind Siliguri', sans-serif",
+                        }}
+                    >
+                        সবগুলো দেখুন →
+                    </Link>
+                )}
             </div>
 
             {/* Products Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {products.slice(0, 6).map((product: Post) => (
+                {displayProducts.map((product: Post) => (
                     <ProductCard key={product.id} post={product} />
                 ))}
             </div>

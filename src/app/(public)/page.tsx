@@ -13,16 +13,26 @@ export default async function HomePage() {
   });
   const { data: products } = await res.json();
 
-  // const catRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category`, {
-  //   next: {
-  //     tags: ["CATEGORIES"],
-  //   },
-  // });
-  // const { data: categories } = await catRes.json();
-  // console.log("Categories:", categories);
+  // Fetch categories with products included
+  let categories: Category[] = [];
+  try {
+    const catRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category`, {
+      next: {
+        tags: ["CATEGORIES"],
+      },
+    });
+    if (catRes.ok) {
+      const catData = await catRes.json();
+      categories = catData?.data || [];
+      console.log("Categories loaded:", categories.length);
+    }
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Hero />
+      <Hero categories={categories} />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* ===== হট ডিল Section ===== */}
@@ -100,11 +110,12 @@ export default async function HomePage() {
             ))}
           </div>
         </div>
-        {/* ===== সবচেয়ে জনপ্রিয় Category ===== */}
-        <div className="mb-10">
-          <CategoryProductPage slug="smartwatch" />
-        </div>
-
+        {/* ===== Categories with Products ===== */}
+        {categories.map((category: Category) => (
+          <Suspense key={category.id} fallback={<div className="h-32 animate-pulse">Loading...</div>}>
+            <CategoryProductPage slug={category.slug} categoryData={category} />
+          </Suspense>
+        ))}
 
       </div>
     </div>
