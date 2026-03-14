@@ -43,17 +43,19 @@ export default async function CategoryProductPage({ slug, categoryData, showAll 
         <div className="mb-10">
             {/* Section Header */}
             <div
-                className="flex justify-between items-center mb-5 px-4 py-3 rounded-xl"
-                style={{
-                    background: "linear-gradient(135deg, #1a3a7a 0%, #2251a8 100%)",
-                    borderLeft: "5px solid #e53e3e",
-                }}
+                className="flex justify-between items-center mb-5 px-4 py-3 rounded-xl border-1 border-green-900"
+
             >
                 <h2
-                    className="text-xl font-bold text-white flex items-center gap-2"
+                    className="text-xl font-bold text-green-900 flex items-center gap-2"
                     style={{ fontFamily: "'Hind Siliguri', sans-serif" }}
                 >
-                    📦 {data?.name}
+                    {
+                        showAll && (
+                            <Link href="/">Home /</Link>
+                        )
+                    }
+                    {data?.name}
                 </h2>
 
                 {!showAll && (
@@ -71,8 +73,8 @@ export default async function CategoryProductPage({ slug, categoryData, showAll 
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {displayProducts.map((product: Post) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {displayProducts.slice(0, 5).map((product: Post) => (
                     <ProductCard key={product.id} post={product} />
                 ))}
             </div>

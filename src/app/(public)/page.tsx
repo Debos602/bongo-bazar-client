@@ -67,8 +67,8 @@ export default async function HomePage() {
           </div>
 
           {/* Products Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {products?.slice(0, 6).map((product: Post) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {products?.slice(0, 5).map((product: Post) => (
               <ProductCard key={product?.id} post={product} />
             ))}
           </div>
@@ -104,8 +104,8 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {products?.slice(6, 12).map((product: Post) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {products?.slice(0, 5).map((product: Post) => (
               <ProductCard key={product?.id} post={product} />
             ))}
           </div>
