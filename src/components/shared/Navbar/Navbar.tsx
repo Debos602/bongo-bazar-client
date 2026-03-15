@@ -7,7 +7,9 @@ import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import {
   Phone, Mail, Home, ShoppingCart, Search,
-  ChevronDown, Menu, X, LayoutGrid
+  ChevronDown, Menu, X, LayoutGrid,
+  Flame, Tag, Heart, Bell, User, LogIn, UserPlus,
+  MapPin, Clock, Truck, ShieldCheck, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,45 +20,46 @@ import logo from "../../../../public/logo.png";
 import useCategories from "@/hooks/useCategories";
 import getCategoryIcon from "@/lib/categoryIcons";
 
-const quickLinks = [
-  { label: "🔥 হট ডিল", href: "/hot-deals" },
-  { label: "👟 Baby Shoes", href: "/category/baby-shoes" },
-  { label: "🏠 Home Appliance", href: "/category/home-appliance" },
-  { label: "👗 Baby Cloth", href: "/category/baby-cloth" },
-  { label: "🧸 Toys", href: "/category/toys" },
-  { label: "📱 Electronics", href: "/category/electronics" },
-  { label: "💄 Beauty", href: "/category/beauty" },
+const uspItems = [
+  { icon: Truck, label: "Free Delivery on ৳999+" },
+  { icon: ShieldCheck, label: "100% Secure Payment" },
+  { icon: Clock, label: "24/7 Customer Support" },
+  { icon: MapPin, label: "Deliver All Over Bangladesh" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const catRef = useRef<HTMLDivElement>(null);
+
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [catOpen, setCatOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const catRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [uspIdx, setUspIdx] = useState(0);
+
   const { categories, loading } = useCategories();
 
-  // ── shared search handler ──
+  /* ── handlers ── */
   const handleSearch = (closeMobile = false) => {
-    if (searchQuery.trim()) {
-      router.push(`/products?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      router.push(`/products`);
-    }
+    const q = searchQuery.trim();
+    router.push(q ? `/products?searchTerm=${encodeURIComponent(q)}` : "/products");
     setSearchQuery("");
     if (closeMobile) setMobileOpen(false);
   };
 
+  /* ── scroll shadow ── */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* ── close sheet on route change ── */
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
+  /* ── close category dropdown on outside click ── */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (catRef.current && !catRef.current.contains(e.target as Node))
@@ -66,53 +69,71 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  /* ── USP ticker ── */
+  useEffect(() => {
+    const t = setInterval(() => setUspIdx((i) => (i + 1) % uspItems.length), 3500);
+    return () => clearInterval(t);
+  }, []);
+
+  /* ════════════════════════════════════════ */
   return (
     <>
-      {/* ════════════════════════════════════════
-          TOP BAR
-      ════════════════════════════════════════ */}
-      <div
-        className="text-gray-200 text-xs py-2"
-        style={{ background: "linear-gradient(90deg, #0d4a1f 0%, #1a2e0d 45%, #4a0d0d 100%)" }}
-      >
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
-
-          {/* Left — contact */}
-          <div className="flex items-center gap-5">
-            <span className="flex items-center gap-1.5">
-              <Phone className="w-3 h-3 text-green-300" />
-              হটলাইনঃ{" "}
-              <a href="tel:01641754794"
-                className="text-green-300 font-semibold hover:text-green-200 transition-colors">
-                ০১৬৪১-৭৫৪৭৯৪
-              </a>
-            </span>
-            <span className="hidden sm:flex items-center gap-1.5">
-              <Mail className="w-3 h-3 text-red-300" />
-              ই-মেইলঃ{" "}
-              <a href="mailto:info@bongobazar.com"
-                className="text-red-300 font-semibold hover:text-red-200 transition-colors">
-                info@bongobazar.com
-              </a>
-            </span>
+      {/* ── ANNOUNCEMENT / USP BAR ── */}
+      <div className="hidden md:block bg-gradient-to-r from-emerald-950 via-stone-900 to-red-950 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center justify-between">
+          {/* Rotating USP */}
+          <div className="flex items-center gap-6">
+            {uspItems.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <span
+                  key={i}
+                  className={cn(
+                    "flex items-center gap-1.5 text-[11px] font-medium transition-all duration-500",
+                    i === uspIdx ? "text-emerald-300 scale-105" : "text-gray-400"
+                  )}
+                >
+                  <Icon className="w-3 h-3" />
+                  {item.label}
+                </span>
+              );
+            })}
           </div>
 
-          {/* Right — auth */}
+          {/* Right — hotline + email */}
+          <div className="flex items-center gap-5 text-xs text-gray-300">
+            <a href="tel:01641754794"
+              className="flex items-center gap-1.5 hover:text-emerald-300 transition-colors">
+              <Phone className="w-3 h-3 text-emerald-400" />
+              হটলাইনঃ <span className="text-emerald-300 font-semibold ml-0.5">০১৬৪১-৭৫৪৭৯৪</span>
+            </a>
+            <a href="mailto:info@bongobazar.com"
+              className="hidden sm:flex items-center gap-1.5 hover:text-red-300 transition-colors">
+              <Mail className="w-3 h-3 text-red-400" />
+              <span className="text-red-300 font-semibold">info@bongobazar.com</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* ── TOP AUTH BAR (mobile only) ── */}
+      <div
+        className="md:hidden text-gray-200 text-xs py-2"
+        style={{ background: "linear-gradient(90deg, #0d4a1f 0%, #1a2e0d 45%, #4a0d0d 100%)" }}
+      >
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+          <a href="tel:01641754794" className="flex items-center gap-1.5 text-emerald-300 font-semibold">
+            <Phone className="w-3 h-3" />
+            ০১৬৪১-৭৫৪৭৯৪
+          </a>
           <div className="flex items-center gap-2">
-            <Link href="/"
-              className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors mr-1">
-              <Home className="w-3 h-3" />
-              <span>হোম</span>
-            </Link>
             <Button asChild size="sm"
-              className="h-6 px-3 text-xs rounded font-semibold"
-              style={{ background: "linear-gradient(135deg,#16a34a,#15803d)", color: "#fff", border: "none" }}>
-              <Link href="/login">সাইন ইন</Link>
+              className="h-6 px-3 text-xs rounded font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-0">
+              <Link href="/login"><LogIn className="w-3 h-3 mr-1" />সাইন ইন</Link>
             </Button>
             <Button asChild size="sm"
-              className="h-6 px-3 text-xs rounded font-semibold"
-              style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)", color: "#fff", border: "none" }}>
-              <Link href="/register">সাইন আপ</Link>
+              className="h-6 px-3 text-xs rounded font-semibold bg-red-700 hover:bg-red-800 text-white border-0">
+              <Link href="/register"><UserPlus className="w-3 h-3 mr-1" />সাইন আপ</Link>
             </Button>
           </div>
         </div>
@@ -125,153 +146,235 @@ export default function Navbar() {
         className={cn(
           "bg-white sticky top-0 z-50 transition-all duration-300",
           scrolled
-            ? "shadow-[0_4px_24px_rgba(0,0,0,0.12)]"
+            ? "shadow-[0_6px_32px_rgba(0,0,0,0.14)]"
             : "shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
         )}
         style={{
           borderTop: "3px solid transparent",
-          borderImage: "linear-gradient(90deg,#16a34a,#15803d 40%,#b91c1c 60%,#dc2626) 1"
+          borderImage: "linear-gradient(90deg,#16a34a,#15803d 40%,#b91c1c 60%,#dc2626) 1",
         }}
       >
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-4 h-[72px]">
 
-            {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
+            {/* ── Logo ── */}
+            <Link href="/" className="flex-shrink-0 group">
               <Image
                 src={logo}
                 alt="BongoBazar"
                 width={Math.round((logo.width / logo.height) * 54)}
                 height={54}
-                className="w-auto"
+                className="w-auto transition-transform duration-200 group-hover:scale-105"
               />
             </Link>
 
-            {/* Search — desktop */}
-            <div className="hidden md:flex flex-1 max-w-[600px]">
+            {/* ── Search — desktop ── */}
+            <div className="hidden md:flex flex-1 max-w-[620px] relative">
+              {/* glow ring on focus */}
+              <div className={cn(
+                "absolute inset-0 rounded-md transition-all duration-300 pointer-events-none",
+                searchFocused ? "shadow-[0_0_0_3px_rgba(22,163,74,0.18)]" : ""
+              )} />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }} // ✅ Enter key
+                onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
                 placeholder="প্রোডাক্ট সার্চ করুন..."
-                className="rounded-r-none border-2 focus-visible:ring-0 focus-visible:ring-offset-0"
-                style={{ borderColor: "#16a34a", borderRight: "none" }}
+                className="rounded-r-none border-2 border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-11 text-sm transition-colors"
+                style={{ borderColor: searchFocused ? "#16a34a" : "#d1d5db" }}
               />
               <button
-                onClick={() => handleSearch()} // ✅ fixed
-                className="px-5 text-white font-semibold rounded-r-md transition-all hover:opacity-90 active:scale-95"
-                style={{ background: "linear-gradient(135deg,#16a34a,#15803d)", border: "2px solid #15803d", borderLeft: "none" }}
+                onClick={() => handleSearch()}
+                className="px-5 h-11 text-white font-semibold rounded-r-md transition-all hover:opacity-90 active:scale-95 flex items-center gap-1.5"
+                style={{
+                  background: "linear-gradient(135deg,#16a34a,#15803d)",
+                  border: "2px solid #15803d",
+                  borderLeft: "none",
+                }}
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-4 h-4" />
+                <span className="text-sm hidden lg:inline">খুঁজুন</span>
               </button>
             </div>
 
-            {/* Cart + Hamburger */}
-            <div className="ml-auto flex items-center gap-3">
+            {/* ── Right cluster ── */}
+            <div className="ml-auto flex items-center gap-1 md:gap-2">
+
+              {/* Wishlist — desktop */}
+              <Link href="/wishlist"
+                className="hidden md:flex items-center gap-1.5 text-gray-600 hover:text-red-600 transition-colors p-2 rounded-xl hover:bg-red-50 relative group">
+                <Heart className="w-6 h-6" />
+                <span className="text-sm font-medium hidden lg:inline">উইশলিস্ট</span>
+                <Badge
+                  className="absolute -top-1 -right-1 h-[16px] w-[16px] flex items-center justify-center p-0 text-[9px] font-bold border-2 border-white bg-red-500">
+                  3
+                </Badge>
+              </Link>
+
+              {/* Notifications — desktop */}
+              <button className="hidden md:flex items-center p-2 rounded-xl text-gray-600 hover:text-amber-600 hover:bg-amber-50 transition-colors relative">
+                <Bell className="w-6 h-6" />
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white" />
+              </button>
+
+              {/* Auth — desktop */}
+              <div className="hidden md:flex items-center gap-2 ml-1">
+                <Button asChild size="sm" variant="ghost"
+                  className="h-9 px-3 text-sm font-semibold text-gray-700 hover:text-emerald-700 hover:bg-emerald-50 border border-gray-200 rounded-lg gap-1.5">
+                  <Link href="/login"><LogIn className="w-4 h-4" />সাইন ইন</Link>
+                </Button>
+                <Button asChild size="sm"
+                  className="h-9 px-4 text-sm font-semibold text-white rounded-lg gap-1.5 hover:opacity-90 border-0"
+                  style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)" }}>
+                  <Link href="/register"><UserPlus className="w-4 h-4" />সাইন আপ</Link>
+                </Button>
+              </div>
 
               {/* Cart */}
-              <Link href="/cart"
-                className="relative flex items-center gap-1.5 text-gray-700 hover:text-green-700 transition-colors p-2 rounded-xl hover:bg-green-50">
-                <ShoppingCart className="w-7 h-7 text-green-600" />
-                <Badge className="absolute -top-1 -right-1 h-[18px] w-[18px] flex items-center justify-center p-0 text-[10px] font-bold border-2 border-white"
+              <Link
+                href="/cart"
+                className="relative flex items-center gap-1.5 text-white transition-all p-2.5 rounded-xl ml-1"
+                style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <Badge
+                  className="absolute -top-1.5 -right-1.5 h-[20px] w-[20px] flex items-center justify-center p-0 text-[10px] font-bold border-2 border-white"
                   style={{ background: "#dc2626" }}>
                   2
                 </Badge>
-                <span className="hidden sm:inline text-sm font-semibold text-gray-700">
-                  কার্ট
-                </span>
+                <span className="hidden sm:inline text-sm font-semibold pr-0.5">কার্ট</span>
               </Link>
 
-              {/* Mobile Sheet */}
+              {/* ── Mobile Hamburger ── */}
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
+                  <Button
+                    variant="ghost" size="icon"
+                    className="md:hidden w-10 h-10 rounded-xl border border-gray-200"
+                    aria-label="Menu"
+                  >
                     {mobileOpen
                       ? <X className="w-5 h-5 text-gray-700" />
                       : <Menu className="w-5 h-5 text-gray-700" />}
                   </Button>
                 </SheetTrigger>
 
-                <SheetContent side="left" className="w-72 p-0 overflow-y-auto">
-                  {/* Sheet header */}
-                  <div className="p-4" style={{ background: "linear-gradient(135deg,#0d4a1f,#1a2e0d 50%,#4a0d0d)" }}>
+                {/* ── Mobile Sheet ── */}
+                <SheetContent side="left" className="w-[300px] p-0 overflow-y-auto">
+                  {/* Header */}
+                  <div
+                    className="p-4 flex items-center justify-between"
+                    style={{ background: "linear-gradient(135deg,#0d4a1f,#1a2e0d 50%,#4a0d0d)" }}
+                  >
                     <Image
-                      src={logo}
-                      alt="BongoBazar"
-                      width={Math.round((logo.width / logo.height) * 40)}
-                      height={40}
+                      src={logo} alt="BongoBazar"
+                      width={Math.round((logo.width / logo.height) * 40)} height={40}
                       className="h-10"
                     />
+                    <button
+                      onClick={() => setMobileOpen(false)}
+                      className="text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
                   </div>
 
-                  {/* Mobile search — Sheet */}
-                  <div className="flex p-3 border-b">
+                  {/* Mobile search */}
+                  <div className="flex p-3 border-b bg-gray-50">
                     <Input
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") handleSearch(true); }} // ✅ Enter key
+                      onKeyDown={(e) => { if (e.key === "Enter") handleSearch(true); }}
                       placeholder="সার্চ করুন..."
-                      className="rounded-r-none text-sm border-2 focus-visible:ring-0"
-                      style={{ borderColor: "#16a34a", borderRight: "none" }}
+                      className="rounded-r-none text-sm border-2 border-r-0 focus-visible:ring-0 h-10"
+                      style={{ borderColor: "#16a34a" }}
                     />
                     <button
-                      onClick={() => handleSearch(true)} // ✅ fixed
-                      className="rounded-r-md px-3 text-white"
+                      onClick={() => handleSearch(true)}
+                      className="rounded-r-md px-4 h-10 text-white flex items-center"
                       style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
                     >
                       <Search className="w-4 h-4" />
                     </button>
                   </div>
 
-                  {/* Mobile categories */}
-                  <p className="text-xs font-bold text-gray-400 uppercase px-4 pt-4 pb-1 tracking-wider">
+                  {/* Quick actions */}
+                  <div className="grid grid-cols-3 gap-2 p-3 border-b">
+                    {[
+                      { icon: Home, label: "হোম", href: "/" },
+                      { icon: Heart, label: "উইশলিস্ট", href: "/wishlist" },
+                      { icon: Bell, label: "নোটিফিকেশন", href: "/notifications" },
+                    ].map(({ icon: Icon, label, href }) => (
+                      <Link key={href} href={href}
+                        className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-emerald-50 text-gray-600 hover:text-emerald-700 transition-all text-center">
+                        <Icon className="w-5 h-5" />
+                        <span className="text-[10px] font-medium">{label}</span>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Categories */}
+                  <p className="text-[10px] font-bold text-gray-400 uppercase px-4 pt-4 pb-1.5 tracking-widest">
                     ক্যাটেগরীজ
                   </p>
-                  {loading ? (
-                    Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="px-4 py-3">
-                        <div className="h-3 w-2/3 bg-gray-200 rounded-md animate-pulse" />
+                  {loading
+                    ? Array.from({ length: 7 }).map((_, i) => (
+                      <div key={i} className="px-4 py-3 border-b border-gray-50">
+                        <div className="h-3 w-3/5 bg-gray-200 rounded-md animate-pulse" />
                       </div>
                     ))
-                  ) : (
-                    categories.map((cat: any) => (
+                    : categories.map((cat: any) => (
                       <Link key={cat.slug} href={`/category/${cat.slug}`}
-                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 border-b border-gray-50 transition-all hover:pl-6 hover:bg-green-50 hover:text-green-700">
-                        <span className="text-lg">{getCategoryIcon(cat.name)}</span>
-                        {cat.name}
+                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 border-b border-gray-50 transition-all hover:pl-6 hover:bg-emerald-50 hover:text-emerald-700 group">
+                        <span className="text-xl w-7 flex-shrink-0 text-center">{getCategoryIcon(cat.name)}</span>
+                        <span className="font-medium flex-1">{cat.name}</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all" />
                       </Link>
                     ))
-                  )}
+                  }
 
                   {/* Mobile auth */}
-                  <div className="p-4 flex flex-col gap-2 border-t mt-2">
-                    <button className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                      style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}>
-                      সাইন ইন
-                    </button>
-                    <button className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                      style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)" }}>
-                      সাইন আপ
-                    </button>
+                  <div className="p-4 flex flex-col gap-2.5 border-t mt-2 bg-gray-50">
+                    <Button asChild className="w-full h-11 text-sm font-semibold text-white gap-2 bg-emerald-600 hover:bg-emerald-700 border-0">
+                      <Link href="/login"><LogIn className="w-4 h-4" />সাইন ইন</Link>
+                    </Button>
+                    <Button asChild className="w-full h-11 text-sm font-semibold text-white gap-2 bg-red-600 hover:bg-red-700 border-0">
+                      <Link href="/register"><UserPlus className="w-4 h-4" />সাইন আপ</Link>
+                    </Button>
+                  </div>
+
+                  {/* USP strip */}
+                  <div className="px-4 py-3 space-y-2 bg-white border-t">
+                    {uspItems.map((item, i) => {
+                      const Icon = item.icon;
+                      return (
+                        <div key={i} className="flex items-center gap-2 text-xs text-gray-500">
+                          <Icon className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                          {item.label}
+                        </div>
+                      );
+                    })}
                   </div>
                 </SheetContent>
               </Sheet>
             </div>
           </div>
 
-          {/* Mobile search row */}
+          {/* ── Mobile search row ── */}
           <div className="md:hidden flex pb-3 gap-0">
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }} // ✅ Enter key
+              onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
               placeholder="প্রোডাক্ট সার্চ করুন..."
-              className="rounded-r-none border-2 focus-visible:ring-0 text-sm"
-              style={{ borderColor: "#16a34a", borderRight: "none" }}
+              className="rounded-r-none border-2 border-r-0 focus-visible:ring-0 text-sm h-10"
+              style={{ borderColor: "#16a34a" }}
             />
             <button
-              onClick={() => handleSearch()} // ✅ fixed
-              className="px-4 rounded-r-md text-white"
+              onClick={() => handleSearch()}
+              className="px-4 rounded-r-md text-white h-10 flex items-center"
               style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
             >
               <Search className="w-4 h-4" />
@@ -280,67 +383,94 @@ export default function Navbar() {
         </div>
 
         {/* ════════════════════════════════════════
-            CATEGORY NAV
+            CATEGORY NAV BAR — desktop
         ════════════════════════════════════════ */}
         <div
           className="hidden md:block"
-          style={{ background: "linear-gradient(90deg,#166534 0%,#15803d 35%,#991b1b 70%,#b91c1c 100%)" }}
+          style={{
+            background: "linear-gradient(90deg,#166534 0%,#15803d 35%,#991b1b 70%,#b91c1c 100%)",
+          }}
         >
           <div className="max-w-7xl mx-auto px-4 flex items-center" ref={catRef}>
 
-            {/* Category dropdown button */}
+            {/* Categories dropdown button */}
             <div className="relative">
               <button
                 onClick={() => setCatOpen((v) => !v)}
-                className="flex items-center gap-2 px-5 py-3 text-white font-semibold text-sm whitespace-nowrap transition-colors hover:bg-white/10"
-                style={{ background: catOpen ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.15)" }}
+                className="flex items-center gap-2 px-5 py-3 text-white font-semibold text-sm whitespace-nowrap transition-colors hover:bg-black/15 select-none"
+                style={{ background: catOpen ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.18)" }}
               >
                 <LayoutGrid className="w-4 h-4" />
                 ক্যাটেগরীজ
-                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", catOpen && "rotate-180")} />
+                <ChevronDown
+                  className={cn(
+                    "w-3.5 h-3.5 transition-transform duration-200",
+                    catOpen && "rotate-180"
+                  )}
+                />
               </button>
 
-              {/* Dropdown */}
+              {/* Dropdown panel */}
               {catOpen && (
-                <div className="absolute top-full left-0 bg-white w-56 z-50 rounded-b-xl overflow-hidden shadow-2xl"
-                  style={{ borderTop: "3px solid #16a34a" }}>
-                  {loading ? (
-                    <div className="p-3">
-                      <div className="h-3 w-3/4 bg-gray-200 rounded-md animate-pulse mb-2" />
-                      <div className="h-3 w-1/2 bg-gray-200 rounded-md animate-pulse" />
-                    </div>
-                  ) : (
-                    categories.map((cat: any, i: number) => (
+                <div
+                  className="absolute top-full left-0 bg-white w-60 z-50 rounded-b-xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150"
+                  style={{ borderTop: "3px solid #16a34a" }}
+                >
+                  {loading
+                    ? Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="px-4 py-3 border-b border-gray-50">
+                        <div className="h-3 w-3/4 bg-gray-200 rounded-md animate-pulse" />
+                      </div>
+                    ))
+                    : categories.map((cat: any, i: number) => (
                       <Link
                         key={cat.slug}
                         href={`/category/${cat.slug}`}
                         onClick={() => setCatOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 border-b border-gray-100 last:border-0 transition-all hover:pl-6 hover:text-green-700"
-                        style={{ animationDelay: `${i * 30}ms` }}
+                        style={{ animationDelay: `${i * 25}ms` }}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 border-b border-gray-100 last:border-0 transition-all hover:pl-6 hover:bg-emerald-50 hover:text-emerald-700 group"
                       >
                         <span className="text-base w-6 text-center">{getCategoryIcon(cat.name)}</span>
-                        {cat.name}
+                        <span className="flex-1 font-medium">{cat.name}</span>
+                        <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all" />
                       </Link>
                     ))
-                  )}
+                  }
                 </div>
               )}
             </div>
 
-            {/* Quick nav links */}
-            <div className="flex items-center overflow-x-auto">
-              {quickLinks.map((link) => (
+            {/* ── Quick nav links ── */}
+            <div className="flex items-center">
+              {categories.slice(0, 9).map((cat: any) => (
                 <Link
-                  key={link.href}
-                  href={link.href}
+                  key={cat.slug}
+                  href={`/category/${cat.slug}`}
                   className={cn(
-                    "text-white/85 hover:text-white text-sm font-medium px-4 py-3 whitespace-nowrap border-r border-white/10 last:border-0 transition-all hover:bg-white/15",
-                    pathname === link.href && "bg-white/20 text-white font-semibold"
+                    "flex items-center gap-1.5 text-sm font-medium px-3.5 py-3 whitespace-nowrap",
+                    "border-r border-white/10 last:border-0",
+                    "transition-all duration-150 hover:bg-white/15",
+                    "text-white/85 hover:text-white",
+                    pathname === `/category/${cat.slug}` && "bg-white/20 text-white font-semibold"
                   )}
                 >
-                  {link.label}
+                  <span className="text-base leading-none">{getCategoryIcon(cat.name)}</span>
+                  {cat.name}
                 </Link>
               ))}
+
+              {/* All products */}
+              <Link
+                href="/products"
+                className={cn(
+                  "flex items-center gap-1.5 text-sm font-medium px-3.5 py-3 whitespace-nowrap ml-auto",
+                  "text-white/70 hover:text-white hover:bg-white/15 transition-all",
+                  pathname === "/products" && "bg-white/20 text-white font-semibold"
+                )}
+              >
+                <Tag className="w-3.5 h-3.5" />
+                সব প্রোডাক্ট
+              </Link>
             </div>
           </div>
         </div>
