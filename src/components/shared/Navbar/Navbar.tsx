@@ -15,15 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import logo from "../../../../public/logo.png";
-const categories = [
-  { label: "Baby Shoes", icon: "👟", href: "/category/baby-shoes" },
-  { label: "Home Appliance", icon: "🏠", href: "/category/home-appliance" },
-  { label: "Baby Cloth", icon: "👗", href: "/category/baby-cloth" },
-  { label: "Toys & Games", icon: "🧸", href: "/category/toys" },
-  { label: "Electronics", icon: "📱", href: "/category/electronics" },
-  { label: "Beauty & Health", icon: "💄", href: "/category/beauty" },
-  { label: "Baby Care", icon: "🍼", href: "/category/baby-care" },
-];
+import useCategories from "@/hooks/useCategories";
+import getCategoryIcon from "@/lib/categoryIcons";
 
 const quickLinks = [
   { label: "🔥 হট ডিল", href: "/hot-deals" },
@@ -35,8 +28,6 @@ const quickLinks = [
   { label: "💄 Beauty", href: "/category/beauty" },
 ];
 
-
-
 export default function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -45,6 +36,18 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { categories, loading } = useCategories();
+
+  // ── shared search handler ──
+  const handleSearch = (closeMobile = false) => {
+    if (searchQuery.trim()) {
+      router.push(`/products?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push(`/products`);
+    }
+    setSearchQuery("");
+    if (closeMobile) setMobileOpen(false);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -66,7 +69,7 @@ export default function Navbar() {
   return (
     <>
       {/* ════════════════════════════════════════
-          TOP BAR  — dark green → dark red gradient
+          TOP BAR
       ════════════════════════════════════════ */}
       <div
         className="text-gray-200 text-xs py-2"
@@ -116,7 +119,7 @@ export default function Navbar() {
       </div>
 
       {/* ════════════════════════════════════════
-          MAIN NAVBAR — white with subtle top border
+          MAIN NAVBAR
       ════════════════════════════════════════ */}
       <nav
         className={cn(
@@ -140,7 +143,7 @@ export default function Navbar() {
                 alt="BongoBazar"
                 width={Math.round((logo.width / logo.height) * 54)}
                 height={54}
-                className=" w-auto"
+                className="w-auto"
               />
             </Link>
 
@@ -149,15 +152,13 @@ export default function Navbar() {
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }} // ✅ Enter key
                 placeholder="প্রোডাক্ট সার্চ করুন..."
                 className="rounded-r-none border-2 focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ borderColor: "#16a34a", borderRight: "none" }}
               />
               <button
-                onClick={() => {
-                  if (searchQuery.trim()) router.push(`/products?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
-                  else router.push(`/products`);
-                }}
+                onClick={() => handleSearch()} // ✅ fixed
                 className="px-5 text-white font-semibold rounded-r-md transition-all hover:opacity-90 active:scale-95"
                 style={{ background: "linear-gradient(135deg,#16a34a,#15803d)", border: "2px solid #15803d", borderLeft: "none" }}
               >
@@ -203,21 +204,21 @@ export default function Navbar() {
                     />
                   </div>
 
-                  {/* Mobile search */}
+                  {/* Mobile search — Sheet */}
                   <div className="flex p-3 border-b">
                     <Input
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleSearch(true); }} // ✅ Enter key
                       placeholder="সার্চ করুন..."
                       className="rounded-r-none text-sm border-2 focus-visible:ring-0"
-                      style={{ borderColor: "#16a34a", borderRight: "none" }} />
+                      style={{ borderColor: "#16a34a", borderRight: "none" }}
+                    />
                     <button
-                      onClick={() => {
-                        if (searchQuery.trim()) router.push(`/products?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
-                        setMobileOpen(false);
-                      }}
+                      onClick={() => handleSearch(true)} // ✅ fixed
                       className="rounded-r-md px-3 text-white"
-                      style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}>
+                      style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
+                    >
                       <Search className="w-4 h-4" />
                     </button>
                   </div>
@@ -226,13 +227,21 @@ export default function Navbar() {
                   <p className="text-xs font-bold text-gray-400 uppercase px-4 pt-4 pb-1 tracking-wider">
                     ক্যাটেগরীজ
                   </p>
-                  {categories.map((cat) => (
-                    <Link key={cat.href} href={cat.href}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 border-b border-gray-50 transition-all hover:pl-6 hover:bg-green-50 hover:text-green-700">
-                      <span className="text-lg">{cat.icon}</span>
-                      {cat.label}
-                    </Link>
-                  ))}
+                  {loading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="px-4 py-3">
+                        <div className="h-3 w-2/3 bg-gray-200 rounded-md animate-pulse" />
+                      </div>
+                    ))
+                  ) : (
+                    categories.map((cat: any) => (
+                      <Link key={cat.slug} href={`/category/${cat.slug}`}
+                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 border-b border-gray-50 transition-all hover:pl-6 hover:bg-green-50 hover:text-green-700">
+                        <span className="text-lg">{getCategoryIcon(cat.name)}</span>
+                        {cat.name}
+                      </Link>
+                    ))
+                  )}
 
                   {/* Mobile auth */}
                   <div className="p-4 flex flex-col gap-2 border-t mt-2">
@@ -255,24 +264,23 @@ export default function Navbar() {
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }} // ✅ Enter key
               placeholder="প্রোডাক্ট সার্চ করুন..."
               className="rounded-r-none border-2 focus-visible:ring-0 text-sm"
               style={{ borderColor: "#16a34a", borderRight: "none" }}
             />
             <button
-              onClick={() => {
-                if (searchQuery.trim()) router.push(`/products?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
-                else router.push(`/products`);
-              }}
+              onClick={() => handleSearch()} // ✅ fixed
               className="px-4 rounded-r-md text-white"
-              style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}>
+              style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
+            >
               <Search className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* ════════════════════════════════════════
-            CATEGORY NAV — green → red gradient
+            CATEGORY NAV
         ════════════════════════════════════════ */}
         <div
           className="hidden md:block"
@@ -296,18 +304,25 @@ export default function Navbar() {
               {catOpen && (
                 <div className="absolute top-full left-0 bg-white w-56 z-50 rounded-b-xl overflow-hidden shadow-2xl"
                   style={{ borderTop: "3px solid #16a34a" }}>
-                  {categories.map((cat, i) => (
-                    <Link
-                      key={cat.href}
-                      href={cat.href}
-                      onClick={() => setCatOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 border-b border-gray-100 last:border-0 transition-all hover:pl-6 hover:text-green-700"
-                      style={{ animationDelay: `${i * 30}ms` }}
-                    >
-                      <span className="text-base w-6 text-center">{cat.icon}</span>
-                      {cat.label}
-                    </Link>
-                  ))}
+                  {loading ? (
+                    <div className="p-3">
+                      <div className="h-3 w-3/4 bg-gray-200 rounded-md animate-pulse mb-2" />
+                      <div className="h-3 w-1/2 bg-gray-200 rounded-md animate-pulse" />
+                    </div>
+                  ) : (
+                    categories.map((cat: any, i: number) => (
+                      <Link
+                        key={cat.slug}
+                        href={`/category/${cat.slug}`}
+                        onClick={() => setCatOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 border-b border-gray-100 last:border-0 transition-all hover:pl-6 hover:text-green-700"
+                        style={{ animationDelay: `${i * 30}ms` }}
+                      >
+                        <span className="text-base w-6 text-center">{getCategoryIcon(cat.name)}</span>
+                        {cat.name}
+                      </Link>
+                    ))
+                  )}
                 </div>
               )}
             </div>
