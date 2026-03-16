@@ -61,22 +61,22 @@ export default function Navbar() {
   // ✅ Correct — handle the async call properly
   const [cartCount, setCartCount] = useState<number | null>(null);
 
+
+
+
   useEffect(() => {
     const fetchCartCount = async () => {
       try {
         const count = await getCartCount();
-
-        console.log("Cart count", count);
-
+        router.refresh();
         setCartCount(count ?? 0);
-      } catch (error) {
-        console.error("Cart count fetch failed:", error);
-        setCartCount(0); // fail silently — don't crash navbar
+      } catch {
+        setCartCount(0);
       }
     };
 
-    if (isLoggedIn) fetchCartCount(); // ✅ only fetch if user is logged in
-  }, [isLoggedIn]); // ✅ re-fetch when auth state changes
+    if (isLoggedIn) fetchCartCount();
+  }, [isLoggedIn]);
 
   /* ── helpers ── */
   const getInitials = (name?: string | null) => {

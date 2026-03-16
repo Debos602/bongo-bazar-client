@@ -8,9 +8,7 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
-    const session = await getServerSession(authOptions); // ✅ safe for Server Actions
-
-    console.log("instance-server-token", session);
+    const session = await getServerSession(authOptions); // ✅ safe for Server Actions 
 
     const token = (session?.user as any)?.accessToken;
     if (token) {
