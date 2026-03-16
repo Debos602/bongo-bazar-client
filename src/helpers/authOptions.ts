@@ -98,12 +98,15 @@ export const authOptions: NextAuthOptions = {
     ],
 
     callbacks: {
-        async jwt({ token, user }) {
-            console.log("token", token);
+        async jwt({ token, user, account }) {
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
-                token.accessToken = user.accessToken; // ✅ JWT এ আছে (server only)
+                token.accessToken = user.accessToken; // ✅ Google login এ এটা undefined!
+            }
+            // ✅ Google OAuth token থেকে নিতে হলে:
+            if (account?.access_token) {
+                token.accessToken = account.access_token;
             }
             return token;
         },
@@ -111,7 +114,7 @@ export const authOptions: NextAuthOptions = {
             if (session?.user) {
                 session.user.id = token.id as string;
                 session.user.role = token.role as string;
-                // ❌ accessToken session এ দিও না — client এ যাবে
+                session.user.accessToken = token.accessToken as string; // ✅ needed for server use
             }
             return session;
         },

@@ -1,22 +1,21 @@
+
+
+// src/actions/cart.ts
 "use server";
 
 import axiosInstance from "@/lib/axiosInstance";
-import { getAuthToken } from "@/helpers/getAuthToken";
 import axios from "axios";
 
 export const createCart = async (data: { productId: number; quantity: number; }) => {
     try {
-        const token = await getAuthToken(); // ✅ server only
-
-        if (!token) return { success: false, message: "Not authenticated" };
-
-        const res = await axiosInstance.post("/cart", data, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axiosInstance.post("/cart", data);
+        // ✅ token interceptor দিয়েই যাচ্ছে, আলাদা getAuthToken() লাগবে না
+        console.log("result from create cart action", res);
         return res.data;
     } catch (error: any) {
-        console.error("Failed to create cart", error.response?.data);
-        return error.response?.data;
+        const message = error.response?.data?.message ?? "Something went wrong";
+        console.error("Cart error:", error.response?.data);
+        return { success: false, message }; // ✅ কখনো undefined না
     }
 };
 

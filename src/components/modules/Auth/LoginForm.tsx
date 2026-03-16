@@ -19,7 +19,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginForm() {
     const form = useForm<FieldValues>({
-        defaultValues: { email: "", password: "" },
+        defaultValues: {
+            email: "data@gmail.com",      // ✅ correct place
+            password: "Password123!"       // ✅ correct place
+        },
     });
 
     const [isLoading, setIsLoading] = useState(false);

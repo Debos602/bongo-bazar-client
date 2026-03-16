@@ -98,8 +98,6 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
 
     try {
       const res = await createCart({ productId, quantity: 1 });
-      console.log("cart result", res);
-      toast.success("cart added successfully");
 
       if (res?.id || res?.success) {
         setCartAdded(true);
