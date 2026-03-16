@@ -1,46 +1,35 @@
 "use server";
 
 import { FieldValues } from "react-hook-form";
+import axiosInstance from "@/lib/axiosInstance";
 
 export const register = async (data: FieldValues) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/user`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-
-    const result = await res.json();
-
-    if (!res.ok) {
-        console.error("Failed to register user", result);
-        return result;
+    try {
+        const res = await axiosInstance.post("/user", data);
+        return res.data;
+    } catch (error: any) {
+        console.error("Failed to register user", error.response?.data);
+        return error.response?.data;
     }
-
-    return result;
 };
 
 export const login = async (data: FieldValues) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/login`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-        console.error("Failed to login user", await res.text());
+    try {
+        const res = await axiosInstance.post("/auth/login", data);
+        console.log(res.data);
+        return res.data;
+    } catch (error: any) {
+        console.error("Failed to login user", error.response?.data);
+        return error.response?.data;
     }
-    return await res.json();
 };
 
 export const logout = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/logout`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-    const result = await res.json();
+    try {
+        const res = await axiosInstance.post("/auth/logout");
+        return res.data;
+    } catch (error: any) {
+        console.error("Failed to logout", error.response?.data);
+        return error.response?.data;
+    }
 };

@@ -1,5 +1,5 @@
 // File: src/app/(public)/products/[productId]/page.tsx
-import BlogDetailsCard from "@/components/modules/Products/ProductDetailsCard";
+import ProductDetailsCard from "@/components/modules/Products/ProductDetailsCard";
 import { getBlogById } from "@/services/PostServices";
 import { Post } from "@/types";
 
@@ -50,8 +50,8 @@ export default async function ProductDetailsPage({ params }: PageProps) {
     const product = await getBlogById(productId);
 
     return (
-        <div className="py-30 px-4 max-w-7xl mx-auto">
-            <BlogDetailsCard blog={product} />
+        <div className=" max-w-8xl mx-auto">
+            <ProductDetailsCard product={product} />
         </div>
     );
 }

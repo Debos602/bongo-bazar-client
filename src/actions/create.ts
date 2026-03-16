@@ -1,6 +1,7 @@
 "use server";
 
 import { getUserSession } from "@/helpers/getUserSession";
+import axiosInstance from "@/lib/axiosInstance";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -14,20 +15,19 @@ export const create = async (data: FormData) => {
         vendorId: session?.user?.id
     };
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/product`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(modifiedData),
-    });
+    try {
+        const res = await axiosInstance.post("/product", modifiedData);
+        const result = res.data;
 
-    const result = await res.json();
+        if (result?.id) {
+            revalidateTag("PRODUCTS");
+            revalidatePath("/products");
+            redirect("/");
+        }
 
-    if (result?.id) {
-        revalidateTag("PRODUCTS");
-        revalidatePath("/products");
-        redirect("/");
+        return result;
+    } catch (error: any) {
+        console.error("Failed to create product", error.response?.data);
+        return error.response?.data;
     }
-    return result;
 };

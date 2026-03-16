@@ -18,6 +18,7 @@ export default async function CategoryProductPage({ slug, categoryData, showAll 
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category/slug/${slug}`, {
                 next: { tags: ["CATEGORY_PRODUCTS"] },
+                cache: "force-cache", // Ensure we get fresh data for category pages
             });
             if (res.ok) {
                 const response = await res.json();

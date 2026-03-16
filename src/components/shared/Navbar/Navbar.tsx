@@ -10,15 +10,28 @@ import {
   ChevronDown, Menu, X, LayoutGrid,
   Flame, Tag, Heart, Bell, User, LogIn, UserPlus,
   MapPin, Clock, Truck, ShieldCheck, ChevronRight,
+  LogOut, LayoutDashboard, Package, Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import logo from "../../../../public/logo.png";
 import useCategories from "@/hooks/useCategories";
 import getCategoryIcon from "@/lib/categoryIcons";
+import { useSession, signOut } from "next-auth/react";
+import { getCartCount } from "@/actions/cart";
 
 const uspItems = [
   { icon: Truck, label: "Free Delivery on ৳999+" },
@@ -28,6 +41,7 @@ const uspItems = [
 ];
 
 export default function Navbar() {
+
   const pathname = usePathname();
   const router = useRouter();
   const catRef = useRef<HTMLDivElement>(null);
@@ -40,13 +54,45 @@ export default function Navbar() {
   const [uspIdx, setUspIdx] = useState(0);
 
   const { categories, loading } = useCategories();
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated";
+  const user = session?.user;
 
-  /* ── handlers ── */
+  // ✅ Correct — handle the async call properly
+  const [cartCount, setCartCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      try {
+        const count = await getCartCount();
+
+        console.log("Cart count", count);
+
+        setCartCount(count ?? 0);
+      } catch (error) {
+        console.error("Cart count fetch failed:", error);
+        setCartCount(0); // fail silently — don't crash navbar
+      }
+    };
+
+    if (isLoggedIn) fetchCartCount(); // ✅ only fetch if user is logged in
+  }, [isLoggedIn]); // ✅ re-fetch when auth state changes
+
+  /* ── helpers ── */
+  const getInitials = (name?: string | null) => {
+    if (!name) return "U";
+    return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
   const handleSearch = (closeMobile = false) => {
     const q = searchQuery.trim();
     router.push(q ? `/products?searchTerm=${encodeURIComponent(q)}` : "/products");
     setSearchQuery("");
     if (closeMobile) setMobileOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
   };
 
   /* ── scroll shadow ── */
@@ -56,10 +102,8 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* ── close sheet on route change ── */
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  /* ── close category dropdown on outside click ── */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (catRef.current && !catRef.current.contains(e.target as Node))
@@ -69,38 +113,169 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* ── USP ticker ── */
   useEffect(() => {
     const t = setInterval(() => setUspIdx((i) => (i + 1) % uspItems.length), 3500);
     return () => clearInterval(t);
   }, []);
 
-  /* ════════════════════════════════════════ */
+  /* ── User Dropdown Component ── */
+  const UserDropdown = ({ mobile = false }: { mobile?: boolean; }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className={cn(
+          "flex items-center gap-2 rounded-xl transition-all",
+          mobile
+            ? "w-full p-3 hover:bg-gray-50 border border-gray-200"
+            : "p-1.5 hover:bg-gray-100"
+        )}>
+          <Avatar className="w-8 h-8 border-2 border-[#006a4e]">
+            <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
+            <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-xs font-bold">
+              {getInitials(user?.name)}
+            </AvatarFallback>
+          </Avatar>
+          {mobile ? (
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold text-gray-800 leading-tight">{user?.name}</p>
+              <p className="text-xs text-gray-400 truncate max-w-[180px]">{user?.email}</p>
+            </div>
+          ) : (
+            <div className="hidden lg:flex flex-col items-start">
+              <span className="text-xs font-bold text-gray-800 leading-tight max-w-[90px] truncate">
+                {user?.name}
+              </span>
+              <span className="text-[10px] text-gray-400">অ্যাকাউন্ট</span>
+            </div>
+          )}
+          <ChevronDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+        </button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent
+        align={mobile ? "center" : "end"}
+        sideOffset={8}
+        className="w-56 rounded-xl shadow-xl border border-gray-100 p-1"
+      >
+        {/* User info header */}
+        <DropdownMenuLabel className="px-3 py-2.5">
+          <div className="flex items-center gap-2.5">
+            <Avatar className="w-9 h-9 border-2 border-[#006a4e]">
+              <AvatarImage src={user?.image ?? ""} />
+              <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-xs font-bold">
+                {getInitials(user?.name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-bold text-gray-800 truncate">{user?.name}</span>
+              <span className="text-xs text-gray-400 truncate">{user?.email}</span>
+            </div>
+          </div>
+          {/* Role badge */}
+          <div className="mt-2">
+            <span className={cn(
+              "text-[10px] font-bold px-2 py-0.5 rounded-full",
+              user?.role === "ADMIN"
+                ? "bg-[#dc143c]/10 text-[#dc143c]"
+                : "bg-[#006a4e]/10 text-[#006a4e]"
+            )}>
+              {user?.role === "ADMIN" ? "অ্যাডমিন" : "কাস্টমার"}
+            </span>
+          </div>
+        </DropdownMenuLabel>
+
+        <DropdownMenuSeparator className="bg-gray-100" />
+
+        <DropdownMenuGroup>
+          {user?.role === "ADMIN" && (
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer hover:bg-[#006a4e]/5 hover:text-[#006a4e]">
+              <Link href="/dashboard" className="flex items-center gap-2.5 px-3 py-2">
+                <LayoutDashboard className="w-4 h-4" />
+                <span className="text-sm font-medium">ড্যাশবোর্ড</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
+
+          <DropdownMenuItem asChild className="rounded-lg cursor-pointer hover:bg-[#006a4e]/5 hover:text-[#006a4e]">
+            <Link href="/profile" className="flex items-center gap-2.5 px-3 py-2">
+              <User className="w-4 h-4" />
+              <span className="text-sm font-medium">প্রোফাইল</span>
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild className="rounded-lg cursor-pointer hover:bg-[#006a4e]/5 hover:text-[#006a4e]">
+            <Link href="/orders" className="flex items-center gap-2.5 px-3 py-2">
+              <Package className="w-4 h-4" />
+              <span className="text-sm font-medium">আমার অর্ডার</span>
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild className="rounded-lg cursor-pointer hover:bg-[#006a4e]/5 hover:text-[#006a4e]">
+            <Link href="/settings" className="flex items-center gap-2.5 px-3 py-2">
+              <Settings className="w-4 h-4" />
+              <span className="text-sm font-medium">সেটিংস</span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator className="bg-gray-100" />
+
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="rounded-lg cursor-pointer hover:bg-[#dc143c]/5 hover:text-[#dc143c] focus:bg-[#dc143c]/5 focus:text-[#dc143c]"
+        >
+          <div className="flex items-center gap-2.5 px-3 py-2 w-full">
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm font-medium">লগ আউট</span>
+          </div>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  /* ── Auth Buttons Component ── */
+  const AuthButtons = ({ mobile = false }: { mobile?: boolean; }) =>
+    mobile ? (
+      <div className="flex flex-col gap-2.5">
+        <Button asChild className="w-full h-11 text-sm font-semibold text-white gap-2 bg-emerald-600 hover:bg-emerald-700 border-0">
+          <Link href="/login"><LogIn className="w-4 h-4" />সাইন ইন</Link>
+        </Button>
+        <Button asChild className="w-full h-11 text-sm font-semibold text-white gap-2 bg-red-600 hover:bg-red-700 border-0">
+          <Link href="/register"><UserPlus className="w-4 h-4" />সাইন আপ</Link>
+        </Button>
+      </div>
+    ) : (
+      <div className="flex items-center gap-2 ml-1">
+        <Button asChild size="sm" variant="ghost"
+          className="h-9 px-3 text-sm font-semibold text-gray-700 hover:text-emerald-700 hover:bg-emerald-50 border border-gray-200 rounded-lg gap-1.5">
+          <Link href="/login"><LogIn className="w-4 h-4" />সাইন ইন</Link>
+        </Button>
+        <Button asChild size="sm"
+          className="h-9 px-4 text-sm font-semibold text-white rounded-lg gap-1.5 hover:opacity-90 border-0"
+          style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)" }}>
+          <Link href="/register"><UserPlus className="w-4 h-4" />সাইন আপ</Link>
+        </Button>
+      </div>
+    );
+
   return (
     <>
       {/* ── ANNOUNCEMENT / USP BAR ── */}
       <div className="hidden md:block bg-gradient-to-r from-emerald-950 via-stone-900 to-red-950 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center justify-between">
-          {/* Rotating USP */}
           <div className="flex items-center gap-6">
             {uspItems.map((item, i) => {
               const Icon = item.icon;
               return (
-                <span
-                  key={i}
-                  className={cn(
-                    "flex items-center gap-1.5 text-[11px] font-medium transition-all duration-500",
-                    i === uspIdx ? "text-emerald-300 scale-105" : "text-gray-400"
-                  )}
-                >
+                <span key={i} className={cn(
+                  "flex items-center gap-1.5 text-[11px] font-medium transition-all duration-500",
+                  i === uspIdx ? "text-emerald-300 scale-105" : "text-gray-400"
+                )}>
                   <Icon className="w-3 h-3" />
                   {item.label}
                 </span>
               );
             })}
           </div>
-
-          {/* Right — hotline + email */}
           <div className="flex items-center gap-5 text-xs text-gray-300">
             <a href="tel:01641754794"
               className="flex items-center gap-1.5 hover:text-emerald-300 transition-colors">
@@ -126,22 +301,35 @@ export default function Navbar() {
             <Phone className="w-3 h-3" />
             ০১৬৪১-৭৫৪৭৯৪
           </a>
-          <div className="flex items-center gap-2">
-            <Button asChild size="sm"
-              className="h-6 px-3 text-xs rounded font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-0">
-              <Link href="/login"><LogIn className="w-3 h-3 mr-1" />সাইন ইন</Link>
-            </Button>
-            <Button asChild size="sm"
-              className="h-6 px-3 text-xs rounded font-semibold bg-red-700 hover:bg-red-800 text-white border-0">
-              <Link href="/register"><UserPlus className="w-3 h-3 mr-1" />সাইন আপ</Link>
-            </Button>
-          </div>
+          {/* ✅ Mobile top bar: show user or auth */}
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2">
+              <Avatar className="w-7 h-7 border-2 border-emerald-400">
+                <AvatarImage src={user?.image ?? ""} />
+                <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-[10px] font-bold">
+                  {getInitials(user?.name)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-emerald-300 text-xs font-semibold truncate max-w-[100px]">
+                {user?.name}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button asChild size="sm"
+                className="h-6 px-3 text-xs rounded font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-0">
+                <Link href="/login"><LogIn className="w-3 h-3 mr-1" />সাইন ইন</Link>
+              </Button>
+              <Button asChild size="sm"
+                className="h-6 px-3 text-xs rounded font-semibold bg-red-700 hover:bg-red-800 text-white border-0">
+                <Link href="/register"><UserPlus className="w-3 h-3 mr-1" />সাইন আপ</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ════════════════════════════════════════
-          MAIN NAVBAR
-      ════════════════════════════════════════ */}
+      {/* ── MAIN NAVBAR ── */}
       <nav
         className={cn(
           "bg-white sticky top-0 z-50 transition-all duration-300",
@@ -157,7 +345,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-4 h-[72px]">
 
-            {/* ── Logo ── */}
+            {/* Logo */}
             <Link href="/" className="flex-shrink-0 group">
               <Image
                 src={logo}
@@ -168,9 +356,8 @@ export default function Navbar() {
               />
             </Link>
 
-            {/* ── Search — desktop ── */}
+            {/* Search — desktop */}
             <div className="hidden md:flex flex-1 max-w-[620px] relative">
-              {/* glow ring on focus */}
               <div className={cn(
                 "absolute inset-0 rounded-md transition-all duration-300 pointer-events-none",
                 searchFocused ? "shadow-[0_0_0_3px_rgba(22,163,74,0.18)]" : ""
@@ -199,38 +386,34 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* ── Right cluster ── */}
+            {/* Right cluster */}
             <div className="ml-auto flex items-center gap-1 md:gap-2">
 
-              {/* Wishlist — desktop */}
+              {/* Wishlist */}
               <Link href="/wishlist"
                 className="hidden md:flex items-center gap-1.5 text-gray-600 hover:text-red-600 transition-colors p-2 rounded-xl hover:bg-red-50 relative group">
                 <Heart className="w-6 h-6" />
                 <span className="text-sm font-medium hidden lg:inline">উইশলিস্ট</span>
-                <Badge
-                  className="absolute -top-1 -right-1 h-[16px] w-[16px] flex items-center justify-center p-0 text-[9px] font-bold border-2 border-white bg-red-500">
+                <Badge className="absolute -top-1 -right-1 h-[16px] w-[16px] flex items-center justify-center p-0 text-[9px] font-bold border-2 border-white bg-red-500">
                   3
                 </Badge>
               </Link>
 
-              {/* Notifications — desktop */}
+              {/* Notifications */}
               <button className="hidden md:flex items-center p-2 rounded-xl text-gray-600 hover:text-amber-600 hover:bg-amber-50 transition-colors relative">
                 <Bell className="w-6 h-6" />
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white" />
               </button>
 
-              {/* Auth — desktop */}
-              <div className="hidden md:flex items-center gap-2 ml-1">
-                <Button asChild size="sm" variant="ghost"
-                  className="h-9 px-3 text-sm font-semibold text-gray-700 hover:text-emerald-700 hover:bg-emerald-50 border border-gray-200 rounded-lg gap-1.5">
-                  <Link href="/login"><LogIn className="w-4 h-4" />সাইন ইন</Link>
-                </Button>
-                <Button asChild size="sm"
-                  className="h-9 px-4 text-sm font-semibold text-white rounded-lg gap-1.5 hover:opacity-90 border-0"
-                  style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)" }}>
-                  <Link href="/register"><UserPlus className="w-4 h-4" />সাইন আপ</Link>
-                </Button>
+              {/* ✅ Auth — desktop: show dropdown or buttons */}
+              <div className="hidden md:flex items-center ml-1">
+                {isLoggedIn ? (
+                  <UserDropdown />
+                ) : (
+                  <AuthButtons />
+                )}
               </div>
+
 
               {/* Cart */}
               <Link
@@ -239,15 +422,17 @@ export default function Navbar() {
                 style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
               >
                 <ShoppingCart className="w-5 h-5" />
-                <Badge
-                  className="absolute -top-1.5 -right-1.5 h-[20px] w-[20px] flex items-center justify-center p-0 text-[10px] font-bold border-2 border-white"
-                  style={{ background: "#dc2626" }}>
-                  2
-                </Badge>
+                {cartCount !== null && cartCount > 0 && (
+                  <Badge
+                    className="absolute -top-1.5 -right-1.5 h-[20px] w-[20px] flex items-center justify-center p-0 text-[10px] font-bold border-2 border-white"
+                    style={{ background: "#dc2626" }}>
+                    {cartCount}
+                  </Badge>
+                )}
                 <span className="hidden sm:inline text-sm font-semibold pr-0.5">কার্ট</span>
               </Link>
 
-              {/* ── Mobile Hamburger ── */}
+              {/* Mobile Hamburger */}
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
                   <Button
@@ -261,9 +446,8 @@ export default function Navbar() {
                   </Button>
                 </SheetTrigger>
 
-                {/* ── Mobile Sheet ── */}
+                {/* Mobile Sheet */}
                 <SheetContent side="left" className="w-[300px] p-0 overflow-y-auto">
-                  {/* Header */}
                   <div
                     className="p-4 flex items-center justify-between"
                     style={{ background: "linear-gradient(135deg,#0d4a1f,#1a2e0d 50%,#4a0d0d)" }}
@@ -335,14 +519,13 @@ export default function Navbar() {
                     ))
                   }
 
-                  {/* Mobile auth */}
-                  <div className="p-4 flex flex-col gap-2.5 border-t mt-2 bg-gray-50">
-                    <Button asChild className="w-full h-11 text-sm font-semibold text-white gap-2 bg-emerald-600 hover:bg-emerald-700 border-0">
-                      <Link href="/login"><LogIn className="w-4 h-4" />সাইন ইন</Link>
-                    </Button>
-                    <Button asChild className="w-full h-11 text-sm font-semibold text-white gap-2 bg-red-600 hover:bg-red-700 border-0">
-                      <Link href="/register"><UserPlus className="w-4 h-4" />সাইন আপ</Link>
-                    </Button>
+                  {/* ✅ Mobile auth: dropdown or buttons */}
+                  <div className="p-4 border-t mt-2 bg-gray-50">
+                    {isLoggedIn ? (
+                      <UserDropdown mobile />
+                    ) : (
+                      <AuthButtons mobile />
+                    )}
                   </div>
 
                   {/* USP strip */}
@@ -362,7 +545,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* ── Mobile search row ── */}
+          {/* Mobile search row */}
           <div className="md:hidden flex pb-3 gap-0">
             <Input
               value={searchQuery}
@@ -382,18 +565,12 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* ════════════════════════════════════════
-            CATEGORY NAV BAR — desktop
-        ════════════════════════════════════════ */}
+        {/* Category Nav Bar — desktop */}
         <div
           className="hidden md:block"
-          style={{
-            background: "linear-gradient(90deg,#166534 0%,#15803d 35%,#991b1b 70%,#b91c1c 100%)",
-          }}
+          style={{ background: "linear-gradient(90deg,#166534 0%,#15803d 35%,#991b1b 70%,#b91c1c 100%)" }}
         >
           <div className="max-w-7xl mx-auto px-4 flex items-center" ref={catRef}>
-
-            {/* Categories dropdown button */}
             <div className="relative">
               <button
                 onClick={() => setCatOpen((v) => !v)}
@@ -402,15 +579,9 @@ export default function Navbar() {
               >
                 <LayoutGrid className="w-4 h-4" />
                 ক্যাটেগরীজ
-                <ChevronDown
-                  className={cn(
-                    "w-3.5 h-3.5 transition-transform duration-200",
-                    catOpen && "rotate-180"
-                  )}
-                />
+                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", catOpen && "rotate-180")} />
               </button>
 
-              {/* Dropdown panel */}
               {catOpen && (
                 <div
                   className="absolute top-full left-0 bg-white w-60 z-50 rounded-b-xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150"
@@ -440,7 +611,6 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* ── Quick nav links ── */}
             <div className="flex items-center">
               {categories.slice(0, 9).map((cat: any) => (
                 <Link
@@ -458,8 +628,6 @@ export default function Navbar() {
                   {cat.name}
                 </Link>
               ))}
-
-              {/* All products */}
               <Link
                 href="/products"
                 className={cn(

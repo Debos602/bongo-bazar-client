@@ -8,10 +8,22 @@ export const metadata: Metadata = {
     description: "Browse all products available in the store. Find deals, prices and stock information."
 };
 
-const AllProductsPage = async ({ searchParams }: { searchParams?: { page?: string; limit?: string; searchTerm?: string; }; }) => {
-    const page = parseInt(searchParams?.page || "1");
-    const limit = parseInt(searchParams?.limit || "10");
-    const searchTerm = searchParams?.searchTerm?.toString() || "";
+const AllProductsPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{
+        page?: string;
+        limit?: string;
+        searchTerm?: string;
+    }>;
+}) => {
+    // ✅ Await searchParams first (required in Next.js 15+ for server components)
+    const params = await searchParams;
+
+    // Parse safely (prevent NaN and negative values)
+    const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
+    const limit = Math.max(1, parseInt(params.limit ?? "10", 10) || 10);
+    const searchTerm = params.searchTerm?.toString() || "";
 
     let url = `${process.env.NEXT_PUBLIC_BASE_API}/product?page=${page}&limit=${limit}`;
     if (searchTerm) url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
@@ -21,10 +33,16 @@ const AllProductsPage = async ({ searchParams }: { searchParams?: { page?: strin
     });
     const { data: products, meta } = await res.json();
 
+    // Helper to build pagination URLs (preserves searchTerm!)
+    const buildPaginationUrl = (newPage: number) => {
+        let href = `/products?page=${newPage}&limit=${limit}`;
+        if (searchTerm) href += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+        return href;
+    };
+
     return (
         <div className="min-h-screen bg-[#fdf8f0] py-10 px-4">
             <div className="max-w-7xl mx-auto">
-
                 {/* Section Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#e8ddd0] relative">
                     {/* Gradient underline accent */}
@@ -34,7 +52,7 @@ const AllProductsPage = async ({ searchParams }: { searchParams?: { page?: strin
                     />
                     <h2 className="text-xl font-bold text-[#1a1208] flex items-center gap-3" style={{ fontFamily: "'Hind Siliguri', sans-serif" }}>
                         <span>
-                            <Link href='/'>Home/</Link>All Products
+                            <Link href="/">Home/</Link>All Products
                         </span>
                         <span
                             className="text-xs font-bold text-white px-3 py-0.5 rounded-full"
@@ -52,24 +70,22 @@ const AllProductsPage = async ({ searchParams }: { searchParams?: { page?: strin
 
                 {/* Products Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {
-                        Array.isArray(products) && products.length > 0 ? (
-                            products.map((product: Post) => (
-                                <BlogCard key={product.id} post={product} />
-                            ))
-                        ) : (
-                            <p className="col-span-full text-center text-[#7a6a5a] py-16 text-sm">
-                                No products found.
-                            </p>
-                        )
-                    }
+                    {Array.isArray(products) && products.length > 0 ? (
+                        products.map((product: Post) => (
+                            <BlogCard key={product.id} post={product} />
+                        ))
+                    ) : (
+                        <p className="col-span-full text-center text-[#7a6a5a] py-16 text-sm">
+                            No products found.
+                        </p>
+                    )}
                 </div>
 
                 {/* Pagination */}
                 {meta && (
                     <div className="flex items-center justify-center gap-3 mt-10">
                         <a
-                            href={`/products?page=${Math.max(1, (meta.page || page) - 1)}&limit=${meta.limit || limit}`}
+                            href={buildPaginationUrl(Math.max(1, (meta.page || page) - 1))}
                             className="px-5 py-2 rounded-lg text-sm font-semibold border-[1.5px] border-[#e8ddd0] bg-white text-[#7a6a5a] hover:border-[#00825a] hover:text-[#00825a] transition-all"
                         >
                             ← Prev
@@ -78,7 +94,7 @@ const AllProductsPage = async ({ searchParams }: { searchParams?: { page?: strin
                             Page {meta.page || page} of {Math.ceil((meta.total || 0) / (meta.limit || limit))}
                         </span>
                         <a
-                            href={`/products?page=${(meta.page || page) + 1}&limit=${meta.limit || limit}`}
+                            href={buildPaginationUrl((meta.page || page) + 1)}
                             className="px-5 py-2 rounded-lg text-sm font-semibold border-[1.5px] border-[#e8ddd0] bg-white text-[#7a6a5a] hover:border-[#00825a] hover:text-[#00825a] transition-all"
                         >
                             Next →

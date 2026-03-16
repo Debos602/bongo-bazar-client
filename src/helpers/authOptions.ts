@@ -9,6 +9,8 @@ declare module "next-auth" {
             email: string;
             name: string;
             image?: string;
+            role: string;
+            accessToken: string;
         };
     }
     interface User {
@@ -16,12 +18,12 @@ declare module "next-auth" {
         email: string;
         name: string;
         image?: string;
+        role: string;
+        accessToken: string;
     }
 }
 
-
 export const authOptions: NextAuthOptions = {
-    // Configure one or more authentication providers
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -33,39 +35,62 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "text" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials, req) {
-                if (!credentials?.email || !credentials?.password) {
-                    console.error("Email and password are required");
-                    return null;
-                }
+            // ✅ এখানে বসবে
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) return null;
                 try {
                     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/login`, {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
+                        headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             email: credentials.email,
                             password: credentials.password,
                         }),
                     });
-                    if (!res.ok) {
-                        console.error("Failed to login user", await res.text());
-                        return null;
-                    }
-                    const user = await res.json();
-                    if (user?.id) {
-                        return {
-                            id: user?.id,
-                            email: user?.email,
-                            name: user?.name,
-                            image: user?.picture,
-                        };
-                    } else {
-                        return null;
-                    }
+
+                    const result = await res.json();
+                    if (!res.ok || !result.success) return null;
+
+                    // ✅ Cookie থেকে accessToken বের করো
+                    const setCookieHeader = res.headers.get("set-cookie");
+                    console.log("Cookies >>>", setCookieHeader);
+
+                    const accessToken = setCookieHeader
+                        ?.split(";")
+                        .find((c) => c.trim().startsWith("accessToken="))
+                        ?.split("=")[1];
+
+                    console.log("AccessToken >>>", accessToken);
+
+                    if (!accessToken) return null;
+
+                    // ✅ Token দিয়ে user info আনো
+                    const profileRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/me`, {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            Cookie: `accessToken=${accessToken}`, // backend cookie based হলে
+                        },
+                    });
+
+                    const profile = await profileRes.json();
+                    console.log("Profile >>>", profile);
+
+                    const userData = profile?.data ?? profile;
+
+                    if (!userData?.id) return null;
+
+                    return {
+                        id: String(userData.id),
+                        email: userData.email,
+                        name: userData.name,
+                        image: userData.image ?? null,
+                        role: userData.role,
+                        // ✅ token ও save করো পরে use করতে
+                        accessToken,
+                    };
+
                 } catch (err) {
-                    console.error("Error authorizing user", err);
+                    console.error("Error:", err);
                     return null;
                 }
             }
@@ -74,23 +99,26 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user }) {
+            console.log("token", token);
             if (user) {
-                token.id = user?.id;
+                token.id = user.id;
+                token.role = user.role;
+                token.accessToken = user.accessToken; // ✅ JWT এ আছে (server only)
             }
             return token;
         },
         async session({ session, token }) {
             if (session?.user) {
-                session.user.id = token?.id as string;
+                session.user.id = token.id as string;
+                session.user.role = token.role as string;
+                // ❌ accessToken session এ দিও না — client এ যাবে
             }
             return session;
-        }
+        },
     },
 
     secret: process.env.NEXTAUTH_SECRET,
     pages: {
         signIn: "/login"
     }
-
 };
-
