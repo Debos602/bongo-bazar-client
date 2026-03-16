@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth"; // ✅ works on both server + clie
 import { authOptions } from "@/helpers/authOptions";
 
 const axiosInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    baseURL: process.env.NEXT_PUBLIC_BASE_API,
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
