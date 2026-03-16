@@ -2,8 +2,6 @@
 
 import axiosInstance from "@/lib/axiosInstance";
 import { revalidateTag } from "next/cache";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/helpers/authOptions";
 
 // ✅ CREATE CART
 export const createCart = async (data: { productId: number; quantity: number; }) => {
@@ -27,6 +25,7 @@ export const getCartCount = async () => {
     try {
         const res = await axiosInstance.get('/cart/count');
         revalidateTag("cart-count");
+        console.log("res-from-api", res);
         return res?.data?.data ?? 0;
     } catch {
         return 0;

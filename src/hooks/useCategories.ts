@@ -1,33 +1,36 @@
-"use client";
+// src/hooks/useCategories.ts
+import { useState, useEffect } from "react";
 
-import { useEffect, useState } from "react";
-import type { Category } from "@/types";
+// ✅ module-level cache — page reload না হলে আর fetch হবে না
+let cachedCategories: any[] = [];
 
 export default function useCategories() {
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+    const [categories, setCategories] = useState<any[]>(cachedCategories);
+    const [loading, setLoading] = useState(cachedCategories.length === 0);
 
     useEffect(() => {
+        // ✅ cache থাকলে আর fetch করবে না
+        if (cachedCategories.length > 0) return;
+
         let mounted = true;
-        (async () => {
+        const fetchCategories = async () => {
             try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category`);
                 if (!res.ok) throw new Error(`Failed to fetch categories: ${res.status}`);
                 const json = await res.json();
                 if (!mounted) return;
-                setCategories(json?.data || []);
+                cachedCategories = json?.data || [];
+                setCategories(cachedCategories);
             } catch (err) {
-                if (!mounted) return;
-                console.error("useCategories error:", err);
-                setError(err);
+                console.error(err);
             } finally {
-                if (!mounted) return;
-                setLoading(false);
+                if (mounted) setLoading(false);
             }
-        })();
+        };
+
+        fetchCategories();
         return () => { mounted = false; };
     }, []);
 
-    return { categories, loading, error };
+    return { categories, loading };
 }

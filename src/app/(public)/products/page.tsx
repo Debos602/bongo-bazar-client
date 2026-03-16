@@ -29,7 +29,7 @@ const AllProductsPage = async ({
     if (searchTerm) url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
 
     const res = await fetch(url, {
-        cache: "no-store",
+        next: { revalidate: 60 }
     });
     const { data: products, meta } = await res.json();
 

@@ -16,22 +16,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Next Blog",
+  title: "Bongo Bazar",
   description: "A simple blog built with Next.js, Tailwind CSS, and shadcn/ui.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode; }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <AuthProvider>
-          <Toaster richColors position="top-center"></Toaster>
+          <Toaster richColors position="top-center" />
           <MessengerButton />
           {children}
         </AuthProvider>

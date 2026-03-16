@@ -87,25 +87,25 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
     !product.stock ? "out" : product.stock < 10 ? "low" : "in";
 
   const handleAddToCart = async (productId: number) => {
-    // ✅ login না থাকলে login এ পাঠাও
     if (!session) {
       router.push(`/login?callbackUrl=/products`);
       return;
     }
 
     setCartLoading(true);
-    setCartError(null);
-
     try {
       const res = await createCart({ productId, quantity: 1 });
-
       if (res?.id || res?.success) {
         setCartAdded(true);
-        setTimeout(() => setCartAdded(false), 2200); // ✅ 2.2s পর reset
+        toast.success("cart added successfully");
+        setTimeout(() => {
+          router.refresh(); // ✅ একটু delay দিন
+          setCartAdded(false);
+        }, 500);
       } else {
         setCartError("কার্টে যোগ করা যায়নি");
       }
-    } catch (err) {
+    } catch {
       setCartError("Something went wrong");
     } finally {
       setCartLoading(false);

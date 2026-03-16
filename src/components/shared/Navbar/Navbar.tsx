@@ -31,7 +31,6 @@ import logo from "../../../../public/logo.png";
 import useCategories from "@/hooks/useCategories";
 import getCategoryIcon from "@/lib/categoryIcons";
 import { useSession, signOut } from "next-auth/react";
-import { getCartCount } from "@/actions/cart";
 
 const uspItems = [
   { icon: Truck, label: "Free Delivery on ৳999+" },
@@ -40,7 +39,7 @@ const uspItems = [
   { icon: MapPin, label: "Deliver All Over Bangladesh" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ cartButton }: { cartButton?: React.ReactNode; }) {
 
   const pathname = usePathname();
   const router = useRouter();
@@ -58,25 +57,10 @@ export default function Navbar() {
   const isLoggedIn = status === "authenticated";
   const user = session?.user;
 
-  // ✅ Correct — handle the async call properly
-  const [cartCount, setCartCount] = useState<number | null>(null);
 
 
 
 
-  useEffect(() => {
-    const fetchCartCount = async () => {
-      try {
-        const count = await getCartCount();
-        router.refresh();
-        setCartCount(count ?? 0);
-      } catch {
-        setCartCount(0);
-      }
-    };
-
-    if (isLoggedIn) fetchCartCount();
-  }, [isLoggedIn]);
 
   /* ── helpers ── */
   const getInitials = (name?: string | null) => {
@@ -416,22 +400,7 @@ export default function Navbar() {
 
 
               {/* Cart */}
-              <Link
-                href="/cart"
-                className="relative flex items-center gap-1.5 text-white transition-all p-2.5 rounded-xl ml-1"
-                style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
-              >
-                <ShoppingCart className="w-5 h-5" />
-                {cartCount !== null && cartCount > 0 && (
-                  <Badge
-                    className="absolute -top-1.5 -right-1.5 h-[20px] w-[20px] flex items-center justify-center p-0 text-[10px] font-bold border-2 border-white"
-                    style={{ background: "#dc2626" }}>
-                    {cartCount}
-                  </Badge>
-                )}
-                <span className="hidden sm:inline text-sm font-semibold pr-0.5">কার্ট</span>
-              </Link>
-
+              {cartButton}
               {/* Mobile Hamburger */}
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
