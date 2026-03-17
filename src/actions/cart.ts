@@ -39,7 +39,8 @@ export const getCartCount = async () => {
 
         if (!res.ok) return 0;
         const data = await res.json();
-        return data?.data ?? 0;
+        console.log("Data", data);
+        return data?.data?.totalQuantity ?? 0;
     } catch {
         return 0;
     }
