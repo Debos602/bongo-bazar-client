@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getCart, removeFromCart, updateCartQuantity } from "@/actions/cart";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { createOrderWithAddress } from "@/actions/order";
 const SHIPPING_COSTS = { dhaka: 60, outside: 110 };
 
 type CartItem = {
@@ -29,6 +30,8 @@ export default function CartPage() {
     const [loading, setLoading] = useState(true);
     const [area, setArea] = useState("outside");
     const [form, setForm] = useState({ name: "", mobile: "", email: "", address: "" });
+    // ✅ type ঠিক করো
+    const [orderLoading, setOrderLoading] = useState<boolean>(false);
     const router = useRouter();
     // ✅ API থেকে cart load করো
     useEffect(() => {
@@ -40,6 +43,36 @@ export default function CartPage() {
         };
         fetchCart();
     }, []);
+
+    const handleOrder = async () => {
+        if (!form.name.trim()) { toast.error("নাম দিন"); return; }
+        if (!form.mobile.trim()) { toast.error("মোবাইল নম্বর দিন"); return; }
+        if (!form.address.trim()) { toast.error("ঠিকানা দিন"); return; }
+        if (cartItems.length === 0) { toast.error("কার্ট খালি"); return; }
+
+        setOrderLoading(true);
+        try {
+            const res = await createOrderWithAddress({
+                fullName: form.name,
+                phone: form.mobile,
+                city: area === "dhaka" ? "Dhaka" : "Outside Dhaka",
+                area: area,
+                address: form.address,
+            });
+
+            if (res?.data?.id) {
+                toast.success("অর্ডার সফলভাবে হয়েছে! 🎉");
+                clearCart();
+                router.push("/orders");
+            } else {
+                toast.error(res?.message ?? "অর্ডার হয়নি");
+            }
+        } catch {
+            toast.error("কিছু একটা ভুল হয়েছে");
+        } finally {
+            setOrderLoading(false);
+        }
+    };
 
     // ✅ Quantity update
     const updateQty = async (id: number, delta: number) => {
@@ -149,8 +182,20 @@ export default function CartPage() {
                                         onChange={(e) => setForm({ ...form, address: e.target.value })}
                                         className="bg-[#fdf8f0] border-gray-200 focus:border-[#006a4e] rounded-xl" />
                                 </div>
-                                <Button className="w-full py-3 mt-2 rounded-xl font-extrabold text-white text-base bg-gradient-to-r from-[#006a4e] to-[#004d38] hover:opacity-90 transition-all shadow-md">
-                                    অর্ডার কনফার্ম করুন
+
+                                <Button
+                                    onClick={handleOrder}
+                                    disabled={orderLoading || cartItems.length === 0}
+                                    className="w-full py-3 mt-2 rounded-xl font-extrabold text-white text-base bg-gradient-to-r from-[#006a4e] to-[#004d38] hover:opacity-90 transition-all shadow-md disabled:opacity-60"
+                                >
+                                    {orderLoading ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <Loader2 size={16} className="animate-spin" />
+                                            অর্ডার হচ্ছে...
+                                        </span>
+                                    ) : (
+                                        "অর্ডার কনফার্ম করুন"
+                                    )}
                                 </Button>
                             </div>
                         </div>
