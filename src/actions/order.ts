@@ -26,8 +26,8 @@ export const getUserOrder = async () => {
     try {
         const res = await axiosInstance.get("/order");
         revalidateTag("order");
-        console.log("order-data", res.data);
-        return res.data;
+        console.log("order-data", res.data.data);
+        return res.data.data;
     } catch (error: any) {
         return { success: false, message: error.response?.data?.message ?? "error" };
     }
