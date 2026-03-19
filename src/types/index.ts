@@ -63,3 +63,19 @@ export interface Category {
     slug: string;
     products?: Array<{ productId: number; categoryId: number; product: Post; }>;
 }
+
+export type OrderItem = {
+    id: number;
+    quantity: number;
+    price: number;
+    product: { id: number; name: string; image: string; price: number; };
+};
+export type Order = {
+    id: number;
+    total: number;
+    status: string;
+    createdAt: string;
+    payment?: { status: string; method: string; } | null;
+    address: { fullName: string; phone: string; city: string; area: string; address: string; tag?: string; };
+    items: OrderItem[];
+};

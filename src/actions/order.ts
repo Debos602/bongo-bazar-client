@@ -24,9 +24,7 @@ export const createOrderWithAddress = async (data: {
 
 export const getUserOrder = async () => {
     try {
-        const res = await axiosInstance.get("/order");
-        revalidateTag("order");
-        console.log("order-data", res.data.data);
+        const res = await axiosInstance.get("/order"); // cache option সরিয়ে দিন
         return res.data.data;
     } catch (error: any) {
         return { success: false, message: error.response?.data?.message ?? "error" };
