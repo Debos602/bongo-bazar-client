@@ -5,14 +5,16 @@ import axiosInstance from "@/lib/axiosInstance";
 
 export const register = async (data: FieldValues) => {
     try {
-        const res = await axiosInstance.post("/user", data);
+        const res = await axiosInstance.post("/auth/register", data);
+        console.log("✅ REGISTER RESPONSE:", res.data); // Terminal-এ দেখবে
         return res.data;
     } catch (error: any) {
-        console.error("Failed to register user", error.response?.data);
+        console.error("❌ REGISTER ERROR:", error.response?.data);
+        console.error("❌ STATUS:", error.response?.status);
+        console.error("❌ URL HIT:", error.config?.url);
         return error.response?.data;
     }
 };
-
 export const login = async (data: FieldValues) => {
     try {
         const res = await axiosInstance.post("/auth/login", data);

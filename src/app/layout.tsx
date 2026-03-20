@@ -4,6 +4,8 @@ import "./globals.css";
 import AuthProvider from "@/providers/AuthProvider";
 import { Toaster } from "sonner";
 import MessengerButton from "@/components/shared/MessengerButton";
+import { Suspense } from "react";
+import InitialLoader from "@/components/shared/Initialloader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +32,9 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
         <AuthProvider>
           <Toaster richColors position="top-center" />
           <MessengerButton />
-          {children}
+          <Suspense fallback={<InitialLoader />}>  {/* ← এইটুকু add করুন */}
+            {children}
+          </Suspense>
         </AuthProvider>
       </body>
     </html>
