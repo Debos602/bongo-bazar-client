@@ -59,9 +59,6 @@ export default function Navbar({ cartButton }: { cartButton?: React.ReactNode; }
 
 
 
-
-
-
   /* ── helpers ── */
   const getInitials = (name?: string | null) => {
     if (!name) return "U";
