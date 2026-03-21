@@ -45,9 +45,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import logo from "../../../../public/logo.png";
-import useCategories from "@/hooks/useCategories";
 import getCategoryIcon from "@/lib/categoryIcons";
 import { useSession, signOut } from "next-auth/react";
+import { getCategory } from "@/actions/category";
 
 type Category = {
   slug: string;
@@ -79,11 +79,24 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [uspIdx, setUspIdx] = useState(0);
+  // ✅ useState + useEffect দিয়ে getCategory ব্যবহার
+  const [safeCategories, setSafeCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { categories, loading } = useCategories();
-  const safeCategories: Category[] = Array.isArray(categories)
-    ? (categories as Category[])
-    : [];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategory();
+        console.log("Raw category data Navbar:", data);
+        setSafeCategories(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
