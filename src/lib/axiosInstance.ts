@@ -1,6 +1,5 @@
-// src/lib/axiosInstance.ts
 import axios from "axios";
-import { getServerSession } from "next-auth"; // ✅ works on both server + client
+import { getServerSession } from "next-auth";
 import { authOptions } from "@/helpers/authOptions";
 
 const axiosInstance = axios.create({
@@ -8,12 +7,14 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
-    const session = await getServerSession(authOptions); // ✅ safe for Server Actions 
+    const session = await getServerSession(authOptions);
 
-    const token = (session?.user as any)?.accessToken;
+    const token = session?.user?.accessToken; // ✅ no any
+
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
 });
 

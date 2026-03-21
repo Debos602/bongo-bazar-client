@@ -2,6 +2,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import {
   ShoppingCart, Zap, Heart, Share2,
@@ -54,14 +55,13 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
   const [wished, setWished] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "reviews">("desc");
-  // component এর ভেতরে:
+
   const { data: session } = useSession();
-  // console.log("session", session);
   const router = useRouter();
 
   const [cartAdded, setCartAdded] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
-  const [cartError, setCartError] = useState<string | null>(null);
+
   /* ── empty state ── */
   if (!product) {
     return (
@@ -97,16 +97,16 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
       const res = await createCart({ productId, quantity: 1 });
       if (res?.id || res?.success) {
         setCartAdded(true);
-        toast.success("cart added successfully");
+        toast.success("Cart added successfully");
         setTimeout(() => {
-          router.refresh(); // ✅ একটু delay দিন
+          router.refresh();
           setCartAdded(false);
         }, 500);
       } else {
-        setCartError("কার্টে যোগ করা যায়নি");
+        toast.error("কার্টে যোগ করা যায়নি");
       }
     } catch {
-      setCartError("Something went wrong");
+      toast.error("Something went wrong");
     } finally {
       setCartLoading(false);
     }
@@ -161,8 +161,6 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
     { name: "Nasrin B.", rating: 5, date: "2 weeks ago", body: "Best price online. Works perfectly. Will definitely buy again from BongoBazar!" },
   ];
 
-
-
   /* ══════════════════════════════════════════════════════════ */
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -170,25 +168,25 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
 
       {/* ── Breadcrumb ── */}
       <nav className="max-w-7xl mx-auto px-5 pt-5 pb-2 flex items-center gap-1 flex-wrap">
-        <a href="/"
+        <Link href="/"
           className="text-[13px] font-medium text-green-700 hover:text-green-900
                       hover:underline underline-offset-2 transition-colors">
           Home
-        </a>
+        </Link>
         <ChevronRight size={13} className="text-green-400 flex-shrink-0" />
-        <a href="/products"
+        <Link href="/products"
           className="text-[13px] font-medium text-green-700 hover:text-green-900
                       hover:underline underline-offset-2 transition-colors">
           Products
-        </a>
+        </Link>
         <ChevronRight size={13} className="text-green-400 flex-shrink-0" />
         {product.category && (
           <>
-            <a href={`/category/${product.categorySlug ?? product.category}`}
+            <Link href={`/category/${product.categorySlug ?? product.category}`}
               className="text-[13px] font-medium text-green-700 hover:text-green-900
                           hover:underline underline-offset-2 transition-colors capitalize">
               {product.category}
-            </a>
+            </Link>
             <ChevronRight size={13} className="text-green-400 flex-shrink-0" />
           </>
         )}
@@ -472,7 +470,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
             <div className="flex gap-3 mb-5">
               <button
                 onClick={() => handleAddToCart(product.id)}
-                disabled={!product.stock}
+                disabled={cartLoading || !product.stock}
                 className={`flex-1 h-12 rounded-xl font-bold text-[13px] tracking-wide
                             flex items-center justify-center gap-2
                             border-2 transition-all duration-200
@@ -483,9 +481,13 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                   }`}
                 style={{ fontFamily: "'Syne', sans-serif" }}
               >
-                {cartAdded
-                  ? <><Check size={16} /> Added!</>
-                  : <><ShoppingCart size={16} /> Add to Cart</>}
+                {cartLoading ? (
+                  "Adding to Cart..."
+                ) : cartAdded ? (
+                  <><Check size={16} /> Added!</>
+                ) : (
+                  <><ShoppingCart size={16} /> Add to Cart</>
+                )}
               </button>
 
               <button

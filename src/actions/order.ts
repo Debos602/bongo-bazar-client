@@ -1,9 +1,9 @@
 "use server";
 
 import axiosInstance from "@/lib/axiosInstance";
+import { AxiosError } from "axios";
 import { revalidateTag } from "next/cache";
 
-// src/actions/order.ts
 export const createOrderWithAddress = async (data: {
     fullName: string;
     phone: string;
@@ -17,16 +17,18 @@ export const createOrderWithAddress = async (data: {
         const res = await axiosInstance.post("/order/with-address", data);
         revalidateTag("cart-count");
         return res.data;
-    } catch (error: any) {
-        return { success: false, message: error.response?.data?.message ?? "Order failed" };
+    } catch (error) {
+        const err = error as AxiosError<{ message?: string; }>;
+        return { success: false, message: err.response?.data?.message ?? "Order failed" };
     }
 };
 
 export const getUserOrder = async () => {
     try {
-        const res = await axiosInstance.get("/order"); // cache option সরিয়ে দিন
+        const res = await axiosInstance.get("/order");
         return res.data.data;
-    } catch (error: any) {
-        return { success: false, message: error.response?.data?.message ?? "error" };
+    } catch (error) {
+        const err = error as AxiosError<{ message?: string; }>;
+        return { success: false, message: err.response?.data?.message ?? "error" };
     }
 };

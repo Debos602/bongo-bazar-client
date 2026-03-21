@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// components/modules/Products/ProductCard.tsx
+
 import Link from "next/link";
 import Image from "next/image";
 import { Post } from "@/types";
@@ -30,12 +31,15 @@ function getFallbackImage(name: string): string {
 
 export default function ProductCard({ post }: { post: Post; }) {
   const imageSrc = (post.image || post.thumbnail) || getFallbackImage(post.name || post.title || "");
-  const altText = (post.name || post.title) as string;
+  const altText = (post.name || post.title || "প্রোডাক্ট") as string;
 
-  const originalPrice = post.price ?? post.price ?? null;
-  const currentPrice = post.price ?? post.price ?? null;
+  // ✅ ফিক্স: duplicate ?? সরানো হয়েছে + discount শুধু তখনই দেখাবে যখন আসল দাম > বর্তমান দাম
+  const price = post.price ?? null;
+  const originalPrice = price; // যদি আপনার Post টাইপে regularPrice / oldPrice ফিল্ড থাকে তাহলে এখানে বসাবেন
+  const currentPrice = price;
+
   const discount =
-    originalPrice && currentPrice
+    originalPrice && currentPrice && originalPrice > currentPrice
       ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
       : null;
 
@@ -46,7 +50,7 @@ export default function ProductCard({ post }: { post: Post; }) {
         {/* Image Area */}
         <div className="relative w-full bg-gradient-to-br from-green-50 to-red-50" style={{ paddingTop: "100%" }}>
           {/* Discount Badge */}
-          {discount && (
+          {discount && discount > 0 && (
             <div className="absolute top-2 right-2 z-10 flex flex-col items-center justify-center rounded-full text-white font-bold w-11 h-11 leading-tight shadow-lg"
               style={{ background: "linear-gradient(135deg, #dc2626, #b91c1c)" }}>
               <span className="text-[11px] font-extrabold">{discount}%</span>
@@ -68,7 +72,7 @@ export default function ProductCard({ post }: { post: Post; }) {
 
           {/* Price */}
           <div className="mb-1">
-            {originalPrice && (
+            {originalPrice && originalPrice !== currentPrice && (
               <span className="block text-xs line-through text-gray-400">
                 ৳ {originalPrice.toLocaleString()}
               </span>

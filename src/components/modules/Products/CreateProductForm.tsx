@@ -2,10 +2,8 @@
 import { create } from "@/actions/create";
 import Form from "next/form";
 
-import { useState } from "react";
 
 export default function CreateProductForm() {
-    const [isFeatured, setIsFeatured] = useState("false");
 
     return (
         <Form

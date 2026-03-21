@@ -12,6 +12,7 @@ export const getAuthToken = async () => {
 
     if (!sessionToken) return null;
 
+    // ✅ এখানে unknown দিয়ে cast করা হয়েছে (TypeScript নিজেই এটাই সাজেস্ট করেছে)
     const token = await getToken({
         req: {
             cookies: {
@@ -19,7 +20,7 @@ export const getAuthToken = async () => {
                 "__Secure-next-auth.session-token": sessionToken,
             },
             headers: {},
-        } as any,
+        } as unknown as Parameters<typeof getToken>[0]["req"],
         secret: process.env.NEXTAUTH_SECRET!,
     });
 

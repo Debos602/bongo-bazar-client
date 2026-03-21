@@ -34,8 +34,10 @@ export default async function CategoryProductPage({ slug, categoryData, showAll 
         return null;
     }
 
-    // Extract products from the nested structure
-    const products: Post[] = data.products.map((item: any) => item.product) ?? [];
+
+    const products: Post[] = data.products.map(
+        (item: { product: Post; }) => item.product
+    ) ?? [];
 
     // Show all products on category page, or just 6 on home page
     const displayProducts = showAll ? products : products.slice(0, 5);
