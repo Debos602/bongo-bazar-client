@@ -81,7 +81,9 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
   const [uspIdx, setUspIdx] = useState(0);
 
   const { categories, loading } = useCategories();
-  const safeCategories: Category[] = Array.isArray(categories) ? (categories as Category[]) : [];
+  const safeCategories: Category[] = Array.isArray(categories)
+    ? (categories as Category[])
+    : [];
 
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
@@ -99,7 +101,9 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
 
   const handleSearch = (closeMobile = false) => {
     const q = searchQuery.trim();
-    router.push(q ? `/products?searchTerm=${encodeURIComponent(q)}` : "/products");
+    router.push(
+      q ? `/products?searchTerm=${encodeURIComponent(q)}` : "/products"
+    );
     setSearchQuery("");
     if (closeMobile) setMobileOpen(false);
   };
@@ -124,13 +128,15 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
         setCatOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => setUspIdx((i) => (i + 1) % uspItems.length), 3500);
+    const t = setInterval(
+      () => setUspIdx((i) => (i + 1) % uspItems.length),
+      3500
+    );
     return () => clearInterval(t);
   }, []);
 
@@ -155,8 +161,12 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
 
           {mobile ? (
             <div className="flex-1 text-left">
-              <p className="text-sm font-bold text-gray-800 leading-tight">{user?.name}</p>
-              <p className="text-xs text-gray-400 truncate max-w-[180px]">{user?.email}</p>
+              <p className="text-sm font-bold text-gray-800 leading-tight">
+                {user?.name}
+              </p>
+              <p className="text-xs text-gray-400 truncate max-w-[180px]">
+                {user?.email}
+              </p>
             </div>
           ) : (
             <div className="hidden lg:flex flex-col items-start">
@@ -186,8 +196,12 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
             </Avatar>
 
             <div className="flex flex-col min-w-0">
-              <span className="text-sm font-bold text-gray-800 truncate">{user?.name}</span>
-              <span className="text-xs text-gray-400 truncate">{user?.email}</span>
+              <span className="text-sm font-bold text-gray-800 truncate">
+                {user?.name}
+              </span>
+              <span className="text-xs text-gray-400 truncate">
+                {user?.email}
+              </span>
             </div>
           </div>
 
@@ -317,8 +331,76 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
       </div>
     );
 
+  // ─── Auth section renderers (hydration-safe) ───────────────────────────────
+
+  /** Desktop top-bar: Avatar + name OR login buttons OR skeleton */
+  const renderDesktopAuth = () => {
+    if (status === "loading") {
+      return <div className="w-24 h-9 rounded-lg bg-gray-100 animate-pulse" />;
+    }
+    return isLoggedIn ? <UserDropdown /> : <AuthButtons />;
+  };
+
+  /** Mobile top-bar: Avatar + name OR login buttons OR skeleton */
+  const renderMobileTopBar = () => {
+    if (status === "loading") {
+      return <div className="w-20 h-6 rounded bg-white/20 animate-pulse" />;
+    }
+    if (isLoggedIn) {
+      return (
+        <div className="flex items-center gap-2">
+          <Avatar className="w-7 h-7 border-2 border-emerald-400">
+            <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
+            <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-[10px] font-bold">
+              {getInitials(user?.name)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-emerald-300 text-xs font-semibold truncate max-w-[100px]">
+            {user?.name}
+          </span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-2">
+        <Button
+          asChild
+          size="sm"
+          className="h-6 px-3 text-xs rounded font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+        >
+          <Link href="/login">
+            <LogIn className="w-3 h-3 mr-1" />
+            সাইন ইন
+          </Link>
+        </Button>
+
+        <Button
+          asChild
+          size="sm"
+          className="h-6 px-3 text-xs rounded font-semibold bg-red-700 hover:bg-red-800 text-white border-0"
+        >
+          <Link href="/register">
+            <UserPlus className="w-3 h-3 mr-1" />
+            সাইন আপ
+          </Link>
+        </Button>
+      </div>
+    );
+  };
+
+  /** Mobile Sheet footer: UserDropdown OR AuthButtons OR skeleton */
+  const renderMobileSheetAuth = () => {
+    if (status === "loading") {
+      return <div className="w-full h-11 rounded-xl bg-gray-200 animate-pulse" />;
+    }
+    return isLoggedIn ? <UserDropdown mobile /> : <AuthButtons mobile />;
+  };
+
+  // ──────────────────────────────────────────────────────────────────────────
+
   return (
     <>
+      {/* ── Desktop top info bar ── */}
       <div className="hidden md:block bg-gradient-to-r from-emerald-950 via-stone-900 to-red-950 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center justify-between">
           <div className="flex items-center gap-6">
@@ -360,68 +442,45 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
         </div>
       </div>
 
+      {/* ── Mobile top info bar ── */}
       <div
         className="md:hidden text-gray-200 text-xs py-2"
-        style={{ background: "linear-gradient(90deg, #0d4a1f 0%, #1a2e0d 45%, #4a0d0d 100%)" }}
+        style={{
+          background:
+            "linear-gradient(90deg, #0d4a1f 0%, #1a2e0d 45%, #4a0d0d 100%)",
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <a href="tel:01641754794" className="flex items-center gap-1.5 text-emerald-300 font-semibold">
+          <a
+            href="tel:01641754794"
+            className="flex items-center gap-1.5 text-emerald-300 font-semibold"
+          >
             <Phone className="w-3 h-3" />
             ০১৬৪১-৭৫৪৭৯৪
           </a>
 
-          {isLoggedIn ? (
-            <div className="flex items-center gap-2">
-              <Avatar className="w-7 h-7 border-2 border-emerald-400">
-                <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
-                <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-[10px] font-bold">
-                  {getInitials(user?.name)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-emerald-300 text-xs font-semibold truncate max-w-[100px]">
-                {user?.name}
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Button
-                asChild
-                size="sm"
-                className="h-6 px-3 text-xs rounded font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-0"
-              >
-                <Link href="/login">
-                  <LogIn className="w-3 h-3 mr-1" />
-                  সাইন ইন
-                </Link>
-              </Button>
-
-              <Button
-                asChild
-                size="sm"
-                className="h-6 px-3 text-xs rounded font-semibold bg-red-700 hover:bg-red-800 text-white border-0"
-              >
-                <Link href="/register">
-                  <UserPlus className="w-3 h-3 mr-1" />
-                  সাইন আপ
-                </Link>
-              </Button>
-            </div>
-          )}
+          {/* ✅ FIX 1 — mobile top bar auth */}
+          {renderMobileTopBar()}
         </div>
       </div>
 
+      {/* ── Main navbar ── */}
       <nav
         className={cn(
           "bg-white sticky top-0 z-50 transition-all duration-300",
-          scrolled ? "shadow-[0_6px_32px_rgba(0,0,0,0.14)]" : "shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+          scrolled
+            ? "shadow-[0_6px_32px_rgba(0,0,0,0.14)]"
+            : "shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
         )}
         style={{
           borderTop: "3px solid transparent",
-          borderImage: "linear-gradient(90deg,#16a34a,#15803d 40%,#b91c1c 60%,#dc2626) 1",
+          borderImage:
+            "linear-gradient(90deg,#16a34a,#15803d 40%,#b91c1c 60%,#dc2626) 1",
         }}
       >
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-4 h-[72px]">
+            {/* Logo */}
             <Link href="/" className="flex-shrink-0 group">
               <Image
                 src={logo}
@@ -432,6 +491,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
               />
             </Link>
 
+            {/* Desktop search */}
             <div className="hidden md:flex flex-1 max-w-[620px] relative">
               <div
                 className={cn(
@@ -467,7 +527,9 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
               </button>
             </div>
 
+            {/* Right side actions */}
             <div className="ml-auto flex items-center gap-1 md:gap-2">
+              {/* Wishlist */}
               <Link
                 href="/wishlist"
                 className="hidden md:flex items-center gap-1.5 text-gray-600 hover:text-red-600 transition-colors p-2 rounded-xl hover:bg-red-50 relative group"
@@ -479,6 +541,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 </Badge>
               </Link>
 
+              {/* Notification bell */}
               <button
                 type="button"
                 className="hidden md:flex items-center p-2 rounded-xl text-gray-600 hover:text-amber-600 hover:bg-amber-50 transition-colors relative"
@@ -487,12 +550,14 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white" />
               </button>
 
+              {/* ✅ FIX 2 — desktop nav auth */}
               <div className="hidden md:flex items-center ml-1">
-                {isLoggedIn ? <UserDropdown /> : <AuthButtons />}
+                {renderDesktopAuth()}
               </div>
 
               {cartButton}
 
+              {/* Mobile menu sheet */}
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
                   <Button
@@ -510,9 +575,13 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 </SheetTrigger>
 
                 <SheetContent side="left" className="w-[300px] p-0 overflow-y-auto">
+                  {/* Sheet header */}
                   <div
                     className="p-4 flex items-center justify-between"
-                    style={{ background: "linear-gradient(135deg,#0d4a1f,#1a2e0d 50%,#4a0d0d)" }}
+                    style={{
+                      background:
+                        "linear-gradient(135deg,#0d4a1f,#1a2e0d 50%,#4a0d0d)",
+                    }}
                   >
                     <Image
                       src={logo}
@@ -530,6 +599,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                     </button>
                   </div>
 
+                  {/* Sheet search */}
                   <div className="flex p-3 border-b bg-gray-50">
                     <Input
                       value={searchQuery}
@@ -551,6 +621,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                     </button>
                   </div>
 
+                  {/* Quick links */}
                   <div className="grid grid-cols-3 gap-2 p-3 border-b">
                     {[
                       { icon: Home, label: "হোম", href: "/" },
@@ -568,6 +639,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                     ))}
                   </div>
 
+                  {/* Categories */}
                   <p className="text-[10px] font-bold text-gray-400 uppercase px-4 pt-4 pb-1.5 tracking-widest">
                     ক্যাটেগরীজ
                   </p>
@@ -592,10 +664,12 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                       </Link>
                     ))}
 
+                  {/* ✅ FIX 3 — mobile sheet footer auth */}
                   <div className="p-4 border-t mt-2 bg-gray-50">
-                    {isLoggedIn ? <UserDropdown mobile /> : <AuthButtons mobile />}
+                    {renderMobileSheetAuth()}
                   </div>
 
+                  {/* USP items */}
                   <div className="px-4 py-3 space-y-2 bg-white border-t">
                     {uspItems.map((item, i) => {
                       const Icon = item.icon;
@@ -612,6 +686,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
             </div>
           </div>
 
+          {/* Mobile inline search */}
           <div className="md:hidden flex pb-3 gap-0">
             <Input
               value={searchQuery}
@@ -634,11 +709,18 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
           </div>
         </div>
 
+        {/* ── Category nav bar (desktop) ── */}
         <div
           className="hidden md:block"
-          style={{ background: "linear-gradient(90deg,#166534 0%,#15803d 35%,#991b1b 70%,#b91c1c 100%)" }}
+          style={{
+            background:
+              "linear-gradient(90deg,#166534 0%,#15803d 35%,#991b1b 70%,#b91c1c 100%)",
+          }}
         >
-          <div className="max-w-7xl mx-auto px-4 flex items-center" ref={catRef}>
+          <div
+            className="max-w-7xl mx-auto px-4 flex items-center"
+            ref={catRef}
+          >
             <div className="relative">
               <button
                 type="button"
@@ -649,7 +731,10 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 <LayoutGrid className="w-4 h-4" />
                 ক্যাটেগরীজ
                 <ChevronDown
-                  className={cn("w-3.5 h-3.5 transition-transform duration-200", catOpen && "rotate-180")}
+                  className={cn(
+                    "w-3.5 h-3.5 transition-transform duration-200",
+                    catOpen && "rotate-180"
+                  )}
                 />
               </button>
 
@@ -672,7 +757,9 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                         style={{ animationDelay: `${i * 25}ms` }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 border-b border-gray-100 last:border-0 transition-all hover:pl-6 hover:bg-emerald-50 hover:text-emerald-700 group"
                       >
-                        <span className="text-base w-6 text-center">{getCategoryIcon(cat.name)}</span>
+                        <span className="text-base w-6 text-center">
+                          {getCategoryIcon(cat.name)}
+                        </span>
                         <span className="flex-1 font-medium">{cat.name}</span>
                         <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all" />
                       </Link>
@@ -691,10 +778,13 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                     "border-r border-white/10 last:border-0",
                     "transition-all duration-150 hover:bg-white/15",
                     "text-white/85 hover:text-white",
-                    pathname === `/category/${cat.slug}` && "bg-white/20 text-white font-semibold"
+                    pathname === `/category/${cat.slug}` &&
+                    "bg-white/20 text-white font-semibold"
                   )}
                 >
-                  <span className="text-base leading-none">{getCategoryIcon(cat.name)}</span>
+                  <span className="text-base leading-none">
+                    {getCategoryIcon(cat.name)}
+                  </span>
                   {cat.name}
                 </Link>
               ))}
