@@ -89,6 +89,11 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
   const isLoggedIn = status === "authenticated";
   const user = session?.user as SessionUser | undefined;
 
+  // ✅ mounted না হওয়া পর্যন্ত skeleton দেখাও
+  // server ও client দুজনেই প্রথমে skeleton → কোনো mismatch নেই
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const getInitials = (name?: string | null) => {
     if (!name) return "U";
     return name
@@ -335,7 +340,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
 
   /** Desktop top-bar: Avatar + name OR login buttons OR skeleton */
   const renderDesktopAuth = () => {
-    if (status === "loading") {
+    if (!mounted) {
       return <div className="w-24 h-9 rounded-lg bg-gray-100 animate-pulse" />;
     }
     return isLoggedIn ? <UserDropdown /> : <AuthButtons />;
@@ -343,7 +348,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
 
   /** Mobile top-bar: Avatar + name OR login buttons OR skeleton */
   const renderMobileTopBar = () => {
-    if (status === "loading") {
+    if (!mounted) {
       return <div className="w-20 h-6 rounded bg-white/20 animate-pulse" />;
     }
     if (isLoggedIn) {
@@ -390,7 +395,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
 
   /** Mobile Sheet footer: UserDropdown OR AuthButtons OR skeleton */
   const renderMobileSheetAuth = () => {
-    if (status === "loading") {
+    if (!mounted) {
       return <div className="w-full h-11 rounded-xl bg-gray-200 animate-pulse" />;
     }
     return isLoggedIn ? <UserDropdown mobile /> : <AuthButtons mobile />;
