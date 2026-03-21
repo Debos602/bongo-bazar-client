@@ -87,7 +87,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
     const fetchCategories = async () => {
       try {
         const data = await getCategory();
-        console.log("Raw category data Navbar:", data);
+        // console.log("Raw category data Navbar:", data);
         setSafeCategories(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Failed to fetch categories:", error);

@@ -4,7 +4,7 @@ import { AxiosError } from "axios";
 export const getCategory = async () => {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category`);
-        console.log("getCategory response:", res);
+        // console.log("getCategory response:", res);
         if (!res.ok) throw new Error("Failed to fetch categories");
         const json = await res.json();
         return json.data;
