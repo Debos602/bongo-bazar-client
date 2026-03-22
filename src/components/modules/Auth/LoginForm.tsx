@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginForm() {
     const form = useForm<FieldValues>({
@@ -25,7 +25,7 @@ export default function LoginForm() {
     });
 
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
+
     const searchParams = useSearchParams();
 
     const onSubmit = async (values: FieldValues) => {
