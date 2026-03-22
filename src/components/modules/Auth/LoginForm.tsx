@@ -13,7 +13,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import Image from "next/image";
-import { getSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginForm() {
@@ -31,35 +31,15 @@ export default function LoginForm() {
     const onSubmit = async (values: FieldValues) => {
         setIsLoading(true);
         try {
-            const res = await signIn("credentials", {
+            const rawCallbackUrl = searchParams.get("callbackUrl");
+            const callbackUrl = rawCallbackUrl ?? "/";
+
+            // Use a server-side redirect so the auth cookie is set correctly in production
+            await signIn("credentials", {
                 ...values,
-                redirect: false,
+                redirect: true,
+                callbackUrl,
             });
-
-            if (res?.error) {
-                console.error("Login failed:", res.error);
-                return;
-            }
-
-            if (res?.ok) {
-                const rawCallbackUrl = searchParams.get("callbackUrl");
-
-                let redirectTo = "/";
-
-                if (rawCallbackUrl) {
-                    try {
-                        const decoded = decodeURIComponent(rawCallbackUrl);
-                        const url = new URL(decoded);
-                        redirectTo = url.pathname; // ✅ শুধু "/cart" নেবে
-                    } catch {
-                        redirectTo = rawCallbackUrl;
-                    }
-                }
-
-                // ✅ refresh + push — production এ এটা জরুরি
-                router.refresh();
-                router.push(redirectTo);
-            }
         } catch (err) {
             console.error(err);
         } finally {
