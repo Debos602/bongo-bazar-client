@@ -44,10 +44,19 @@ export default function LoginForm() {
             if (res?.ok) {
                 const session = await getSession();
                 const role = session?.user?.role;
-                const callbackUrl = searchParams.get("callbackUrl");
+
+                // ✅ callbackUrl decode করো
+                const rawCallbackUrl = searchParams.get("callbackUrl");
+                const callbackUrl = rawCallbackUrl
+                    ? decodeURIComponent(rawCallbackUrl)
+                    : null;
 
                 if (callbackUrl) {
-                    router.push(callbackUrl);
+                    // ✅ শুধু same-origin URL allow করো (security)
+                    const isSameOrigin = callbackUrl.startsWith("/") ||
+                        callbackUrl.startsWith(window.location.origin);
+
+                    router.push(isSameOrigin ? callbackUrl : "/");
                 } else if (role === "ADMIN") {
                     router.push("/dashboard");
                 } else {
