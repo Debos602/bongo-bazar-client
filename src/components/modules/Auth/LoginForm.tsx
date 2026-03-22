@@ -42,26 +42,23 @@ export default function LoginForm() {
             }
 
             if (res?.ok) {
-                const session = await getSession();
-                const role = session?.user?.role;
-
-                // ✅ callbackUrl decode করো
                 const rawCallbackUrl = searchParams.get("callbackUrl");
-                const callbackUrl = rawCallbackUrl
-                    ? decodeURIComponent(rawCallbackUrl)
-                    : null;
 
-                if (callbackUrl) {
-                    // ✅ শুধু same-origin URL allow করো (security)
-                    const isSameOrigin = callbackUrl.startsWith("/") ||
-                        callbackUrl.startsWith(window.location.origin);
+                let redirectTo = "/";
 
-                    router.push(isSameOrigin ? callbackUrl : "/");
-                } else if (role === "ADMIN") {
-                    router.push("/dashboard");
-                } else {
-                    router.push("/");
+                if (rawCallbackUrl) {
+                    try {
+                        const decoded = decodeURIComponent(rawCallbackUrl);
+                        const url = new URL(decoded);
+                        redirectTo = url.pathname; // ✅ শুধু "/cart" নেবে
+                    } catch {
+                        redirectTo = rawCallbackUrl;
+                    }
                 }
+
+                // ✅ refresh + push — production এ এটা জরুরি
+                router.refresh();
+                router.push(redirectTo);
             }
         } catch (err) {
             console.error(err);
