@@ -1,8 +1,0 @@
-# NEXT_PUBLIC_BASE_API=http://localhost:5000/api/v1
-# NEXT_PUBLIC_BASE_API=https://bongo-bazar-server.vercel.app/api/v1
-
-# GOOGLE_CLIENT_ID=885964325583-8snhd4orgdulffgpno7gs6irbmh87pss.apps.googleusercontent.com
-# GOOGLE_CLIENT_SECRET=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
-# NEXTAUTH_SECRET=5171fad84741584ff7a5a1eb2b755a68be9651f1b6cd34e1b9e2050f01e5099c
-# NEXTAUTH_URL=http://localhost:3000
-# NEXTAUTH_URL=https://bongo-bazar-client.vercel.app
