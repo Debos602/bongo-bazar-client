@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./global.css";
 import AuthProvider from "@/providers/AuthProvider";
 import { Toaster } from "sonner";
-import MessengerButton from "@/components/shared/MessengerButton";
 import { Suspense } from "react";
 import InitialLoader from "@/components/shared/Initialloader";
 import AIChatWidget from "@/components/AIChatWidget";
@@ -32,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
       >
         <AuthProvider>
           <Toaster richColors position="top-center" />
-          <MessengerButton />
+      
           <Suspense fallback={<InitialLoader />}>  {/* ← এইটুকু add করুন */}
             {children}
             <AIChatWidget />

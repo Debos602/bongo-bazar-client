@@ -68,7 +68,7 @@ const uspItems = [
   { icon: MapPin, label: "Deliver All Over Bangladesh" },
 ];
 
-export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
+export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const catRef = useRef<HTMLDivElement>(null);
@@ -79,7 +79,6 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [uspIdx, setUspIdx] = useState(0);
-  // ✅ useState + useEffect দিয়ে getCategory ব্যবহার
   const [safeCategories, setSafeCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -87,7 +86,6 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
     const fetchCategories = async () => {
       try {
         const data = await getCategory();
-        // console.log("Raw category data Navbar:", data);
         setSafeCategories(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -102,8 +100,6 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
   const isLoggedIn = status === "authenticated";
   const user = session?.user as SessionUser | undefined;
 
-  // ✅ mounted না হওয়া পর্যন্ত skeleton দেখাও
-  // server ও client দুজনেই প্রথমে skeleton → কোনো mismatch নেই
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -158,7 +154,8 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
     return () => clearInterval(t);
   }, []);
 
-  const UserDropdown = ({ mobile = false }: { mobile?: boolean; }) => (
+  // ─── User Dropdown (shared between mobile and desktop) ──────────────────────
+  const UserDropdown = ({ mobile = false }: { mobile?: boolean }) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
@@ -178,11 +175,11 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
           </Avatar>
 
           {mobile ? (
-            <div className="flex-1 text-left">
-              <p className="text-sm font-bold text-gray-800 leading-tight">
+            <div className="flex-1 text-left min-w-0">
+              <p className="text-sm font-bold text-gray-800 leading-tight truncate">
                 {user?.name}
               </p>
-              <p className="text-xs text-gray-400 truncate max-w-[180px]">
+              <p className="text-xs text-gray-400 truncate">
                 {user?.email}
               </p>
             </div>
@@ -212,7 +209,6 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 {getInitials(user?.name)}
               </AvatarFallback>
             </Avatar>
-
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-bold text-gray-800 truncate">
                 {user?.name}
@@ -222,7 +218,6 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
               </span>
             </div>
           </div>
-
           <div className="mt-2">
             <span
               className={cn(
@@ -298,7 +293,8 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
     </DropdownMenu>
   );
 
-  const AuthButtons = ({ mobile = false }: { mobile?: boolean; }) =>
+  // ─── Auth buttons (desktop / mobile) ────────────────────────────────────────
+  const AuthButtons = ({ mobile = false }: { mobile?: boolean }) =>
     mobile ? (
       <div className="flex flex-col gap-2.5">
         <Button
@@ -310,7 +306,6 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
             সাইন ইন
           </Link>
         </Button>
-
         <Button
           asChild
           className="w-full h-11 text-sm font-semibold text-white gap-2 bg-red-600 hover:bg-red-700 border-0"
@@ -334,7 +329,6 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
             সাইন ইন
           </Link>
         </Button>
-
         <Button
           asChild
           size="sm"
@@ -349,53 +343,48 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
       </div>
     );
 
-  // ─── Auth section renderers (hydration-safe) ───────────────────────────────
+  // ─── Hydration-safe renderers ────────────────────────────────────────────────
 
-  /** Desktop top-bar: Avatar + name OR login buttons OR skeleton */
   const renderDesktopAuth = () => {
-    if (!mounted) {
+    if (!mounted)
       return <div className="w-24 h-9 rounded-lg bg-gray-100 animate-pulse" />;
-    }
     return isLoggedIn ? <UserDropdown /> : <AuthButtons />;
   };
 
-  /** Mobile top-bar: Avatar + name OR login buttons OR skeleton */
   const renderMobileTopBar = () => {
-    if (!mounted) {
+    if (!mounted)
       return <div className="w-20 h-6 rounded bg-white/20 animate-pulse" />;
-    }
     if (isLoggedIn) {
       return (
-        <div className="flex items-center gap-2">
-          <Avatar className="w-7 h-7 border-2 border-emerald-400">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Avatar className="w-6 h-6 flex-shrink-0 border border-emerald-400">
             <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
-            <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-[10px] font-bold">
+            <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-[9px] font-bold">
               {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>
-          <span className="text-emerald-300 text-xs font-semibold truncate max-w-[100px]">
+          <span className="text-emerald-300 text-[11px] font-semibold truncate max-w-[90px]">
             {user?.name}
           </span>
         </div>
       );
     }
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <Button
           asChild
           size="sm"
-          className="h-6 px-3 text-xs rounded font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+          className="h-6 px-2.5 text-[11px] rounded font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-0"
         >
           <Link href="/login">
             <LogIn className="w-3 h-3 mr-1" />
             সাইন ইন
           </Link>
         </Button>
-
         <Button
           asChild
           size="sm"
-          className="h-6 px-3 text-xs rounded font-semibold bg-red-700 hover:bg-red-800 text-white border-0"
+          className="h-6 px-2.5 text-[11px] rounded font-semibold bg-red-700 hover:bg-red-800 text-white border-0"
         >
           <Link href="/register">
             <UserPlus className="w-3 h-3 mr-1" />
@@ -406,15 +395,13 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
     );
   };
 
-  /** Mobile Sheet footer: UserDropdown OR AuthButtons OR skeleton */
   const renderMobileSheetAuth = () => {
-    if (!mounted) {
+    if (!mounted)
       return <div className="w-full h-11 rounded-xl bg-gray-200 animate-pulse" />;
-    }
     return isLoggedIn ? <UserDropdown mobile /> : <AuthButtons mobile />;
   };
 
-  // ──────────────────────────────────────────────────────────────────────────
+  // ────────────────────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -448,7 +435,6 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
               হটলাইনঃ
               <span className="text-emerald-300 font-semibold ml-0.5">০১৬৪১-৭৫৪৭৯৪</span>
             </a>
-
             <a
               href="mailto:info@bongobazar.com"
               className="hidden sm:flex items-center gap-1.5 hover:text-red-300 transition-colors"
@@ -462,23 +448,28 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
 
       {/* ── Mobile top info bar ── */}
       <div
-        className="md:hidden text-gray-200 text-xs py-2"
+        className="md:hidden text-gray-200 text-xs py-1.5"
         style={{
           background:
             "linear-gradient(90deg, #0d4a1f 0%, #1a2e0d 45%, #4a0d0d 100%)",
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+        {/* 
+          FIX: Use a flex row that never overflows.
+          Phone on the left (flex-shrink-0), auth on the right (min-w-0 to allow truncation).
+          px-3 instead of px-4 on very small screens to reclaim space.
+        */}
+        <div className="max-w-7xl mx-auto px-3 flex items-center justify-between gap-2 overflow-hidden">
           <a
             href="tel:01641754794"
-            className="flex items-center gap-1.5 text-emerald-300 font-semibold"
+            className="flex items-center gap-1 text-emerald-300 font-semibold flex-shrink-0 text-[11px]"
           >
-            <Phone className="w-3 h-3" />
-            ০১৬৪১-৭৫৪৭৯৪
+            <Phone className="w-3 h-3 flex-shrink-0" />
+            <span className="hidden xs:inline">০১৬৪১-৭৫৪৭৯৪</span>
+            {/* Fallback for very narrow screens (< ~360 px) */}
+            <span className="xs:hidden">কল</span>
           </a>
-
-          {/* ✅ FIX 1 — mobile top bar auth */}
-          {renderMobileTopBar()}
+          <div className="flex-shrink-0">{renderMobileTopBar()}</div>
         </div>
       </div>
 
@@ -496,8 +487,15 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
             "linear-gradient(90deg,#16a34a,#15803d 40%,#b91c1c 60%,#dc2626) 1",
         }}
       >
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-4 h-[72px]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4">
+          {/* 
+            FIX: Main row — on mobile:
+              • Logo is fixed-width and never squished
+              • Cart + hamburger are flex-shrink-0 on the right
+              • The gap between them is kept tight (gap-2)
+              • Height reduced slightly on mobile (h-14) for better fit
+          */}
+          <div className="flex items-center gap-2 sm:gap-4 h-14 md:h-[72px]">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 group">
               <Image
@@ -505,11 +503,12 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 alt="BongoBazar"
                 width={Math.round((logo.width / logo.height) * 54)}
                 height={54}
-                className="w-auto transition-transform duration-200 group-hover:scale-105"
+                className="h-9 sm:h-11 md:h-[54px] w-auto transition-transform duration-200 group-hover:scale-105"
+                priority
               />
             </Link>
 
-            {/* Desktop search */}
+            {/* Desktop search — hidden on mobile; mobile search is below */}
             <div className="hidden md:flex flex-1 max-w-[620px] relative">
               <div
                 className={cn(
@@ -529,7 +528,6 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 className="rounded-r-none border-2 border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-11 text-sm transition-colors"
                 style={{ borderColor: searchFocused ? "#16a34a" : "#d1d5db" }}
               />
-
               <button
                 type="button"
                 onClick={() => handleSearch()}
@@ -545,9 +543,14 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
               </button>
             </div>
 
-            {/* Right side actions */}
+            {/* 
+              Right-side actions:
+              FIX: on mobile, only show cart + hamburger (no wishlist/bell clutter).
+              Desktop keeps wishlist + bell + auth.
+              gap is tighter on mobile.
+            */}
             <div className="ml-auto flex items-center gap-1 md:gap-2">
-              {/* Wishlist */}
+              {/* Wishlist — desktop only */}
               <Link
                 href="/wishlist"
                 className="hidden md:flex items-center gap-1.5 text-gray-600 hover:text-red-600 transition-colors p-2 rounded-xl hover:bg-red-50 relative group"
@@ -559,7 +562,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 </Badge>
               </Link>
 
-              {/* Notification bell */}
+              {/* Notification bell — desktop only */}
               <button
                 type="button"
                 className="hidden md:flex items-center p-2 rounded-xl text-gray-600 hover:text-amber-600 hover:bg-amber-50 transition-colors relative"
@@ -568,20 +571,22 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white" />
               </button>
 
-              {/* ✅ FIX 2 — desktop nav auth */}
+              {/* Desktop auth */}
               <div className="hidden md:flex items-center ml-1">
                 {renderDesktopAuth()}
               </div>
 
-              {cartButton}
+              {/* Cart button (passed in as prop — always visible) */}
+              {/* FIX: wrap in a flex-shrink-0 span so it never gets crushed */}
+              <span className="flex-shrink-0">{cartButton}</span>
 
-              {/* Mobile menu sheet */}
+              {/* Mobile hamburger */}
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="md:hidden w-10 h-10 rounded-xl border border-gray-200"
+                    className="md:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-gray-200 flex-shrink-0"
                     aria-label="Menu"
                   >
                     {mobileOpen ? (
@@ -592,10 +597,18 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                   </Button>
                 </SheetTrigger>
 
-                <SheetContent side="left" className="w-[300px] p-0 overflow-y-auto">
+                {/* 
+                  FIX: Sheet width responsive.
+                  w-[85vw] on very small screens, capped at 300 px on larger ones.
+                  overflow-y-auto ensures tall content is scrollable.
+                */}
+                <SheetContent
+                  side="left"
+                  className="w-[85vw] max-w-[300px] p-0 overflow-y-auto"
+                >
                   {/* Sheet header */}
                   <div
-                    className="p-4 flex items-center justify-between"
+                    className="p-4 flex items-center justify-between flex-shrink-0"
                     style={{
                       background:
                         "linear-gradient(135deg,#0d4a1f,#1a2e0d 50%,#4a0d0d)",
@@ -606,12 +619,12 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                       alt="BongoBazar"
                       width={Math.round((logo.width / logo.height) * 40)}
                       height={40}
-                      className="h-10"
+                      className="h-8 w-auto"
                     />
                     <button
                       type="button"
                       onClick={() => setMobileOpen(false)}
-                      className="text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+                      className="text-white/70 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -626,13 +639,13 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                         if (e.key === "Enter") handleSearch(true);
                       }}
                       placeholder="সার্চ করুন..."
-                      className="rounded-r-none text-sm border-2 border-r-0 focus-visible:ring-0 h-10"
+                      className="rounded-r-none text-sm border-2 border-r-0 focus-visible:ring-0 h-10 min-w-0"
                       style={{ borderColor: "#16a34a" }}
                     />
                     <button
                       type="button"
                       onClick={() => handleSearch(true)}
-                      className="rounded-r-md px-4 h-10 text-white flex items-center"
+                      className="rounded-r-md px-4 h-10 text-white flex items-center flex-shrink-0"
                       style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
                     >
                       <Search className="w-4 h-4" />
@@ -652,37 +665,38 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                         className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-emerald-50 text-gray-600 hover:text-emerald-700 transition-all text-center"
                       >
                         <Icon className="w-5 h-5" />
-                        <span className="text-[10px] font-medium">{label}</span>
+                        <span className="text-[10px] font-medium leading-tight">{label}</span>
                       </Link>
                     ))}
                   </div>
 
-                  {/* Categories */}
+                  {/* Categories heading */}
                   <p className="text-[10px] font-bold text-gray-400 uppercase px-4 pt-4 pb-1.5 tracking-widest">
                     ক্যাটেগরীজ
                   </p>
 
+                  {/* Category list */}
                   {loading
                     ? Array.from({ length: 7 }).map((_, i) => (
-                      <div key={i} className="px-4 py-3 border-b border-gray-50">
-                        <div className="h-3 w-3/5 bg-gray-200 rounded-md animate-pulse" />
-                      </div>
-                    ))
+                        <div key={i} className="px-4 py-3 border-b border-gray-50">
+                          <div className="h-3 w-3/5 bg-gray-200 rounded-md animate-pulse" />
+                        </div>
+                      ))
                     : safeCategories.map((cat) => (
-                      <Link
-                        key={cat.slug}
-                        href={`/category/${cat.slug}`}
-                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 border-b border-gray-50 transition-all hover:pl-6 hover:bg-emerald-50 hover:text-emerald-700 group"
-                      >
-                        <span className="text-xl w-7 flex-shrink-0 text-center">
-                          {getCategoryIcon(cat.name)}
-                        </span>
-                        <span className="font-medium flex-1">{cat.name}</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all" />
-                      </Link>
-                    ))}
+                        <Link
+                          key={cat.slug}
+                          href={`/category/${cat.slug}`}
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 border-b border-gray-50 transition-all hover:pl-6 hover:bg-emerald-50 hover:text-emerald-700 group"
+                        >
+                          <span className="text-xl w-7 flex-shrink-0 text-center">
+                            {getCategoryIcon(cat.name)}
+                          </span>
+                          <span className="font-medium flex-1 min-w-0 truncate">{cat.name}</span>
+                          <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0" />
+                        </Link>
+                      ))}
 
-                  {/* ✅ FIX 3 — mobile sheet footer auth */}
+                  {/* Sheet footer — auth */}
                   <div className="p-4 border-t mt-2 bg-gray-50">
                     {renderMobileSheetAuth()}
                   </div>
@@ -704,8 +718,13 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
             </div>
           </div>
 
-          {/* Mobile inline search */}
-          <div className="md:hidden flex pb-3 gap-0">
+          {/* 
+            Mobile inline search bar.
+            FIX: use px-0 (inherits parent px-3) and ensure the input
+            takes all remaining space without overflow.
+            pb-2.5 gives a little breathing room at the bottom.
+          */}
+          <div className="md:hidden flex pb-2.5 gap-0 w-full">
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -713,13 +732,13 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 if (e.key === "Enter") handleSearch();
               }}
               placeholder="প্রোডাক্ট সার্চ করুন..."
-              className="rounded-r-none border-2 border-r-0 focus-visible:ring-0 text-sm h-10"
+              className="rounded-r-none border-2 border-r-0 focus-visible:ring-0 text-sm h-10 min-w-0 flex-1"
               style={{ borderColor: "#16a34a" }}
             />
             <button
               type="button"
               onClick={() => handleSearch()}
-              className="px-4 rounded-r-md text-white h-10 flex items-center"
+              className="px-4 rounded-r-md text-white h-10 flex items-center flex-shrink-0"
               style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
             >
               <Search className="w-4 h-4" />
@@ -727,7 +746,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
           </div>
         </div>
 
-        {/* ── Category nav bar (desktop) ── */}
+        {/* ── Category nav bar (desktop only) ── */}
         <div
           className="hidden md:block"
           style={{
@@ -736,10 +755,11 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
           }}
         >
           <div
-            className="max-w-7xl mx-auto px-4 flex items-center"
+            className="max-w-7xl mx-auto px-4 flex items-center overflow-x-auto scrollbar-none"
             ref={catRef}
           >
-            <div className="relative">
+            {/* Categories dropdown trigger */}
+            <div className="relative flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setCatOpen((v) => !v)}
@@ -763,30 +783,31 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                 >
                   {loading
                     ? Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} className="px-4 py-3 border-b border-gray-50">
-                        <div className="h-3 w-3/4 bg-gray-200 rounded-md animate-pulse" />
-                      </div>
-                    ))
+                        <div key={i} className="px-4 py-3 border-b border-gray-50">
+                          <div className="h-3 w-3/4 bg-gray-200 rounded-md animate-pulse" />
+                        </div>
+                      ))
                     : safeCategories.map((cat, i) => (
-                      <Link
-                        key={cat.slug}
-                        href={`/category/${cat.slug}`}
-                        onClick={() => setCatOpen(false)}
-                        style={{ animationDelay: `${i * 25}ms` }}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 border-b border-gray-100 last:border-0 transition-all hover:pl-6 hover:bg-emerald-50 hover:text-emerald-700 group"
-                      >
-                        <span className="text-base w-6 text-center">
-                          {getCategoryIcon(cat.name)}
-                        </span>
-                        <span className="flex-1 font-medium">{cat.name}</span>
-                        <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all" />
-                      </Link>
-                    ))}
+                        <Link
+                          key={cat.slug}
+                          href={`/category/${cat.slug}`}
+                          onClick={() => setCatOpen(false)}
+                          style={{ animationDelay: `${i * 25}ms` }}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 border-b border-gray-100 last:border-0 transition-all hover:pl-6 hover:bg-emerald-50 hover:text-emerald-700 group"
+                        >
+                          <span className="text-base w-6 text-center">
+                            {getCategoryIcon(cat.name)}
+                          </span>
+                          <span className="flex-1 font-medium">{cat.name}</span>
+                          <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all" />
+                        </Link>
+                      ))}
                 </div>
               )}
             </div>
 
-            <div className="flex items-center">
+            {/* Category pills */}
+            <div className="flex items-center overflow-x-auto scrollbar-none">
               {safeCategories.slice(0, 9).map((cat) => (
                 <Link
                   key={cat.slug}
@@ -797,7 +818,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
                     "transition-all duration-150 hover:bg-white/15",
                     "text-white/85 hover:text-white",
                     pathname === `/category/${cat.slug}` &&
-                    "bg-white/20 text-white font-semibold"
+                      "bg-white/20 text-white font-semibold"
                   )}
                 >
                   <span className="text-base leading-none">
@@ -810,7 +831,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode; }) {
               <Link
                 href="/products"
                 className={cn(
-                  "flex items-center gap-1.5 text-sm font-medium px-3.5 py-3 whitespace-nowrap ml-auto",
+                  "flex items-center gap-1.5 text-sm font-medium px-3.5 py-3 whitespace-nowrap ml-auto flex-shrink-0",
                   "text-white/70 hover:text-white hover:bg-white/15 transition-all",
                   pathname === "/products" && "bg-white/20 text-white font-semibold"
                 )}

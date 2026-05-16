@@ -13,19 +13,10 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-
-    "baseUrl": ".",                 // ✅ এটা add করো
     "paths": {
       "@/*": ["./src/*"]
     },
-
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-    ,
-    "ignoreDeprecations": "6.0"
+    "plugins": [{ "name": "next" }]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.d.ts", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
