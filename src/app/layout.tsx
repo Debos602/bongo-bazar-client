@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "./global.css";
 import AuthProvider from "@/providers/AuthProvider";
 import { Toaster } from "sonner";
 import MessengerButton from "@/components/shared/MessengerButton";
 import { Suspense } from "react";
 import InitialLoader from "@/components/shared/Initialloader";
+import AIChatWidget from "@/components/AIChatWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
           <MessengerButton />
           <Suspense fallback={<InitialLoader />}>  {/* ← এইটুকু add করুন */}
             {children}
+            <AIChatWidget />
           </Suspense>
         </AuthProvider>
       </body>
