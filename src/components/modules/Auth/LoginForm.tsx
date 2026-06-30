@@ -24,9 +24,24 @@ export default function LoginForm() {
         },
     });
 
+    const { setValue } = form;
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const searchParams = useSearchParams();
+
+    const applyCredentials = (email: string, password: string) => {
+        setValue("email", email, {
+            shouldValidate: false,
+            shouldDirty: true,
+            shouldTouch: true,
+        });
+        setValue("password", password, {
+            shouldValidate: false,
+            shouldDirty: true,
+            shouldTouch: true,
+        });
+    };
 
     const onSubmit = async (values: FieldValues) => {
         setIsLoading(true);
@@ -140,17 +155,60 @@ export default function LoginForm() {
                                             </Link>
                                         </div>
                                         <FormControl>
-                                            <Input
-                                                type="password"
-                                                placeholder="Min. 8 characters"
-                                                className="bg-[#fdf8f0] border-[#e8ddd0] rounded-[10px] text-[#1a1208] placeholder:text-[#c4b8a8] focus:border-[#006a4e] focus:ring-[#006a4e]/10 focus:bg-white"
-                                                {...field}
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    type={showPassword ? "text" : "password"}
+                                                    placeholder="Min. 8 characters"
+                                                    className="bg-[#fdf8f0] border-[#e8ddd0] rounded-[10px] text-[#1a1208] placeholder:text-[#c4b8a8] focus:border-[#006a4e] focus:ring-[#006a4e]/10 focus:bg-white pr-11"
+                                                    {...field}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword((prev) => !prev)}
+                                                    className="absolute inset-y-0 right-3 flex items-center justify-center text-[#7a6a5a] hover:text-[#1a1208] transition-colors"
+                                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                                >
+                                                    {showPassword ? (
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                                                            <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7Zm0 12.9c-4.1 0-7.3-2.4-9-5.9 1.7-3.5 4.9-5.9 9-5.9 4.1 0 7.3 2.4 9 5.9-1.7 3.5-4.9 5.9-9 5.9Zm0-9.4a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm0 5.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                                                            <path d="M12 5c-7 0-11 7-11 7s4 7 11 7c1.5 0 2.9-.2 4.3-.6l2.4 2.4 1.4-1.4-2.5-2.5C20.3 14.1 22 12.1 22 12c-1.7-3.5-4.9-5.9-9-5.9-1.1 0-2.2.2-3.2.6l1.6 1.6c.7-.2 1.4-.3 2.1-.3Zm-9.9-1.4L1.3 3.7 3 2 21 20l-1.7 1.7-2-2C16 21 14.1 21 12 21c-7 0-11-7-11-7 1.2-2.4 3.1-4.4 5.4-5.7l-1.3-1.3Zm7.3 7.3 4.2 4.2a3.48 3.48 0 0 1-4.2-4.2Zm-2.6-2.6 2.6 2.6-2.6-2.6Z" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                            </div>
                                         </FormControl>
                                         <FormMessage className="text-[#dc143c] text-xs font-semibold" />
                                     </FormItem>
                                 )}
                             />
+
+                            {/* Preset credentials */}
+                            <div className="grid grid-cols-3 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => applyCredentials("admin@example.com", "AdminPass123")}
+                                    className="py-2 rounded-[10px] text-[13px] font-bold text-[#1a1208] bg-[#f7f1eb] border border-[#e8ddd0] hover:bg-[#f3e8db] transition-colors"
+                                >
+                                    Admin
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => applyCredentials("vendor@example.com", "VendorPass123")}
+                                    className="py-2 rounded-[10px] text-[13px] font-bold text-[#1a1208] bg-[#f7f1eb] border border-[#e8ddd0] hover:bg-[#f3e8db] transition-colors"
+                                >
+                                    Vendor
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => applyCredentials("user@example.com", "UserPass123")}
+                                    className="py-2 rounded-[10px] text-[13px] font-bold text-[#1a1208] bg-[#f7f1eb] border border-[#e8ddd0] hover:bg-[#f3e8db] transition-colors"
+                                >
+                                    User
+                                </button>
+                            </div>
 
                             {/* Submit */}
                             <button
