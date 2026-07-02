@@ -2,36 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Post } from "@/types";
+import { Product } from "@/types";
 
-// Fallback images by category/keyword — add more as needed
-const fallbackImages: Record<string, string> = {
-  shoes: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-  boot: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=400&q=80",
-  sandal: "https://images.unsplash.com/photo-1603487742131-4160ec999306?w=400&q=80",
-  socks: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=400&q=80",
-  shirt: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80",
-  pant: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80",
-  dress: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&q=80",
-  toy: "https://images.unsplash.com/photo-1558060370-d644485927b0?w=400&q=80",
-  bag: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80",
-  watch: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-  phone: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80",
-  baby: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=400&q=80",
-  default: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-};
 
-function getFallbackImage(name: string): string {
-  const lower = (name || "").toLowerCase();
-  for (const key of Object.keys(fallbackImages)) {
-    if (lower.includes(key)) return fallbackImages[key];
-  }
-  return fallbackImages.default;
-}
-
-export default function ProductCard({ post }: { post: Post; }) {
-  const imageSrc = (post.image || post.thumbnail) || getFallbackImage(post.name || post.title || "");
+ 
+export default function ProductCard({ post }: { post: Product; }) {
+  const imageSrc = post.image || post.thumbnail || "/logo.png";
   const altText = (post.name || post.title || "প্রোডাক্ট") as string;
+  const badgeTag = post.tags?.[0];
 
   // ✅ ফিক্স: duplicate ?? সরানো হয়েছে + discount শুধু তখনই দেখাবে যখন আসল দাম > বর্তমান দাম
   const price = post.price ?? null;
@@ -49,6 +27,14 @@ export default function ProductCard({ post }: { post: Post; }) {
 
         {/* Image Area */}
         <div className="relative w-full bg-gradient-to-br from-green-50 to-red-50" style={{ paddingTop: "100%" }}>
+          {/* Tag Badge */}
+          {badgeTag && (
+            <div className="absolute top-2 left-2 z-10 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-white shadow-lg"
+              style={{ background: "linear-gradient(135deg, #15803d, #007a3d)" }}>
+              {badgeTag}
+            </div>
+          )}
+
           {/* Discount Badge */}
           {discount && discount > 0 && (
             <div className="absolute top-2 right-2 z-10 flex flex-col items-center justify-center rounded-full text-white font-bold w-11 h-11 leading-tight shadow-lg"
@@ -62,7 +48,7 @@ export default function ProductCard({ post }: { post: Post; }) {
             src={imageSrc}
             alt={altText}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover h-[256px] w-auto"
           />
         </div>
 
