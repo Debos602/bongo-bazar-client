@@ -49,6 +49,8 @@ export interface Product {
     vendorId?: number;
 }
 
+export type Post = Product;
+
 export interface Blog {
     id: number;
     title: string;

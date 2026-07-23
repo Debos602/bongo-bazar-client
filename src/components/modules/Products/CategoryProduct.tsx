@@ -23,6 +23,7 @@ export default async function CategoryProductPage({ slug, categoryData, showAll 
             if (res.ok) {
                 const response = await res.json();
                 data = response?.data;
+                console.log(`Fetched category ${slug}:`, data);
             }
         } catch (error) {
             console.error(`Error fetching category ${slug}:`, error);
