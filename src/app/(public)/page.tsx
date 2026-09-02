@@ -1,10 +1,12 @@
 import ProductCard from "@/components/modules/Products/ProductCard";
 import Hero from "@/components/modules/Home/Hero";
+import CategoryBentoGrid from "@/components/modules/Home/CategoryBentoGrid";
 import { Category, Product } from "@/types";
 import Link from "next/link";
 import CategoryProductPage from "@/components/modules/Products/CategoryProduct";
 import { Suspense } from "react";
-import { getCategory } from "@/actions/category";
+import { getCategoryBasic } from "@/actions/category";
+
 
 
 export default async function HomePage() {
@@ -26,10 +28,10 @@ export default async function HomePage() {
   // ✅ getCategory service দিয়ে categories fetch
   let categories: Category[] = [];
   try {
-    const data = await getCategory();
-    // console.log("Raw category data:", data);
+    const data = await getCategoryBasic();
+    // console.log("Raw category data basic:", data);
     categories = Array.isArray(data) ? data : [];
-    console.log("Categories loaded:", categories.length);
+    // console.log("Categories loaded:", categories.length);
   } catch (error) {
     console.error("Failed to fetch categories:", error);
   }
@@ -38,6 +40,9 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[#EDEEEF]">
       <Hero categories={categories} />
       <div className="max-w-7xl mx-auto px-4 py-8">
+        
+        {/* Category Bento Grid Section */}
+        <CategoryBentoGrid categories={categories} />
 
         {/* হট ডিল Section */}
         <div className="py-[80px] ">

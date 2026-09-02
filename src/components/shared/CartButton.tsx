@@ -1,4 +1,3 @@
-"use server";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

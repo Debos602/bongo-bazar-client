@@ -62,6 +62,7 @@ export interface Blog {
 export interface Category {
     id: number;
     name: string;
+    Image: string;
     slug: string;
     products?: Array<{ productId: number; categoryId: number; product: Product; }>;
 }
