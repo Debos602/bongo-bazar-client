@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import getCategoryIcon from '@/lib/categoryIcons';
 import { Category } from '@/types';
 
 interface CategoryBentoGridProps {
@@ -10,7 +9,6 @@ interface CategoryBentoGridProps {
 }
 
 export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps) {
-  console.log("CategoryBentoGrid received categories:", categories);
   if (!categories || categories.length === 0) {
     return null;
   }
@@ -18,9 +16,9 @@ export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps
   const displayCategories = categories.slice(0, 6);
 
   const getCategoryImage = (category: Category): string => {
-  const raw = category.Image || category.products?.[0]?.product?.image || '';
-  return raw ? `${raw}?w=800&q=75&auto=format&fit=crop` : '';
-};
+    const raw = category.Image || category.products?.[0]?.product?.image || '';
+    return raw ? `${raw}?w=1200&q=80&auto=format&fit=crop` : '';
+  };
 
   return (
     <div className="">
@@ -32,46 +30,59 @@ export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
+      {/* Bento Grid — one hero cell, the rest fill in around it */}
+      <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 px-4 md:auto-rows-[220px]">
         {displayCategories.map((category, index) => {
-          const isLarge = index === 0 || index === 4;
-          const gridColSpan = isLarge ? 'md:col-span-2' : '';
-          const gridRowSpan = isLarge ? 'md:row-span-2' : '';
+          const isHero = index === 0;
+          const isWide = index === 1;
+          const isTall = index === 3;
           const categoryImage = getCategoryImage(category);
+
+          const spanClass = isHero || isTall
+            ? 'md:col-span-1 md:row-span-2'
+            : isWide
+            ? 'md:col-span-2 md:row-span-1'
+            : '';
 
           return (
             <Link
               key={category.id}
               href={`/category/${category.slug}`}
-              className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-xl ${gridColSpan} ${gridRowSpan}`}
+              className={`group relative flex overflow-hidden rounded-2xl min-h-[220px] ring-1 ring-inset ring-white/10 transition-shadow duration-300 hover:ring-emerald-400/50 hover:shadow-[0_8px_30px_-8px_rgba(16,185,129,0.35)] ${spanClass}`}
             >
+              {/* Background image */}
               {categoryImage ? (
                 <Image
                   src={categoryImage}
                   alt={category.name}
                   fill
-                  sizes={isLarge ? '(min-width:768px) 66vw, 100vw' : '(min-width:768px) 33vw, 100vw'}
-                  className="object-cover group-hover:scale-110 transition-transform duration-300"
+                  sizes={isHero || isTall ? '(min-width:768px) 34vw, 100vw' : isWide ? '(min-width:768px) 66vw, 100vw' : '(min-width:768px) 33vw, 100vw'}
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   priority={index === 0}
                 />
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-800 to-neutral-900" />
               )}
 
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-all duration-300"></div>
+              {/* Bottom-up tinted gradient — a deep emerald-black instead of flat black, keeps the top of the image clear */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06140F]/90 via-[#06140F]/25 to-transparent" />
 
-              <div className={`relative z-10 flex flex-col justify-between p-6 h-full ${isLarge ? 'min-h-64' : 'min-h-48'}`}>
-                <div className="text-5xl md:text-6xl mb-4 drop-shadow-lg">
-                  {getCategoryIcon(category.name)}
-                </div>
-                <div>
-                  <h3 className="font-bold text-white text-lg md:text-xl mb-2 drop-shadow-md">
-                    {category.name}
-                  </h3>
-                  <p className="text-white text-sm opacity-95 drop-shadow-md">
-                    Browse {category.name} →
-                  </p>
-                </div>
+              {/* Content */}
+              <div className="relative z-10 flex flex-col justify-end w-full p-6">
+                <h3 className="font-semibold text-white text-xl md:text-2xl leading-tight">
+                  {category.name}
+                </h3>
+                <p className="text-emerald-50/70 text-sm mt-1 max-w-[26ch]">
+                  {isHero
+                    ? `Explore high-performance ${category.name.toLowerCase()} for work and play.`
+                    : `Browse the latest in ${category.name.toLowerCase()}.`}
+                </p>
+
+                {isHero && (
+                  <span className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-emerald-900/30 transition-all group-hover:from-emerald-400 group-hover:to-teal-400">
+                    Browse all
+                  </span>
+                )}
               </div>
             </Link>
           );
