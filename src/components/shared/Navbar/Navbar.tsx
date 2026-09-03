@@ -68,6 +68,12 @@ const uspItems = [
   { icon: MapPin, label: "Deliver All Over Bangladesh" },
 ];
 
+const NAV_GRAD = "linear-gradient(90deg,#022c22 0%,#064e3b 45%,#0f766e 100%)";
+const NAV_GRAD_MOBILE = "linear-gradient(90deg,#022c22 0%,#065f46 50%,#0f766e 100%)";
+const CATEGORY_GRAD = "linear-gradient(90deg,#064e3b 0%,#047857 35%,#10b981 75%,#34d399 100%)";
+const BORDER_GRAD = "linear-gradient(90deg,#34d399,#10b981 40%,#047857 70%,#064e3b) 1";
+const SHEET_HEADER_GRAD = "linear-gradient(135deg,#022c22,#064e3b 50%,#047857)";
+
 export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -167,9 +173,9 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               : "p-1.5 hover:bg-gray-100"
           )}
         >
-          <Avatar className="w-8 h-8 border-2 border-[#006a4e]">
+          <Avatar className="w-8 h-8 border-2 border-emerald-500">
             <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
-            <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-xs font-bold">
+            <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-700 text-white text-xs font-bold">
               {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>
@@ -203,9 +209,9 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
       >
         <DropdownMenuLabel className="px-3 py-2.5">
           <div className="flex items-center gap-2.5">
-            <Avatar className="w-9 h-9 border-2 border-[#006a4e]">
+            <Avatar className="w-9 h-9 border-2 border-emerald-500">
               <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
-              <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-xs font-bold">
+              <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-700 text-white text-xs font-bold">
                 {getInitials(user?.name)}
               </AvatarFallback>
             </Avatar>
@@ -223,8 +229,8 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               className={cn(
                 "text-[10px] font-bold px-2 py-0.5 rounded-full",
                 user?.role === "ADMIN"
-                  ? "bg-[#dc143c]/10 text-[#dc143c]"
-                  : "bg-[#006a4e]/10 text-[#006a4e]"
+                  ? "bg-teal-100 text-teal-800"
+                  : "bg-emerald-100 text-emerald-800"
               )}
             >
               {user?.role === "ADMIN" ? "অ্যাডমিন" : "কাস্টমার"}
@@ -238,7 +244,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
           {user?.role === "ADMIN" && (
             <DropdownMenuItem
               asChild
-              className="rounded-lg cursor-pointer hover:bg-[#006a4e]/5 hover:text-[#006a4e]"
+              className="rounded-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700"
             >
               <Link href="/dashboard" className="flex items-center gap-2.5 px-3 py-2">
                 <LayoutDashboard className="w-4 h-4" />
@@ -249,7 +255,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
 
           <DropdownMenuItem
             asChild
-            className="rounded-lg cursor-pointer hover:bg-[#006a4e]/5 hover:text-[#006a4e]"
+            className="rounded-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700"
           >
             <Link href="/profile" className="flex items-center gap-2.5 px-3 py-2">
               <User className="w-4 h-4" />
@@ -259,7 +265,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
 
           <DropdownMenuItem
             asChild
-            className="rounded-lg cursor-pointer hover:bg-[#006a4e]/5 hover:text-[#006a4e]"
+            className="rounded-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700"
           >
             <Link href="/orders" className="flex items-center gap-2.5 px-3 py-2">
               <Package className="w-4 h-4" />
@@ -269,7 +275,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
 
           <DropdownMenuItem
             asChild
-            className="rounded-lg cursor-pointer hover:bg-[#006a4e]/5 hover:text-[#006a4e]"
+            className="rounded-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700"
           >
             <Link href="/settings" className="flex items-center gap-2.5 px-3 py-2">
               <Settings className="w-4 h-4" />
@@ -282,7 +288,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
 
         <DropdownMenuItem
           onClick={handleLogout}
-          className="rounded-lg cursor-pointer hover:bg-[#dc143c]/5 hover:text-[#dc143c] focus:bg-[#dc143c]/5 focus:text-[#dc143c]"
+          className="rounded-lg cursor-pointer hover:bg-slate-100 hover:text-slate-900 focus:bg-slate-100 focus:text-slate-900"
         >
           <div className="flex items-center gap-2.5 px-3 py-2 w-full">
             <LogOut className="w-4 h-4" />
@@ -299,7 +305,8 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
       <div className="flex flex-col gap-2.5">
         <Button
           asChild
-          className="w-full h-11 text-sm font-semibold text-white gap-2 bg-emerald-600 hover:bg-emerald-700 border-0"
+          className="w-full h-11 text-sm font-semibold text-white gap-2 border-0"
+          style={{ background: "linear-gradient(135deg,#10b981,#047857)" }}
         >
           <Link href="/login">
             <LogIn className="w-4 h-4" />
@@ -308,7 +315,8 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         </Button>
         <Button
           asChild
-          className="w-full h-11 text-sm font-semibold text-white gap-2 bg-red-600 hover:bg-red-700 border-0"
+          className="w-full h-11 text-sm font-semibold text-white gap-2 border-0"
+          style={{ background: "linear-gradient(135deg,#059669,#065f46)" }}
         >
           <Link href="/register">
             <UserPlus className="w-4 h-4" />
@@ -322,7 +330,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
           asChild
           size="sm"
           variant="ghost"
-          className="h-9 px-3 text-sm font-semibold text-gray-700 hover:text-emerald-700 hover:bg-emerald-50 border border-gray-200 rounded-lg gap-1.5"
+          className="h-9 px-3 text-sm font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200 rounded-lg gap-1.5"
         >
           <Link href="/login">
             <LogIn className="w-4 h-4" />
@@ -333,7 +341,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
           asChild
           size="sm"
           className="h-9 px-4 text-sm font-semibold text-white rounded-lg gap-1.5 hover:opacity-90 border-0"
-          style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)" }}
+          style={{ background: "linear-gradient(135deg,#059669,#047857)" }}
         >
           <Link href="/register">
             <UserPlus className="w-4 h-4" />
@@ -359,7 +367,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         <div className="flex items-center gap-1.5 min-w-0">
           <Avatar className="w-6 h-6 flex-shrink-0 border border-emerald-400">
             <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
-            <AvatarFallback className="bg-gradient-to-br from-[#dc143c] to-[#006a4e] text-white text-[9px] font-bold">
+            <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-700 text-white text-[9px] font-bold">
               {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>
@@ -371,27 +379,29 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
     }
     return (
       <div className="flex items-center gap-1.5">
-        <Button
-          asChild
-          size="sm"
-          className="h-6 px-2.5 text-[11px] rounded font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-0"
-        >
-          <Link href="/login">
-            <LogIn className="w-3 h-3 mr-1" />
-            সাইন ইন
-          </Link>
-        </Button>
-        <Button
-          asChild
-          size="sm"
-          className="h-6 px-2.5 text-[11px] rounded font-semibold bg-red-700 hover:bg-red-800 text-white border-0"
-        >
-          <Link href="/register">
-            <UserPlus className="w-3 h-3 mr-1" />
-            সাইন আপ
-          </Link>
-        </Button>
-      </div>
+          <Button
+            asChild
+            size="sm"
+            className="h-6 px-2.5 text-[11px] rounded font-semibold text-white border-0"
+            style={{ background: "linear-gradient(135deg,#10b981,#047857)" }}
+          >
+            <Link href="/login">
+              <LogIn className="w-3 h-3 mr-1" />
+              সাইন ইন
+            </Link>
+          </Button>
+          <Button
+            asChild
+            size="sm"
+            className="h-6 px-2.5 text-[11px] rounded font-semibold text-white border-0"
+            style={{ background: "linear-gradient(135deg,#059669,#065f46)" }}
+          >
+            <Link href="/register">
+              <UserPlus className="w-3 h-3 mr-1" />
+              সাইন আপ
+            </Link>
+          </Button>
+        </div>
     );
   };
 
@@ -406,7 +416,10 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
   return (
     <>
       {/* ── Desktop top info bar ── */}
-      <div className="hidden md:block bg-gradient-to-r from-emerald-950 via-stone-900 to-red-950 border-b border-white/5">
+      <div
+        className="hidden md:block border-b border-white/5"
+        style={{ background: NAV_GRAD }}
+      >
         <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center justify-between">
           <div className="flex items-center gap-6">
             {uspItems.map((item, i) => {
@@ -416,7 +429,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                   key={i}
                   className={cn(
                     "flex items-center gap-1.5 text-[11px] font-medium transition-all duration-500",
-                    i === uspIdx ? "text-emerald-300 scale-105" : "text-gray-400"
+                    i === uspIdx ? "text-emerald-300 scale-105" : "text-slate-200/80"
                   )}
                 >
                   <Icon className="w-3 h-3" />
@@ -427,21 +440,21 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
           </div>
 
           <div className="flex items-center gap-5 text-xs text-gray-300">
-            <a
-              href="tel:01641754794"
-              className="flex items-center gap-1.5 hover:text-emerald-300 transition-colors"
-            >
-              <Phone className="w-3 h-3 text-emerald-400" />
-              হটলাইনঃ
-              <span className="text-emerald-300 font-semibold ml-0.5">০১৬৪১-৭৫৪৭৯৪</span>
-            </a>
-            <a
-              href="mailto:info@bongobazar.com"
-              className="hidden sm:flex items-center gap-1.5 hover:text-red-300 transition-colors"
-            >
-              <Mail className="w-3 h-3 text-red-400" />
-              <span className="text-red-300 font-semibold">info@bongobazar.com</span>
-            </a>
+              <a
+                href="tel:01641754794"
+                className="flex items-center gap-1.5 hover:text-emerald-300 transition-colors"
+              >
+                <Phone className="w-3 h-3 text-emerald-400" />
+                হটলাইনঃ
+                <span className="text-emerald-300 font-semibold ml-0.5">০১৬৪১-৭৫৪৭৯৪</span>
+              </a>
+              <a
+                href="mailto:info@bongobazar.com"
+                className="hidden sm:flex items-center gap-1.5 hover:text-emerald-200 transition-colors"
+              >
+                <Mail className="w-3 h-3 text-emerald-300/80" />
+                <span className="text-emerald-200 font-semibold">info@bongobazar.com</span>
+              </a>
           </div>
         </div>
       </div>
@@ -449,10 +462,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
       {/* ── Mobile top info bar ── */}
       <div
         className="md:hidden text-gray-200 text-xs py-1.5"
-        style={{
-          background:
-            "linear-gradient(90deg, #0d4a1f 0%, #1a2e0d 45%, #4a0d0d 100%)",
-        }}
+        style={{ background: NAV_GRAD_MOBILE }}
       >
         {/* 
           FIX: Use a flex row that never overflows.
@@ -483,8 +493,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         )}
         style={{
           borderTop: "3px solid transparent",
-          borderImage:
-            "linear-gradient(90deg,#16a34a,#15803d 40%,#b91c1c 60%,#dc2626) 1",
+          borderImage: BORDER_GRAD,
         }}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4">
@@ -513,7 +522,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               <div
                 className={cn(
                   "absolute inset-0 rounded-md transition-all duration-300 pointer-events-none",
-                  searchFocused ? "shadow-[0_0_0_3px_rgba(22,163,74,0.18)]" : ""
+                  searchFocused ? "shadow-[0_0_0_3px_rgba(16,185,129,0.28)]" : ""
                 )}
               />
               <Input
@@ -526,15 +535,15 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                 onBlur={() => setSearchFocused(false)}
                 placeholder="প্রোডাক্ট সার্চ করুন..."
                 className="rounded-r-none border-2 border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-11 text-sm transition-colors"
-                style={{ borderColor: searchFocused ? "#16a34a" : "#d1d5db" }}
+                style={{ borderColor: searchFocused ? "#10b981" : "#d1d5db" }}
               />
               <button
                 type="button"
                 onClick={() => handleSearch()}
                 className="px-5 h-11 text-white font-semibold rounded-r-md transition-all hover:opacity-90 active:scale-95 flex items-center gap-1.5"
                 style={{
-                  background: "linear-gradient(135deg,#16a34a,#15803d)",
-                  border: "2px solid #15803d",
+                  background: "linear-gradient(135deg,#10b981,#047857 60%,#064e3b)",
+                  border: "2px solid #047857",
                   borderLeft: "none",
                 }}
               >
@@ -553,11 +562,11 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               {/* Wishlist — desktop only */}
               <Link
                 href="/wishlist"
-                className="hidden md:flex items-center gap-1.5 text-gray-600 hover:text-red-600 transition-colors p-2 rounded-xl hover:bg-red-50 relative group"
+                className="hidden md:flex items-center gap-1.5 text-gray-600 hover:text-emerald-700 transition-colors p-2 rounded-xl hover:bg-emerald-50 relative group"
               >
                 <Heart className="w-6 h-6" />
                 <span className="text-sm font-medium hidden lg:inline">উইশলিস্ট</span>
-                <Badge className="absolute -top-1 -right-1 h-[16px] w-[16px] flex items-center justify-center p-0 text-[9px] font-bold border-2 border-white bg-red-500">
+                <Badge className="absolute -top-1 -right-1 h-[16px] w-[16px] flex items-center justify-center p-0 text-[9px] font-bold border-2 border-white bg-emerald-600 text-white">
                   3
                 </Badge>
               </Link>
@@ -565,7 +574,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               {/* Notification bell — desktop only */}
               <button
                 type="button"
-                className="hidden md:flex items-center p-2 rounded-xl text-gray-600 hover:text-amber-600 hover:bg-amber-50 transition-colors relative"
+                className="hidden md:flex items-center p-2 rounded-xl text-gray-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors relative"
               >
                 <Bell className="w-6 h-6" />
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white" />
@@ -609,10 +618,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                   {/* Sheet header */}
                   <div
                     className="p-4 flex items-center justify-between flex-shrink-0"
-                    style={{
-                      background:
-                        "linear-gradient(135deg,#0d4a1f,#1a2e0d 50%,#4a0d0d)",
-                    }}
+                    style={{ background: SHEET_HEADER_GRAD }}
                   >
                     <Image
                       src={logo}
@@ -640,13 +646,13 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                       }}
                       placeholder="সার্চ করুন..."
                       className="rounded-r-none text-sm border-2 border-r-0 focus-visible:ring-0 h-10 min-w-0"
-                      style={{ borderColor: "#16a34a" }}
+                      style={{ borderColor: "#10b981" }}
                     />
                     <button
                       type="button"
                       onClick={() => handleSearch(true)}
                       className="rounded-r-md px-4 h-10 text-white flex items-center flex-shrink-0"
-                      style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
+                      style={{ background: "linear-gradient(135deg,#10b981,#047857)" }}
                     >
                       <Search className="w-4 h-4" />
                     </button>
@@ -733,13 +739,13 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               }}
               placeholder="প্রোডাক্ট সার্চ করুন..."
               className="rounded-r-none border-2 border-r-0 focus-visible:ring-0 text-sm h-10 min-w-0 flex-1"
-              style={{ borderColor: "#16a34a" }}
+              style={{ borderColor: "#10b981" }}
             />
             <button
               type="button"
               onClick={() => handleSearch()}
               className="px-4 rounded-r-md text-white h-10 flex items-center flex-shrink-0"
-              style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
+              style={{ background: "linear-gradient(135deg,#10b981,#047857)" }}
             >
               <Search className="w-4 h-4" />
             </button>
@@ -749,10 +755,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         {/* ── Category nav bar (desktop only) ── */}
         <div
           className="hidden md:block"
-          style={{
-            background:
-              "linear-gradient(90deg,#166534 0%,#15803d 35%,#991b1b 70%,#b91c1c 100%)",
-          }}
+          style={{ background: CATEGORY_GRAD }}
         >
           <div
             className="max-w-7xl mx-auto px-4 flex items-center overflow-x-auto scrollbar-none"
@@ -763,8 +766,8 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               <button
                 type="button"
                 onClick={() => setCatOpen((v) => !v)}
-                className="flex items-center gap-2 px-5 py-3 text-white font-semibold text-sm whitespace-nowrap transition-colors hover:bg-black/15 select-none"
-                style={{ background: catOpen ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.18)" }}
+                className="flex items-center gap-2 px-5 py-3 text-white font-semibold text-sm whitespace-nowrap transition-colors hover:bg-white/10 select-none"
+                style={{ background: catOpen ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)" }}
               >
                 <LayoutGrid className="w-4 h-4" />
                 ক্যাটেগরীজ
@@ -779,7 +782,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               {catOpen && (
                 <div
                   className="absolute top-full left-0 bg-white w-60 z-50 rounded-b-xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150"
-                  style={{ borderTop: "3px solid #16a34a" }}
+                  style={{ borderTop: "3px solid #10b981" }}
                 >
                   {loading
                     ? Array.from({ length: 5 }).map((_, i) => (

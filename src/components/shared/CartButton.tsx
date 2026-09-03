@@ -15,13 +15,13 @@ export default async function CartButton() {
         <Link
             href="/cart"
             className="relative flex items-center gap-1.5 text-white transition-all p-2.5 rounded-xl ml-1"
-            style={{ background: "linear-gradient(135deg,#16a34a,#15803d)" }}
+            style={{ background: "linear-gradient(135deg,#10b981,#047857)" }}
         >
             <ShoppingCart className="w-5 h-5" />
             {cartCount > 0 && (
                 <Badge
                     className="absolute -top-1.5 -right-1.5 h-[20px] w-[20px] flex items-center justify-center p-0 text-[10px] font-bold border-2 border-white"
-                    style={{ background: "#dc2626" }}>
+                    style={{ background: "linear-gradient(135deg,#059669,#047857)" }}>
                     {cartCount}
                 </Badge>
             )}

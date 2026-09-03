@@ -1,28 +1,30 @@
-// components/modules/Products/ProductCard.tsx
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
+import { ShoppingCart, Heart } from "lucide-react";
 import { Product } from "@/types";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { createCart } from "@/actions/cart";
+import { useState } from "react";
 
-// ট্যাগের নাম অনুযায়ী ব্যাজের রং (static mapping)
 const TAG_STYLES: Record<string, string> = {
-  "BEST SELLER": "linear-gradient(135deg, #16a34a, #15803d)", // green
-  HOT: "linear-gradient(135deg, #ef4444, #dc2626)", // red
-  NEW: "linear-gradient(135deg, #16a34a, #15803d)", // green
-  SALE: "linear-gradient(135deg, #ef4444, #dc2626)", // red
-  TRENDING: "linear-gradient(135deg, #f59e0b, #d97706)", // amber
+  "BEST SELLER": "var(--grad-secondary)",
+  HOT: "var(--grad-cta)",
+  NEW: "var(--grad-secondary)",
+  SALE: "var(--grad-cta)",
+  TRENDING: "linear-gradient(135deg, #f59e0b, #d97706)",
 };
 
-// ট্যাগ না থাকলে এই ৪টা static ট্যাগ থেকে ঘুরিয়ে ফিরিয়ে দেখানো হবে
 const DEFAULT_TAGS = ["NEW", "HOT", "BEST SELLER", "TRENDING"];
-
-const DEFAULT_TAG_STYLE = "linear-gradient(135deg, #6b7280, #4b5563)"; // gray fallback (অচেনা ট্যাগের জন্য)
+const DEFAULT_TAG_STYLE = "linear-gradient(135deg, #6b7280, #4b5563)";
 
 export default function ProductCard({ post }: { post: Product }) {
   const imageSrc = post.image || post.thumbnail || "/logo.png";
   const altText = (post.name || post.title || "প্রোডাক্ট") as string;
-  // ট্যাগ না থাকলে product id দিয়ে ৪টা static ট্যাগের একটা নির্দিষ্টভাবে বেছে নেওয়া হবে
-  // (একই প্রোডাক্টে সবসময় একই ট্যাগ দেখাবে, প্রতিবার রিলোডে বদলাবে না)
+
   const idStr = String(post.id ?? "");
   const idSum = idStr
     .split("")
@@ -32,90 +34,118 @@ export default function ProductCard({ post }: { post: Product }) {
   const badgeTag = post.tags?.[0] || fallbackTag;
   const badgeStyle = TAG_STYLES[badgeTag.toUpperCase()] || DEFAULT_TAG_STYLE;
 
-  // ✅ ফিক্স: duplicate ?? সরানো হয়েছে + discount শুধু তখনই দেখাবে যখন আসল দাম > বর্তমান দাম
   const price = post.price ?? null;
-  const originalPrice = price; // যদি আপনার Post টাইপে regularPrice / oldPrice ফিল্ড থাকে তাহলে এখানে বসাবেন
+  const originalPrice = (post as { oldPrice?: number; regularPrice?: number }).oldPrice
+    ?? (post as { oldPrice?: number; regularPrice?: number }).regularPrice
+    ?? null;
   const currentPrice = price;
+  const hasDiscount =
+    originalPrice && currentPrice && originalPrice > currentPrice;
+  const discount = hasDiscount
+    ? Math.round(((Number(originalPrice) - Number(currentPrice)) / Number(originalPrice)) * 100)
+    : null;
 
-  const discount =
-    originalPrice && currentPrice && originalPrice > currentPrice
-      ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
-      : null;
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [adding, setAdding] = useState(false);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!session) {
+      router.push(`/login?callbackUrl=/products/${post.id}`);
+      return;
+    }
+    setAdding(true);
+    try {
+      const res = await createCart({ productId: Number(post.id), quantity: 1 });
+      if (res?.id || res?.success) {
+        toast.success("Cart added successfully");
+        router.refresh();
+      } else {
+        toast.error("কার্টে যোগ করা যায়নি");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
-    <Link href={`/products/${post.id}`} className="block group">
-      <div className="bg-white rounded-lg overflow-hidden flex flex-col h-full border border-gray-100 shadow-sm group-hover:shadow-[0_8px_28px_rgba(0,0,0,0.12)] group-hover:-translate-y-1 transition-all duration-300">
+    <Link href={`/products/${post.id}`} className="block group card-hover h-full">
+      <div className="bg-white rounded-2xl overflow-hidden flex flex-col h-full border border-neutral-200 shadow-[var(--shadow-card)] group-hover:shadow-[var(--shadow-card-hover)]">
 
         {/* Image Area */}
-        <div className="relative w-full overflow-hidden" style={{ paddingTop: "100%" }}>
-          <div className="absolute inset-0 bg-[#f3f5f7]" />
-
-          {/* Tag badge (BEST SELLER / HOT / NEW etc.) — top-left */}
+        <div className="relative w-full overflow-hidden bg-neutral-50" style={{ paddingTop: "100%" }}>
+          {/* Tag badge */}
           {badgeTag && (
             <div
-              className="absolute top-3 left-3 z-10 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white shadow-lg"
+              className="absolute top-3 left-3 z-10 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white shadow-md"
               style={{ background: badgeStyle as string }}
             >
               {badgeTag}
             </div>
           )}
 
-          {/* Discount badge — top-right so it never collides with the tag badge */}
+          {/* Discount badge */}
           {discount && discount > 0 && (
             <div
-              className="absolute top-3 right-3 z-10 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white shadow-lg"
-              style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+              className="absolute top-3 right-3 z-10 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white shadow-md"
+              style={{ background: "var(--grad-cta)" }}
             >
               -{discount}% OFF
             </div>
           )}
 
-          <div className="absolute bottom-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white p-2 shadow-lg pointer-events-none">
-            <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-gray-700">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 20s-7-4.35-9.5-8.5C.5 8 2 4.5 5.5 4c2-.3 3.5.7 4.5 2.2C11 4.7 12.5 3.7 14.5 4 18 4.5 19.5 8 17.5 11.5 15 15.65 12 20 12 20z" />
-              </svg>
-            </div>
-          </div>
+          {/* Wishlist hint */}
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            aria-label="Add to wishlist"
+            className="absolute bottom-3 right-3 z-10 w-10 h-10 rounded-full bg-white/95 backdrop-blur-sm border border-neutral-200 flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:text-brand-red-600 text-neutral-500"
+          >
+            <Heart className="w-4 h-4" />
+          </button>
 
-              <Image
-              src={imageSrc}
-              alt={altText}
-              fill
-              className="object-cover"
-            />
+          <Image
+            src={imageSrc}
+            alt={altText}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+            className="object-cover product-img"
+          />
         </div>
 
         {/* Content */}
         <div className="flex flex-col flex-1 p-4 bg-white">
-          <div className="mb-4 flex-1">
-            <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2">
+          <div className="mb-3 flex-1">
+            <h3 className="text-[15px] font-semibold text-neutral-900 mb-2 line-clamp-2 leading-snug min-h-[2.6em]">
               {altText}
             </h3>
-            <div className="flex items-center gap-2">
-              {currentPrice && (
-                <span className="text-xl font-extrabold text-[#15803d]">
-                  ৳ {currentPrice.toLocaleString()}
+            <div className="flex items-baseline gap-2 flex-wrap">
+              {currentPrice !== null && currentPrice !== undefined && (
+                <span className="text-xl font-extrabold text-brand-green-700 tabular-nums" data-numeric="true">
+                  ৳ {Number(currentPrice).toLocaleString()}
                 </span>
               )}
-              {originalPrice && discount && (
-                <span className="text-sm line-through text-gray-400">
-                  ৳ {originalPrice.toLocaleString()}
+              {hasDiscount && originalPrice && (
+                <span className="text-sm line-through text-neutral-400 tabular-nums" data-numeric="true">
+                  ৳ {Number(originalPrice).toLocaleString()}
                 </span>
               )}
             </div>
           </div>
 
-          <div className="mt-3">
-            <div className="w-full bg-gray-50 rounded-lg border border-gray-200 py-3 px-4 text-sm font-semibold text-gray-800 hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-                <circle cx="9" cy="21" r="1" />
-                <circle cx="20" cy="21" r="1" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-              </svg>
-              Add to Cart
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={adding}
+            className="w-full min-h-11 rounded-xl border-2 border-brand-green-600 bg-brand-green-50 text-brand-green-700 font-semibold text-sm py-2.5 px-4 flex items-center justify-center gap-2 hover:bg-brand-green-600 hover:text-white hover:shadow-[0_8px_20px_-6px_rgba(5,150,105,0.45)] hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {adding ? "Adding..." : "Add to Cart"}
+          </button>
         </div>
       </div>
     </Link>

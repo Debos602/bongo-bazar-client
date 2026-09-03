@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 
 export const getCategory = async () => {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category`);
+        const res = await fetch("/api/categories");
         // console.log("getCategory response:", res);
         if (!res.ok) throw new Error("Failed to fetch categories");
         const json = await res.json();
@@ -15,7 +15,9 @@ export const getCategory = async () => {
 };
 export const getCategoryBasic = async () => {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category/basic`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category`, {
+            cache: "no-store",
+        });
         // console.log("URL:", `${process.env.NEXT_PUBLIC_BASE_API}/category/basic`);
         // console.log("Status:", res.status, res.statusText);
         if (!res.ok) {
