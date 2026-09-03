@@ -59,12 +59,12 @@ export default function Hero({ categories = [] }: HeroProps) {
 
   return (
     <section className="w-full">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 flex gap-3 sm:gap-4">
         {/* Sidebar */}
         <aside className="hidden lg:flex flex-col w-52 flex-shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div
             className="px-4 py-3 text-white text-sm font-bold flex items-center gap-2"
-            style={{ background: "linear-gradient(135deg,#166534,#991b1b)" }}
+            style={{ background: "var(--grad-hero)" }}
           >
             <ShoppingBag className="w-4 h-4" />
             সব ক্যাটেগরি
@@ -76,11 +76,11 @@ export default function Hero({ categories = [] }: HeroProps) {
               href={`/category/${cat.slug}`}
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 border-b border-gray-50 last:border-0 hover:pl-6 group transition-all"
             >
-              <span className="w-8 h-8 rounded-lg flex items-center justify-center text-base bg-blue-100 group-hover:scale-110 transition">
+              <span className="w-8 h-8 rounded-lg flex items-center justify-center text-base bg-brand-green-50 group-hover:scale-110 transition">
                 {getCategoryIcon(cat.slug)}
               </span>
 
-              <span className="font-medium group-hover:text-blue-600">
+              <span className="font-medium group-hover:text-brand-green-600">
                 {cat.name}
               </span>
             </Link>
@@ -88,7 +88,7 @@ export default function Hero({ categories = [] }: HeroProps) {
         </aside>
 
         {/* Hero Slider */}
-        <div className="flex-1 rounded-2xl overflow-hidden relative min-h-[320px] md:min-h-[380px] shadow-lg">
+        <div className="flex-1 rounded-2xl overflow-hidden relative min-h-[280px] sm:min-h-[320px] md:min-h-[380px] shadow-lg">
           {/* Background */}
           <div
             className={cn(
@@ -103,7 +103,7 @@ export default function Hero({ categories = [] }: HeroProps) {
           {/* Content */}
           <div
             className={cn(
-              "relative z-10 h-full flex items-center px-8 md:px-12 py-8 transition-all duration-300",
+              "relative z-10 h-full flex items-center px-6 sm:px-8 md:px-12 py-8 transition-all duration-300",
               animating
                 ? "opacity-0 translate-x-4"
                 : "opacity-100 translate-x-0"
@@ -122,24 +122,24 @@ export default function Hero({ categories = [] }: HeroProps) {
               </div>
 
               <div>
-                <h2 className="text-5xl font-black">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
                   {slide.heading}
-                </h2>
-                <h2 className="text-5xl font-black text-white">
+                </h1>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight">
                   {slide.subheading}
                 </h2>
               </div>
 
               <div className="flex items-center gap-3">
                 <div className="w-20 h-20 flex flex-col items-center justify-center rounded-full border-4 border-white/30 bg-white/10">
-                  <span className="text-2xl font-black">
+                  <span className="text-2xl font-black tabular-nums">
                     {slide.discount}%
                   </span>
-                  <span className="text-xs font-bold">OFF</span>
+                  <span className="text-[10px] font-bold tracking-wider">OFF</span>
                 </div>
 
                 <div>
-                  <p className="text-sm font-bold text-yellow-300">
+                  <p className="text-sm font-bold text-amber-300">
                     {slide.label}
                   </p>
                   <p className="text-xs text-white/70">
@@ -150,9 +150,9 @@ export default function Hero({ categories = [] }: HeroProps) {
 
               <Link
                 href={slide.ctaHref}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white hover:scale-105 transition"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white hover:scale-105 active:scale-95 transition shadow-[var(--shadow-cta)] min-h-11"
                 style={{
-                  background: `linear-gradient(135deg,${slide.accentFrom},${slide.accentTo})`,
+                  background: "var(--grad-cta)",
                 }}
               >
                 <ShoppingBag className="w-4 h-4" />
@@ -177,16 +177,17 @@ export default function Hero({ categories = [] }: HeroProps) {
           </div>
 
           {/* Indicators */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => goTo(i)}
+                aria-label={`Go to slide ${i + 1}`}
                 className={cn(
-                  "rounded-full transition-all",
+                  "rounded-full transition-all min-h-6 min-w-6",
                   i === current
                     ? "w-6 h-2.5 bg-white"
-                    : "w-2.5 h-2.5 bg-white/40"
+                    : "w-2.5 h-2.5 bg-white/40 hover:bg-white/70"
                 )}
               />
             ))}
@@ -197,18 +198,20 @@ export default function Hero({ categories = [] }: HeroProps) {
             onClick={() =>
               goTo((current - 1 + slides.length) % slides.length)
             }
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/30 text-white rounded-full flex items-center justify-center"
+            aria-label="Previous slide"
+            className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center transition z-20"
           >
-            <ChevronLeft />
+            <ChevronLeft className="w-5 h-5" />
           </button>
 
           <button
             onClick={() =>
               goTo((current + 1) % slides.length)
             }
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/30 text-white rounded-full flex items-center justify-center"
+            aria-label="Next slide"
+            className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center transition z-20"
           >
-            <ChevronRight />
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>

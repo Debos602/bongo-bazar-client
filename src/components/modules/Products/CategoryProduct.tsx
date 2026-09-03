@@ -1,86 +1,79 @@
 // components/modules/Products/CategoryProduct.tsx
 
 import ProductCard from "@/components/modules/Products/ProductCard";
-import Link from "next/link";
+import SectionHeader from "@/components/modules/Home/SectionHeader";
 import { Post, Category } from "@/types";
 
 interface Props {
-    slug: string;
-    categoryData?: Category;
-    showAll?: boolean; // When true, shows all products (for category page)
+  slug: string;
+  categoryData?: Category;
+  showAll?: boolean; // When true, shows all products (for category page)
 }
 
-export default async function CategoryProductPage({ slug, categoryData, showAll = false }: Props) {
-    let data = categoryData;
+export default async function CategoryProductPage({
+  slug,
+  categoryData,
+  showAll = false,
+}: Props) {
+  let data = categoryData;
 
-    // If categoryData not provided, fetch it by slug
-    if (!data) {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category/slug/${slug}`, {
-                next: { tags: ["CATEGORY_PRODUCTS"] },
-                cache: "force-cache", // Ensure we get fresh data for category pages
-            });
-            if (res.ok) {
-                const response = await res.json();
-                data = response?.data;
-            }
-        } catch (error) {
-            console.error(`Error fetching category ${slug}:`, error);
+  // If categoryData not provided, fetch it by slug
+  if (!data) {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API}/category/slug/${slug}`,
+        {
+          next: { tags: ["CATEGORY_PRODUCTS"] },
+          cache: "force-cache", // Ensure we get fresh data for category pages
         }
+      );
+      if (res.ok) {
+        const response = await res.json();
+        data = response?.data;
+      }
+    } catch (error) {
+      console.error(`Error fetching category ${slug}:`, error);
     }
+  }
 
-    // Guard against null or missing data
-    if (!data || !data.products || data.products.length === 0) {
-        return null;
-    }
+  // Guard against null or missing data
+  if (!data || !data.products || data.products.length === 0) {
+    return null;
+  }
 
-
-    const products: Post[] = data.products.map(
-        (item: { product: Post; }) => item.product
+  const products: Post[] =
+    data.products.map(
+      (item: { product: Post }) => item.product
     ) ?? [];
 
-    // Show all products on category page, or just 6 on home page
-    const displayProducts = showAll ? products : products.slice(0, 5);
+  // Show all products on category page, or just 5 on home page
+  const displayProducts = showAll ? products : products.slice(0, 5);
+  const productCount = products.length;
 
-    return (
-        <div className="mb-10">
-            {/* Section Header */}
-            <div
-                className="flex justify-between items-center mb-5 px-4 py-3 rounded-xl border-1 border-green-900"
+  return (
+    <section className="mb-10">
+      {/* Section Header (matches Shop by Category / Hot / Popular style) */}
+      <SectionHeader
+        pill={showAll ? "Category" : "Explore"}
+        gradientWord={data?.name}
+        title="Shop by"
+        subtitle={
+          productCount > 0
+            ? `${productCount}টি পণ্য পাওয়া যাচ্ছে`
+            : "এই ক্যাটাগরির পণ্যগুলি দেখুন"
+        }
+        ctaLabel={showAll ? undefined : "সবগুলো দেখুন"}
+        ctaHref={showAll ? undefined : `/category/${slug}`}
+        accent="emerald"
+        className={showAll ? "" : ""}
+      />
 
-            >
-                <h2
-                    className="text-xl font-bold text-green-900 flex items-center gap-2"
-                    style={{ fontFamily: "'Hind Siliguri', sans-serif" }}
-                >
-                    {
-                        showAll && (
-                            <Link href="/">Home /</Link>
-                        )
-                    }
-                    {data?.name}
-                </h2>
-
-                {!showAll && (
-                    <Link
-                        href={`/category/${slug}`}
-                        className="text-sm font-semibold hover:underline"
-                        style={{
-                            color: "#fbbf24",
-                            fontFamily: "'Hind Siliguri', sans-serif",
-                        }}
-                    >
-                        সবগুলো দেখুন →
-                    </Link>
-                )}
-            </div>
-
-            {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {displayProducts.map((product: Post) => (
-                    <ProductCard key={product.id} post={product} />
-                ))}
-            </div>
-        </div>
-    );
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4">
+        {displayProducts.map((product: Post) => (
+          <ProductCard key={product.id} post={product} />
+        ))}
+      </div>
+    </section>
+  );
 }

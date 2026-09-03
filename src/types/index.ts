@@ -16,11 +16,11 @@ export interface User {
     status: UserStatus;
     updatedAt: Date;
     role: Role;
-    posts: Post[]; // Post interface আলাদা করে define করতে হবে
+    posts: Product[]; // Post interface আলাদা করে define করতে হবে
 }
 
 
-export interface Post {
+export interface Product {
     id: number;
     // Blog-style fields
     title?: string;
@@ -49,6 +49,8 @@ export interface Post {
     vendorId?: number;
 }
 
+export type Post = Product;
+
 export interface Blog {
     id: number;
     title: string;
@@ -60,8 +62,9 @@ export interface Blog {
 export interface Category {
     id: number;
     name: string;
+    Image: string;
     slug: string;
-    products?: Array<{ productId: number; categoryId: number; product: Post; }>;
+    products?: Array<{ productId: number; categoryId: number; product: Product; }>;
 }
 
 export type OrderItem = {
