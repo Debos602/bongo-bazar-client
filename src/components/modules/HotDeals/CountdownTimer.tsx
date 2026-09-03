@@ -20,18 +20,20 @@ const calcRemaining = (target: number) => {
 const pad = (n: number) => String(n).padStart(2, '0');
 
 export default function CountdownTimer({ endsAt }: CountdownTimerProps) {
-  const target = endsAt
-    ? new Date(endsAt).getTime()
-    : Date.now() + 1000 * 60 * 60 * 24 * 3; // 3 days fallback
-
-  const [t, setT] = useState(() => calcRemaining(target));
+  const [t, setT] = useState<ReturnType<typeof calcRemaining> | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => setT(calcRemaining(target)), 1000);
-    return () => clearInterval(id);
-  }, [target]);
+    const target = endsAt
+      ? new Date(endsAt).getTime()
+      : Date.now() + 1000 * 60 * 60 * 24 * 3;
 
-  if (t.finished) {
+    const update = () => setT(calcRemaining(target));
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [endsAt]);
+
+  if (t?.finished) {
     return (
       <div className="inline-flex items-center gap-2 rounded-full bg-emerald-900/80 text-emerald-100 px-4 py-2 text-sm font-semibold">
         <Flame className="w-4 h-4" />
@@ -41,10 +43,10 @@ export default function CountdownTimer({ endsAt }: CountdownTimerProps) {
   }
 
   const cells = [
-    { label: 'দিন', value: pad(t.days) },
-    { label: 'ঘন্টা', value: pad(t.hours) },
-    { label: 'মিনিট', value: pad(t.minutes) },
-    { label: 'সেকেন্ড', value: pad(t.seconds) },
+    { label: 'দিন', value: pad(t?.days ?? 0) },
+    { label: 'ঘন্টা', value: pad(t?.hours ?? 0) },
+    { label: 'মিনিট', value: pad(t?.minutes ?? 0) },
+    { label: 'সেকেন্ড', value: pad(t?.seconds ?? 0) },
   ];
 
   return (

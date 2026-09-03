@@ -52,10 +52,10 @@ export default function ProductCard({ post }: { post: Product }) {
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!session) {
-      router.push(`/login?callbackUrl=/products/${post.id}`);
-      return;
-    }
+    // if (!session) {
+    //   router.push(`/login?callbackUrl=/products/${post.id}`);
+    //   return;
+    // }
     setAdding(true);
     try {
       const res = await createCart({ productId: Number(post.id), quantity: 1 });
