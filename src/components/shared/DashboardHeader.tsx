@@ -78,7 +78,7 @@ export default function DashboardHeader({
 
   const userName =
     session.data?.user?.name || session.data?.user?.email || "Guest";
-  const userRole = (session.data?.user as any)?.role || "Customer";
+  const userRole = (session.data?.user as { role?: string } | undefined)?.role || "Customer";
   const userImg = session.data?.user?.image || "";
   const initials = userName.charAt(0).toUpperCase();
 

@@ -65,7 +65,7 @@ export default function AIChatWidget() {
       } else {
         throw new Error(data.error);
       }
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         {

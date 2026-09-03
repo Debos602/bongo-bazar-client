@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { products } from "../products/route";
+import { products } from "../products/store";
 
 export async function GET(
     request: Request,

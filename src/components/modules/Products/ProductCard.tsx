@@ -5,7 +5,6 @@ import Image from "next/image";
 import { ShoppingCart, Heart } from "lucide-react";
 import { Product } from "@/types";
 import { toast } from "sonner";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { createCart } from "@/actions/cart";
 import { useState } from "react";
@@ -45,7 +44,6 @@ export default function ProductCard({ post }: { post: Product }) {
     ? Math.round(((Number(originalPrice) - Number(currentPrice)) / Number(originalPrice)) * 100)
     : null;
 
-  const { data: session } = useSession();
   const router = useRouter();
   const [adding, setAdding] = useState(false);
 

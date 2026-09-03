@@ -70,6 +70,17 @@ function formatTaka(value: number) {
   return "৳" + (value / 1000).toFixed(0) + "k";
 }
 
+function formatRevenue(value: unknown): [string, string] {
+  const numericValue = typeof value === "number"
+    ? value
+    : typeof value === "string" && !isNaN(Number(value))
+      ? Number(value)
+      : undefined;
+  return numericValue !== undefined
+    ? ["৳" + numericValue.toLocaleString("en-BD"), "Revenue"]
+    : [String(value ?? ""), "Revenue"];
+}
+
 // ─── Custom donut label ───────────────────────────────────
 const renderCustomLabel = ({
   cx = 0,
@@ -136,10 +147,7 @@ export default function DashboardCharts() {
             />
             <Tooltip
               contentStyle={tooltipStyle}
-              formatter={(v: any) => {
-                const n = typeof v === "number" ? v : (typeof v === "string" && !isNaN(Number(v)) ? Number(v) : undefined);
-                return n !== undefined ? ["৳" + n.toLocaleString("en-BD"), "Revenue"] : [String(v ?? ""), "Revenue"];
-              }}
+              formatter={formatRevenue}
               labelStyle={{ color: "#64748B", fontSize: 12 }}
             />
             <Area
@@ -211,10 +219,7 @@ export default function DashboardCharts() {
             />
             <Tooltip
               contentStyle={tooltipStyle}
-              formatter={(v: any) => {
-                const n = typeof v === "number" ? v : (typeof v === "string" && !isNaN(Number(v)) ? Number(v) : undefined);
-                return n !== undefined ? ["৳" + n.toLocaleString("en-BD"), "Revenue"] : [String(v ?? ""), "Revenue"];
-              }}
+              formatter={formatRevenue}
             />
             <Bar dataKey="revenue" fill="#3B82F6" radius={[0, 4, 4, 0]} maxBarSize={14} />
           </BarChart>
@@ -247,9 +252,15 @@ export default function DashboardCharts() {
               </Pie>
               <Tooltip
                 contentStyle={tooltipStyle}
-                formatter={(v: any) => {
-                  const n = typeof v === "number" ? v : (typeof v === "string" && !isNaN(Number(v)) ? Number(v) : undefined);
-                  return n !== undefined ? [n + " products", ""] : [String(v ?? ""), ""];
+                formatter={(value: unknown) => {
+                  const numericValue = typeof value === "number"
+                    ? value
+                    : typeof value === "string" && !isNaN(Number(value))
+                      ? Number(value)
+                      : undefined;
+                  return numericValue !== undefined
+                    ? [numericValue + " products", ""]
+                    : [String(value ?? ""), ""];
                 }}
               />
             </PieChart>
