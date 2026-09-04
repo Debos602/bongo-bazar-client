@@ -60,7 +60,7 @@ function SectionHeading({ children }: { children: React.ReactNode; }) {
       />
       <p
         className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]"
-        style={{ fontFamily: "'Syne', sans-serif" }}
+        style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
       >
         {children}
       </p>
@@ -192,9 +192,8 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
   return (
     <div
       className="min-h-screen bg-[#EDEEEF] text-slate-800"
-      style={{ fontFamily: "'DM Sans', 'Hind Siliguri', system-ui, sans-serif" }}
+      style={{ fontFamily: "var(--font-hind-siliguri), var(--font-inter), system-ui, sans-serif" }}
     >
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Hind+Siliguri:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap');`}</style>
 
       {/* ── Breadcrumb ─────────────────────────────────────────── */}
       <nav className="max-w-7xl mx-auto px-4 sm:px-5 pt-5 sm:pt-6 pb-2 flex items-center gap-1.5 flex-wrap">
@@ -225,7 +224,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
         )}
         <span
           className="text-[13px] font-semibold text-slate-800 truncate max-w-[280px]"
-          style={{ fontFamily: "'Syne', sans-serif" }}
+          style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
         >
           {product.name}
         </span>
@@ -367,7 +366,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                            text-white text-sm font-bold shadow-sm"
                 style={{
                   background: "linear-gradient(135deg,#10b981,#047857)",
-                  fontFamily: "'Syne', sans-serif",
+                  fontFamily: "var(--font-inter), system-ui, sans-serif",
                 }}
               >
                 {(product.vendorName ?? product.store ?? "S")[0].toUpperCase()}
@@ -375,7 +374,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
               <div>
                 <p
                   className="text-[14px] font-semibold text-slate-800 tracking-tight"
-                  style={{ fontFamily: "'Syne', sans-serif" }}
+                  style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
                 >
                   {product.vendorName ?? product.store ?? "Official Store"}
                 </p>
@@ -407,7 +406,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
             <h1
               className="text-[24px] sm:text-[28px] font-bold text-slate-900
                          leading-[1.2] mb-3 tracking-tight"
-              style={{ fontFamily: "'Syne', sans-serif" }}
+              style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
             >
               {product.name}
             </h1>
@@ -450,7 +449,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
                     color: "transparent",
-                    fontFamily: "'Syne', sans-serif",
+                    fontFamily: "var(--font-inter), system-ui, sans-serif",
                   }}
                   data-numeric="true"
                 >
@@ -603,7 +602,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                               ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200/60"
                               : "border-emerald-600 bg-white text-emerald-700 hover:bg-emerald-600 hover:text-white hover:shadow-lg hover:shadow-emerald-200/50 hover:-translate-y-0.5"
                             }`}
-                style={{ fontFamily: "'Syne', sans-serif" }}
+                style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
               >
                 {cartLoading ? (
                   "Adding to Cart..."
@@ -630,7 +629,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                 style={{
                   background:
                     "linear-gradient(135deg,#10b981 0%,#047857 100%)",
-                  fontFamily: "'Syne', sans-serif",
+                  fontFamily: "var(--font-inter), system-ui, sans-serif",
                 }}
               >
                 <Zap size={16} /> Buy Now
@@ -671,7 +670,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                 <div key={k}>
                   <p
                     className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em]"
-                    style={{ fontFamily: "'Syne', sans-serif" }}
+                    style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
                   >
                     {k}
                   </p>
@@ -716,7 +715,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                               ? "text-emerald-700 bg-white"
                               : "text-slate-400 hover:text-slate-600"
                             }`}
-                style={{ fontFamily: "'Syne', sans-serif" }}
+                style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
               >
                 <Icon size={13} />
                 {label}
@@ -736,7 +735,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
               <div
                 className="text-[14px] text-slate-600 leading-[1.8] space-y-3
                            tracking-[0.005em]"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}
+                style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
               >
                 <p>
                   {product.description || "No description available for this product."}
@@ -774,7 +773,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                       <td
                         className="py-2.5 px-4 font-semibold text-slate-600 w-2/5
                                    border-b border-slate-100"
-                        style={{ fontFamily: "'Syne', sans-serif" }}
+                        style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
                       >
                         {k}
                       </td>
@@ -804,7 +803,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                         WebkitBackgroundClip: "text",
                         backgroundClip: "text",
                         color: "transparent",
-                        fontFamily: "'Syne', sans-serif",
+                        fontFamily: "var(--font-inter), system-ui, sans-serif",
                       }}
                     >
                       {(product.rating ?? 0).toFixed(1)}
@@ -848,7 +847,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                                      text-white text-sm font-bold"
                           style={{
                             background: "linear-gradient(135deg,#10b981,#047857)",
-                            fontFamily: "'Syne', sans-serif",
+                            fontFamily: "var(--font-inter), system-ui, sans-serif",
                           }}
                         >
                           {r.name[0]}
@@ -856,7 +855,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                         <div>
                           <p
                             className="text-[13px] font-semibold text-slate-800 tracking-tight"
-                            style={{ fontFamily: "'Syne', sans-serif" }}
+                            style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
                           >
                             {r.name}
                           </p>
@@ -902,7 +901,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                   <div>
                     <p
                       className="text-[13px] font-semibold text-slate-800 tracking-tight"
-                      style={{ fontFamily: "'Syne', sans-serif" }}
+                      style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
                     >
                       {title}
                     </p>
@@ -956,13 +955,13 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
             <div className="relative">
               <p
                 className="text-[11px] font-bold text-white/70 mb-1.5 uppercase tracking-[0.18em]"
-                style={{ fontFamily: "'Syne', sans-serif" }}
+                style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
               >
                 Share this product
               </p>
               <p
                 className="text-[15px] font-bold mb-4 tracking-tight"
-                style={{ fontFamily: "'Syne', sans-serif" }}
+                style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
               >
                 Help your friends find great deals!
               </p>
