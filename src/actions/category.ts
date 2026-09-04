@@ -16,19 +16,17 @@ export const getCategory = async () => {
 export const getCategoryBasic = async () => {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/category`, {
-            cache: "no-store",
+            next: { revalidate: 60 },
         });
-        // console.log("URL:", `${process.env.NEXT_PUBLIC_BASE_API}/category/basic`);
-        // console.log("Status:", res.status, res.statusText);
         if (!res.ok) {
             const text = await res.text();
-            console.log("Error body:", text);
-            throw new Error("Failed to fetch categories");
+            console.warn(`Category API returned ${res.status}:`, text);
+            return [];
         }
         const json = await res.json();
-        return json.data;
+        return Array.isArray(json.data) ? json.data : [];
     } catch (error) {
-        console.error("getCategory error:", error);
+        console.warn("Unable to fetch categories:", error);
         return [];
     }
 };

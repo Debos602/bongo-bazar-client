@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createCart } from "@/actions/cart";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 const TAG_STYLES: Record<string, string> = {
   "BEST SELLER": "var(--grad-secondary)",
@@ -45,15 +46,16 @@ export default function ProductCard({ post }: { post: Product }) {
     : null;
 
   const router = useRouter();
+  const { data: session } = useSession();
   const [adding, setAdding] = useState(false);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // if (!session) {
-    //   router.push(`/login?callbackUrl=/products/${post.id}`);
-    //   return;
-    // }
+    if (!session) {
+      router.push(`/login?callbackUrl=/products/${post.id}`);
+      return;
+    }
     setAdding(true);
     try {
       const res = await createCart({ productId: Number(post.id), quantity: 1 });

@@ -1,326 +1,634 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, X, Loader2 } from "lucide-react";
+import {
+  Trash2, Plus, Minus, ShoppingBag, ArrowLeft, X, Loader2,
+  ShoppingCart, Truck, MapPin, Sparkles, ShieldCheck, Tag,
+  Check, CreditCard, ChevronRight, User, Receipt, Package,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { getCart, removeFromCart, updateCartQuantity } from "@/actions/cart";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createOrderWithAddress } from "@/actions/order";
+
+/* ─── Theme tokens (match navbar / hot-deals / home) ─── */
+const NAV_GRAD =
+  "linear-gradient(135deg,#022c22 0%,#064e3b 40%,#047857 70%,#10b981 100%)";
+const BORDER_GRAD =
+  "linear-gradient(90deg,#34d399,#10b981 50%,#047857)";
+
 const SHIPPING_COSTS = { dhaka: 60, outside: 110 };
 
 type CartItem = {
+  id: number;
+  quantity: number;
+  product: {
     id: number;
-    quantity: number;
-    product: {
-        id: number;
-        name: string;
-        price: number;
-        image: string;
-    };
+    name: string;
+    price: number;
+    image: string;
+  };
 };
 
+const STEPS = [
+  { id: 1, label: "Cart", icon: ShoppingCart, current: true },
+  { id: 2, label: "Information", icon: User, current: false },
+  { id: 3, label: "Payment", icon: CreditCard, current: false },
+  { id: 4, label: "Confirmation", icon: Check, current: false },
+];
+
 export default function CartPage() {
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [area, setArea] = useState("outside");
-    const [form, setForm] = useState({ name: "", mobile: "", email: "", address: "" });
-    // ✅ type ঠিক করো
-    const [orderLoading, setOrderLoading] = useState<boolean>(false);
-    const router = useRouter();
-    // ✅ API থেকে cart load করো
-    useEffect(() => {
-        const fetchCart = async () => {
-            setLoading(true);
-            const data = await getCart();
-            setCartItems(data);
-            setLoading(false);
-        };
-        fetchCart();
-    }, []);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [area, setArea] = useState("outside");
+  const [form, setForm] = useState({ name: "", mobile: "", email: "", address: "" });
+  const [orderLoading, setOrderLoading] = useState<boolean>(false);
+  const router = useRouter();
 
-    const handleOrder = async () => {
-        if (!form.name.trim()) { toast.error("নাম দিন"); return; }
-        if (!form.mobile.trim()) { toast.error("মোবাইল নম্বর দিন"); return; }
-        if (!form.address.trim()) { toast.error("ঠিকানা দিন"); return; }
-        if (cartItems.length === 0) { toast.error("কার্ট খালি"); return; }
-
-        setOrderLoading(true);
-        try {
-            const res = await createOrderWithAddress({
-                fullName: form.name,
-                phone: form.mobile,
-                city: area === "dhaka" ? "Dhaka" : "Outside Dhaka",
-                area: area,
-                address: form.address,
-            });
-
-            if (res?.data?.id) {
-                toast.success("অর্ডার সফলভাবে হয়েছে! 🎉");
-                clearCart();
-                router.push("/orders");
-            } else {
-                toast.error(res?.message ?? "অর্ডার হয়নি");
-            }
-        } catch {
-            toast.error("কিছু একটা ভুল হয়েছে");
-        } finally {
-            setOrderLoading(false);
-        }
+  useEffect(() => {
+    const fetchCart = async () => {
+      setLoading(true);
+      const data = await getCart();
+      setCartItems(data);
+      setLoading(false);
     };
+    fetchCart();
+  }, []);
 
-    // ✅ Quantity update
-    const updateQty = async (id: number, delta: number) => {
-        const item = cartItems.find((i) => i.id === id);
-        if (!item) return;
-        const newQty = Math.max(1, item.quantity + delta);
+  const handleOrder = async () => {
+    if (!form.name.trim()) { toast.error("নাম দিন"); return; }
+    if (!form.mobile.trim()) { toast.error("মোবাইল নম্বর দিন"); return; }
+    if (!form.address.trim()) { toast.error("ঠিকানা দিন"); return; }
+    if (cartItems.length === 0) { toast.error("কার্ট খালি"); return; }
 
-        setCartItems((prev) =>
-            prev.map((i) => i.id === id ? { ...i, quantity: newQty } : i)
-        );
+    setOrderLoading(true);
+    try {
+      const res = await createOrderWithAddress({
+        fullName: form.name,
+        phone: form.mobile,
+        city: area === "dhaka" ? "Dhaka" : "Outside Dhaka",
+        area: area,
+        address: form.address,
+      });
 
-        await updateCartQuantity(id, newQty);
-        router.refresh();
-    };
+      if (res?.data?.id) {
+        toast.success("অর্ডার সফলভাবে হয়েছে! 🎉");
+        clearCart();
+        router.push("/orders");
+      } else {
+        toast.error(res?.message ?? "অর্ডার হয়নি");
+      }
+    } catch {
+      toast.error("কিছু একটা ভুল হয়েছে");
+    } finally {
+      setOrderLoading(false);
+    }
+  };
 
-    // ✅ Item remove
-    const removeItem = async (id: number) => {
-        setCartItems((prev) => prev.filter((i) => i.id !== id));
-        const res = await removeFromCart(id);
-        router.refresh();
-        if (!res?.success) {
-            toast.error("মুছতে পারেনি, আবার চেষ্টা করুন");
-        } else {
-            toast.success("কার্ট থেকে সরানো হয়েছে");
-        }
-    };
+  const updateQty = async (id: number, delta: number) => {
+    const item = cartItems.find((i) => i.id === id);
+    if (!item) return;
+    const newQty = Math.max(1, item.quantity + delta);
 
-    const clearCart = () => setCartItems([]);
-
-    const netTotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-    const shippingCost = SHIPPING_COSTS[area as keyof typeof SHIPPING_COSTS] ?? 110;
-    const grandTotal = netTotal + shippingCost;
-
-    return (
-        <div className="min-h-screen bg-[#fdf8f0] py-10 px-4">
-            <div className="max-w-6xl mx-auto">
-
-                <div className="mb-8 flex items-center gap-3">
-                    <div className="w-1 h-8 rounded-full bg-gradient-to-b from-[#dc143c] to-[#006a4e]" />
-                    <h1 className="text-2xl font-extrabold text-gray-800">
-                        আপনার <span className="text-[#dc143c]">কার্ট</span>
-                    </h1>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                    {/* ── Left: Customer Info ── */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="flex h-1.5">
-                            <div className="flex-1 bg-[#dc143c]" />
-                            <div className="flex-1 bg-[#006a4e]" />
-                        </div>
-                        <div className="p-6">
-                            <h2 className="text-lg font-extrabold text-gray-800 mb-1 flex items-center gap-2">
-                                <ShoppingBag size={18} className="text-[#dc143c]" />
-                                কাস্টমার ইনফরমেশন
-                            </h2>
-                            <p className="text-sm text-gray-500 mb-5 leading-relaxed">
-                                অর্ডারটি কনফার্ম করতে নাম, ঠিকানা, মোবাইল নাম্বার লিখে{" "}
-                                <span className="text-[#dc143c] font-bold">অর্ডার কনফার্ম করুন</span>{" "}
-                                বাটনে ক্লিক করুন
-                            </p>
-                            <div className="space-y-4">
-                                <div>
-                                    <Label className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5 block">
-                                        আপনার নাম <span className="text-[#dc143c]">*</span>
-                                    </Label>
-                                    <Input placeholder="আপনার নাম লিখুন" value={form.name}
-                                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                        className="bg-[#fdf8f0] border-gray-200 focus:border-[#006a4e] rounded-xl" />
-                                </div>
-                                <div>
-                                    <Label className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5 block">
-                                        আপনার মোবাইল <span className="text-[#dc143c]">*</span>
-                                    </Label>
-                                    <Input placeholder="+88 ছাড়া ১১ সংখ্যার মোবাইল" value={form.mobile}
-                                        onChange={(e) => setForm({ ...form, mobile: e.target.value })}
-                                        className="bg-[#fdf8f0] border-gray-200 focus:border-[#006a4e] rounded-xl" />
-                                </div>
-                                <div>
-                                    <Label className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5 block">
-                                        আপনার ই-মেইল <span className="text-gray-300">(Optional)</span>
-                                    </Label>
-                                    <Input type="email" placeholder="আপনার ই-মেইল লিখুন" value={form.email}
-                                        onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                        className="bg-[#fdf8f0] border-gray-200 focus:border-[#006a4e] rounded-xl" />
-                                </div>
-                                <div>
-                                    <Label className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5 block">
-                                        এরিয়া সিলেক্ট করুন <span className="text-[#dc143c]">*</span>
-                                    </Label>
-                                    <Select value={area} onValueChange={setArea}>
-                                        <SelectTrigger className="bg-[#fdf8f0] border-gray-200 rounded-xl">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="dhaka">ঢাকার ভেতরে ডেলিভারি</SelectItem>
-                                            <SelectItem value="outside">ঢাকার বাইরে ডেলিভারি</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div>
-                                    <Label className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5 block">
-                                        আপনার ঠিকানা <span className="text-[#dc143c]">*</span>
-                                    </Label>
-                                    <Input placeholder="আপনার ঠিকানা লিখুন" value={form.address}
-                                        onChange={(e) => setForm({ ...form, address: e.target.value })}
-                                        className="bg-[#fdf8f0] border-gray-200 focus:border-[#006a4e] rounded-xl" />
-                                </div>
-
-                                <Button
-                                    onClick={handleOrder}
-                                    disabled={orderLoading || cartItems.length === 0}
-                                    className="w-full py-3 mt-2 rounded-xl font-extrabold text-white text-base bg-gradient-to-r from-[#006a4e] to-[#004d38] hover:opacity-90 transition-all shadow-md disabled:opacity-60"
-                                >
-                                    {orderLoading ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <Loader2 size={16} className="animate-spin" />
-                                            অর্ডার হচ্ছে...
-                                        </span>
-                                    ) : (
-                                        "অর্ডার কনফার্ম করুন"
-                                    )}
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ── Right: Order Info ── */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="flex h-1.5">
-                            <div className="flex-1 bg-[#dc143c]" />
-                            <div className="flex-1 bg-[#006a4e]" />
-                        </div>
-                        <div className="p-6">
-                            <h2 className="text-lg font-extrabold text-gray-800 mb-4 flex items-center gap-2">
-                                <ShoppingBag size={18} className="text-[#006a4e]" />
-                                অর্ডার ইনফরমেশন
-                            </h2>
-
-                            <div className="rounded-xl border border-gray-100 overflow-hidden mb-4">
-                                <table className="w-full text-sm">
-                                    <thead>
-                                        <tr className="bg-[#fdf8f0] border-b border-gray-100">
-                                            <th className="py-2.5 px-3 w-8"></th>
-                                            <th className="py-2.5 px-3 text-left text-xs font-bold uppercase text-gray-400">Product</th>
-                                            <th className="py-2.5 px-3 text-right text-xs font-bold uppercase text-gray-400">Price</th>
-                                            <th className="py-2.5 px-3 text-center text-xs font-bold uppercase text-gray-400">Qty</th>
-                                            <th className="py-2.5 px-3 text-right text-xs font-bold uppercase text-gray-400">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {/* ✅ Loading state */}
-                                        {loading ? (
-                                            <tr>
-                                                <td colSpan={5} className="py-10 text-center text-gray-400">
-                                                    <Loader2 className="animate-spin mx-auto" size={24} />
-                                                </td>
-                                            </tr>
-                                        ) : cartItems.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={5} className="py-10 text-center text-gray-400 text-sm">
-                                                    কার্ট খালি আছে
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            // ✅ Real API data render
-                                            cartItems.map((item) => (
-                                                <tr key={item.id} className="border-b border-gray-50 hover:bg-[#fdf8f0] transition-colors">
-                                                    <td className="py-3 px-3">
-                                                        <button onClick={() => removeItem(item.id)}
-                                                            className="w-6 h-6 rounded-full bg-[#dc143c]/10 hover:bg-[#dc143c] hover:text-white text-[#dc143c] flex items-center justify-center transition-all">
-                                                            <Trash2 size={11} />
-                                                        </button>
-                                                    </td>
-                                                    <td className="py-3 px-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-50">
-                                                                <Image
-                                                                    src={item.product.image}
-                                                                    alt={item.product.name}
-                                                                    width={40} height={40}
-                                                                    className="object-cover w-full h-full"
-                                                                />
-                                                            </div>
-                                                            <span className="text-xs font-semibold text-[#006a4e] leading-snug line-clamp-2">
-                                                                {item.product.name}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-3 px-3 text-right font-bold text-gray-700">
-                                                        ৳{item.product.price.toLocaleString()}
-                                                    </td>
-                                                    <td className="py-3 px-3">
-                                                        <div className="flex items-center justify-center gap-1.5">
-                                                            <button onClick={() => updateQty(item.id, -1)}
-                                                                className="w-6 h-6 rounded-full border border-gray-200 hover:border-[#dc143c] hover:text-[#dc143c] flex items-center justify-center transition-all">
-                                                                <Minus size={10} />
-                                                            </button>
-                                                            <span className="w-7 text-center font-bold text-sm">{item.quantity}</span>
-                                                            <button onClick={() => updateQty(item.id, 1)}
-                                                                className="w-6 h-6 rounded-full border border-gray-200 hover:border-[#006a4e] hover:text-[#006a4e] flex items-center justify-center transition-all">
-                                                                <Plus size={10} />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-3 px-3 text-right font-bold text-gray-800">
-                                                        ৳{(item.product.price * item.quantity).toLocaleString()}
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Totals */}
-                            <div className="bg-[#fdf8f0] rounded-xl p-4 space-y-2.5 mb-5">
-                                <div className="flex justify-between text-sm text-gray-500">
-                                    <span className="font-semibold">Net Total</span>
-                                    <span className="font-bold text-gray-700">৳{netTotal.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between text-sm text-gray-500">
-                                    <span className="font-semibold">Shipping Cost</span>
-                                    <span className="font-bold text-gray-700">৳{shippingCost}</span>
-                                </div>
-                                <div className="h-px bg-gray-200" />
-                                <div className="flex justify-between">
-                                    <span className="font-extrabold text-gray-800">Grand Total</span>
-                                    <span className="font-extrabold text-[#dc143c] text-lg">৳{grandTotal.toLocaleString()}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-3">
-                                <Link href="/products" className="flex-1">
-                                    <Button variant="outline" className="w-full rounded-xl border-[#006a4e] text-[#006a4e] hover:bg-[#006a4e] hover:text-white font-bold gap-2">
-                                        <ArrowLeft size={14} /> Back To Shopping
-                                    </Button>
-                                </Link>
-                                <Button onClick={clearCart} variant="outline"
-                                    className="flex-1 rounded-xl border-[#dc143c] text-[#dc143c] hover:bg-[#dc143c] hover:text-white font-bold gap-2">
-                                    <X size={14} /> Cart Clear
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    setCartItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, quantity: newQty } : i))
     );
+    await updateCartQuantity(id, newQty);
+    router.refresh();
+  };
+
+  const removeItem = async (id: number) => {
+    setCartItems((prev) => prev.filter((i) => i.id !== id));
+    const res = await removeFromCart(id);
+    router.refresh();
+    if (!res?.success) toast.error("মুছতে পারেনি, আবার চেষ্টা করুন");
+    else toast.success("কার্ট থেকে সরানো হয়েছে");
+  };
+
+  const clearCart = () => setCartItems([]);
+
+  const { netTotal, shippingCost, grandTotal, totalItems, totalSavings } = useMemo(() => {
+    const items = cartItems.reduce((s, i) => s + i.quantity, 0);
+    const net = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    const ship = SHIPPING_COSTS[area as keyof typeof SHIPPING_COSTS] ?? 110;
+    return {
+      totalItems: items,
+      netTotal: net,
+      shippingCost: ship,
+      grandTotal: net + ship,
+      totalSavings: 0,
+    };
+  }, [cartItems, area]);
+
+  return (
+    <div className="min-h-screen bg-[#EDEEEF]">
+      {/* ── Compact header (no big banner) ── */}
+      <header
+        className="relative text-white"
+        style={{ background: NAV_GRAD }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
+            backgroundSize: "22px 22px",
+          }}
+          aria-hidden="true"
+        />
+        <div className="relative max-w-7xl mx-auto px-4 py-6 sm:py-8">
+          <nav className="text-[12.5px] text-white/70 mb-4 flex items-center gap-1.5 flex-wrap">
+            <Link href="/" className="hover:text-white transition-colors font-medium">
+              হোম
+            </Link>
+            <ChevronRight size={12} className="text-white/40" />
+            <span className="text-white font-semibold">কার্ট</span>
+          </nav>
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-[11px] font-semibold mb-2">
+                <Sparkles className="w-3 h-3 text-emerald-200" />
+                Step 1 of 4
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                আপনার{" "}
+                <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 bg-clip-text text-transparent">
+                  শপিং কার্ট
+                </span>
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 text-white/80 text-sm">
+              <Receipt size={14} />
+              <span className="tabular-nums">
+                <span className="text-white font-bold">{totalItems}</span> আইটেম
+              </span>
+              <span className="w-1 h-1 rounded-full bg-white/30" />
+              <span className="tabular-nums">
+                <span className="text-white font-bold">৳{netTotal.toLocaleString()}</span> সাবটোটাল
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Stepper ── */}
+      <div className="max-w-7xl mx-auto px-4 -mt-5 relative z-10">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_-6px_rgba(15,23,42,0.06)] px-4 sm:px-6 py-3.5">
+          <ol className="flex items-center justify-between gap-2 sm:gap-0">
+            {STEPS.map((step, idx) => {
+              const Icon = step.icon;
+              const isCurrent = step.current;
+              const isDone = step.id === 1;
+              return (
+                <li
+                  key={step.id}
+                  className="flex items-center flex-1 last:flex-none"
+                >
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div
+                      className={`relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex-shrink-0
+                                  ${isCurrent
+                                    ? "text-white shadow-md shadow-emerald-900/30"
+                                    : isDone
+                                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                      : "bg-slate-50 text-slate-400 border border-slate-200"
+                                  }`}
+                      style={isCurrent ? { background: NAV_GRAD } : undefined}
+                    >
+                      {isDone ? <Check size={14} /> : <Icon size={14} />}
+                    </div>
+                    <div className="min-w-0">
+                      <div
+                        className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.16em] ${
+                          isCurrent ? "text-emerald-700" : isDone ? "text-emerald-700" : "text-slate-400"
+                        }`}
+                      >
+                        Step {step.id}
+                      </div>
+                      <div
+                        className={`text-[12px] sm:text-sm font-semibold truncate ${
+                          isCurrent ? "text-slate-900" : isDone ? "text-slate-700" : "text-slate-400"
+                        }`}
+                      >
+                        {step.label}
+                      </div>
+                    </div>
+                  </div>
+                  {idx < STEPS.length - 1 && (
+                    <div className="hidden sm:block flex-1 mx-4 h-px bg-gradient-to-r from-emerald-200 via-slate-200 to-slate-200" />
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
+
+      {/* ── Main 3-column grid ── */}
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 lg:gap-6">
+          {/* ── Center: Items + Customer form ── */}
+          <div className="flex flex-col gap-5 lg:gap-6 min-w-0">
+            {/* Items card */}
+            <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_4px_20px_-6px_rgba(15,23,42,0.06)]">
+              <header className="flex items-center justify-between gap-2 px-5 sm:px-6 py-4 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
+                  <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
+                    পণ্যের তালিকা
+                  </h2>
+                  <span className="text-[11px] font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full tabular-nums">
+                    {cartItems.length} আইটেম
+                  </span>
+                </div>
+                {cartItems.length > 0 && (
+                  <button
+                    onClick={clearCart}
+                    className="text-[11.5px] font-bold text-slate-500 hover:text-rose-600 transition-colors inline-flex items-center gap-1"
+                  >
+                    <X size={12} /> সব মুছুন
+                  </button>
+                )}
+              </header>
+
+              {/* Loading */}
+              {loading && (
+                <div className="px-5 sm:px-6 py-12 text-center text-slate-400">
+                  <Loader2 className="animate-spin mx-auto" size={24} />
+                  <p className="text-sm mt-2">কার্ট লোড হচ্ছে…</p>
+                </div>
+              )}
+
+              {/* Empty state */}
+              {!loading && cartItems.length === 0 && (
+                <div className="px-5 sm:px-6 py-12 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 mb-3">
+                    <Package size={28} className="text-emerald-600" />
+                  </div>
+                  <p className="text-sm font-semibold text-slate-800 mb-1">আপনার কার্ট খালি</p>
+                  <p className="text-[12.5px] text-slate-500 mb-4">আমাদের পণ্য থেকে পছন্দের জিনিস যোগ করুন</p>
+                  <Link href="/products">
+                    <Button
+                      className="h-10 rounded-xl px-5 font-bold gap-2 text-white shadow-md shadow-emerald-900/20"
+                      style={{ background: NAV_GRAD }}
+                    >
+                      <ShoppingBag size={14} /> পণ্য দেখুন
+                    </Button>
+                  </Link>
+                </div>
+              )}
+
+              {/* Item rows */}
+              {!loading && cartItems.length > 0 && (
+                <ul className="divide-y divide-slate-100">
+                  {cartItems.map((item, i) => (
+                    <li
+                      key={item.id}
+                      className="px-5 sm:px-6 py-4 flex gap-4 items-start group hover:bg-emerald-50/30 transition-colors"
+                    >
+                      {/* index pill */}
+                      <div className="hidden sm:flex w-6 h-6 rounded-md bg-slate-100 text-slate-500 text-[11px] font-bold items-center justify-center mt-1.5 tabular-nums">
+                        {String(i + 1).padStart(2, "0")}
+                      </div>
+
+                      {/* thumb */}
+                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex-shrink-0">
+                        <Image
+                          src={item.product.image}
+                          alt={item.product.name}
+                          fill
+                          sizes="96px"
+                          className="object-cover"
+                        />
+                      </div>
+
+                      {/* details */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[14px] sm:text-[15px] font-semibold text-slate-900 leading-snug line-clamp-2 mb-1.5">
+                          {item.product.name}
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-slate-500">
+                          <span className="inline-flex items-center gap-1">
+                            <Tag size={11} className="text-emerald-600" />
+                            <span className="tabular-nums font-semibold text-slate-700" data-numeric="true">
+                              ৳{item.product.price.toLocaleString()}
+                            </span>
+                            <span className="text-slate-400">/ pcs</span>
+                          </span>
+                          <span className="hidden sm:inline w-1 h-1 rounded-full bg-slate-300" />
+                          <span className="text-slate-400">SKU: {item.product.id}</span>
+                        </div>
+
+                        {/* Stepper + remove */}
+                        <div className="flex items-center justify-between gap-3 mt-3">
+                          <div className="inline-flex items-center border border-slate-200 rounded-lg bg-white overflow-hidden">
+                            <button
+                              onClick={() => updateQty(item.id, -1)}
+                              aria-label="Decrease"
+                              className="w-8 h-8 flex items-center justify-center text-slate-500
+                                         hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                            >
+                              <Minus size={12} />
+                            </button>
+                            <span
+                              className="w-9 text-center text-[13px] font-bold text-slate-800
+                                         border-x border-slate-200 py-1.5 tabular-nums"
+                              data-numeric="true"
+                            >
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => updateQty(item.id, 1)}
+                              aria-label="Increase"
+                              className="w-8 h-8 flex items-center justify-center text-slate-500
+                                         hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </div>
+
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            aria-label="Remove from cart"
+                            className="inline-flex items-center gap-1 text-[12px] font-semibold
+                                       text-slate-500 hover:text-rose-600 transition-colors
+                                       opacity-70 group-hover:opacity-100"
+                          >
+                            <Trash2 size={12} /> Remove
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* line total */}
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-[10.5px] uppercase tracking-[0.14em] text-slate-400 font-bold mb-1">
+                          Subtotal
+                        </div>
+                        <div
+                          className="text-[15px] sm:text-base font-extrabold tabular-nums text-slate-900"
+                          data-numeric="true"
+                        >
+                          ৳{(item.product.price * item.quantity).toLocaleString()}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Customer form */}
+            <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_4px_20px_-6px_rgba(15,23,42,0.06)]">
+              <div className="relative h-1" style={{ background: BORDER_GRAD }} />
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-2.5 mb-5">
+                  <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
+                  <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
+                    কাস্টমার ইনফরমেশন
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                      আপনার নাম <span className="text-rose-500">*</span>
+                    </Label>
+                    <Input
+                      placeholder="আপনার নাম লিখুন"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
+                                 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                      আপনার মোবাইল <span className="text-rose-500">*</span>
+                    </Label>
+                    <Input
+                      placeholder="+88 ছাড়া ১১ সংখ্যার মোবাইল"
+                      value={form.mobile}
+                      onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
+                                 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                      আপনার ই-মেইল <span className="text-slate-300 font-normal">(Optional)</span>
+                    </Label>
+                    <Input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
+                                 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                      ডেলিভারি এরিয়া <span className="text-rose-500">*</span>
+                    </Label>
+                    <Select value={area} onValueChange={setArea}>
+                      <SelectTrigger className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dhaka">ঢাকার ভেতরে — ৳60</SelectItem>
+                        <SelectItem value="outside">ঢাকার বাইরে — ৳110</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                      আপনার ঠিকানা <span className="text-rose-500">*</span>
+                    </Label>
+                    <Input
+                      placeholder="বাড়ি/ফ্ল্যাট, রোড, এলাকা, শহর"
+                      value={form.address}
+                      onChange={(e) => setForm({ ...form, address: e.target.value })}
+                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
+                                 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* ── Right: Sticky order summary ── */}
+          <aside className="lg:sticky lg:top-[88px] self-start">
+            <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_4px_20px_-6px_rgba(15,23,42,0.06)]">
+              <div className="relative h-1" style={{ background: BORDER_GRAD }} />
+
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-2.5 mb-5">
+                  <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
+                  <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
+                    অর্ডার সামারি
+                  </h2>
+                </div>
+
+                {/* Mini item list */}
+                {cartItems.length > 0 && (
+                  <ul className="space-y-2.5 mb-4 max-h-44 overflow-y-auto pr-1">
+                    {cartItems.slice(0, 4).map((item) => (
+                      <li key={item.id} className="flex items-center gap-2.5">
+                        <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 flex-shrink-0">
+                          <Image
+                            src={item.product.image}
+                            alt={item.product.name}
+                            fill
+                            sizes="36px"
+                            className="object-cover"
+                          />
+                          <span
+                            className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full
+                                       bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center tabular-nums"
+                          >
+                            {item.quantity}
+                          </span>
+                        </div>
+                        <span className="flex-1 text-[12.5px] text-slate-700 font-medium line-clamp-1">
+                          {item.product.name}
+                        </span>
+                        <span
+                          className="text-[12px] font-bold text-slate-800 tabular-nums flex-shrink-0"
+                          data-numeric="true"
+                        >
+                          ৳{(item.product.price * item.quantity).toLocaleString()}
+                        </span>
+                      </li>
+                    ))}
+                    {cartItems.length > 4 && (
+                      <li className="text-[11.5px] font-semibold text-slate-500 text-center pt-1">
+                        + {cartItems.length - 4} আরো আইটেম
+                      </li>
+                    )}
+                  </ul>
+                )}
+
+                {/* Promo banner */}
+                <div className="flex items-center gap-2.5 bg-emerald-50/70 border border-emerald-100 rounded-xl px-3 py-2.5 mb-5">
+                  <Tag size={14} className="text-emerald-700 flex-shrink-0" />
+                  <span className="text-[12px] text-slate-600 leading-snug">
+                    কোড <strong className="text-emerald-700 font-bold tracking-wide">BONGO10</strong> ব্যবহার করুন, ১০% ছাড়!
+                  </span>
+                </div>
+
+                {/* Totals */}
+                <dl className="space-y-2.5 text-[13px]">
+                  <div className="flex justify-between text-slate-600">
+                    <dt className="font-semibold">Net Total</dt>
+                    <dd className="font-bold text-slate-800 tabular-nums" data-numeric="true">
+                      ৳{netTotal.toLocaleString()}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <dt className="font-semibold">Shipping</dt>
+                    <dd className="font-bold text-slate-800 tabular-nums" data-numeric="true">
+                      ৳{shippingCost}
+                    </dd>
+                  </div>
+                  {totalSavings > 0 && (
+                    <div className="flex justify-between text-emerald-700">
+                      <dt className="font-semibold">You Save</dt>
+                      <dd className="font-bold tabular-nums" data-numeric="true">
+                        −৳{totalSavings.toLocaleString()}
+                      </dd>
+                    </div>
+                  )}
+                  <div className="h-px bg-slate-200" />
+                  <div className="flex justify-between items-baseline">
+                    <dt className="text-[14px] font-extrabold text-slate-900">Grand Total</dt>
+                    <dd
+                      className="text-[22px] font-extrabold tabular-nums leading-none"
+                      style={{
+                        backgroundImage: "linear-gradient(135deg,#047857,#10b981)",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                        color: "transparent",
+                      }}
+                      data-numeric="true"
+                    >
+                      ৳{grandTotal.toLocaleString()}
+                    </dd>
+                  </div>
+                </dl>
+
+                {/* Confirm button */}
+                <Button
+                  onClick={handleOrder}
+                  disabled={orderLoading || cartItems.length === 0}
+                  className="w-full h-12 mt-5 rounded-xl font-extrabold text-white text-[14px] tracking-wide
+                             hover:-translate-y-px active:scale-[0.99]
+                             transition-all duration-200
+                             shadow-lg shadow-emerald-900/20
+                             hover:shadow-xl hover:shadow-emerald-900/30
+                             disabled:opacity-60 disabled:cursor-not-allowed
+                             flex items-center justify-center gap-2"
+                  style={{ background: NAV_GRAD }}
+                >
+                  {orderLoading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      অর্ডার হচ্ছে...
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} />
+                      অর্ডার কনফার্ম করুন
+                    </>
+                  )}
+                </Button>
+
+                <Link href="/products" className="block mt-2.5">
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl border-slate-200 text-slate-600
+                               hover:bg-slate-100 hover:border-slate-300
+                               font-bold gap-2 h-10"
+                  >
+                    <ArrowLeft size={14} /> আরো শপিং করুন
+                  </Button>
+                </Link>
+
+                {/* Trust strip */}
+                <div className="grid grid-cols-3 gap-2 mt-5 pt-5 border-t border-dashed border-slate-200">
+                  {[
+                    { icon: ShieldCheck, label: "নিরাপদ" },
+                    { icon: Truck, label: "দ্রুত ডেলিভারি" },
+                    { icon: MapPin, label: "সারাদেশে" },
+                  ].map((f) => {
+                    const Icon = f.icon;
+                    return (
+                      <div
+                        key={f.label}
+                        className="flex flex-col items-center gap-1 text-center text-[10.5px] font-semibold text-slate-500"
+                      >
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          <Icon size={13} />
+                        </span>
+                        {f.label}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
 }

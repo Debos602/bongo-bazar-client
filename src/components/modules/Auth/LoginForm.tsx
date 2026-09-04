@@ -118,9 +118,9 @@ export default function LoginForm() {
           {/* Quick-fill demo credentials */}
           <div className="grid grid-cols-3 gap-2 pt-1">
             {[
-              { label: "Admin", email: "admin@example.com", password: "AdminPass123" },
-              { label: "Vendor", email: "vendor@example.com", password: "VendorPass123" },
               { label: "User", email: "user@example.com", password: "UserPass123" },
+              { label: "Vendor", email: "vendor@example.com", password: "VendorPass123" },
+              { label: "Admin", email: "admin@example.com", password: "AdminPass123" },
             ].map((c) => (
               <button
                 key={c.label}
