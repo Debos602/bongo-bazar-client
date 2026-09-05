@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Hind_Siliguri, Inter } from "next/font/google";
 import "./global.css";
 import AuthProvider from "@/providers/AuthProvider";
+import { CartProvider } from "@/providers/CartProvider";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import InitialLoader from "@/components/shared/Initialloader";
@@ -43,12 +44,13 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
         suppressHydrationWarning
       >
         <AuthProvider>
-          <Toaster richColors position="top-center" />
-
-          <Suspense fallback={<InitialLoader />}>
-            {children}
-            <AIChatWidget />
-          </Suspense>
+          <CartProvider>
+            <Toaster richColors position="top-center" />
+            <Suspense fallback={<InitialLoader />}>
+              {children}
+              <AIChatWidget />
+            </Suspense>
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

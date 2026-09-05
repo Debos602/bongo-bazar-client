@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { createCart } from "@/actions/cart";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { useCart } from "@/providers/CartProvider";
 
 const TAG_STYLES: Record<string, string> = {
   "BEST SELLER": "var(--grad-secondary)",
@@ -47,17 +48,25 @@ export default function ProductCard({ post }: { post: Product }) {
 
   const router = useRouter();
   const { data: session } = useSession();
+  const { addItem } = useCart();
   const [adding, setAdding] = useState(false);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!session) {
-      router.push(`/login?callbackUrl=/products/${post.id}`);
-      return;
-    }
     setAdding(true);
     try {
+      if (!session) {
+        addItem({
+          id: Number(post.id),
+          name: post.name || post.title || "প্রোডাক্ট",
+          price: Number(post.price ?? 0),
+          image: post.image || post.thumbnail || "/logo.png",
+        });
+        toast.success("কার্টে যোগ করা হয়েছে");
+        setAdding(false);
+        return;
+      }
       const res = await createCart({ productId: Number(post.id), quantity: 1 });
       if (res?.id || res?.success) {
         toast.success("Cart added successfully");

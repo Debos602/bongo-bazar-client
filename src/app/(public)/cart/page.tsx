@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -14,9 +14,11 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { getCart, removeFromCart, updateCartQuantity } from "@/actions/cart";
+import { getCart, removeFromCart, updateCartQuantity, createCart } from "@/actions/cart";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useCart } from "@/providers/CartProvider";
 import { createOrderWithAddress } from "@/actions/order";
 
 /* ─── Theme tokens (match navbar / hot-deals / home) ─── */
@@ -28,7 +30,7 @@ const BORDER_GRAD =
 const SHIPPING_COSTS = { dhaka: 60, outside: 110 };
 
 type CartItem = {
-  id: number;
+  productId: number;
   quantity: number;
   product: {
     id: number;
@@ -52,18 +54,62 @@ export default function CartPage() {
   const [form, setForm] = useState({ name: "", mobile: "", email: "", address: "" });
   const [orderLoading, setOrderLoading] = useState<boolean>(false);
   const router = useRouter();
+  const { data: session } = useSession();
+  const { items: guestItems, updateQuantity: updateGuestQty, removeItem: removeGuestItem, clearCart: clearGuestCart } = useCart();
+
+  const hasMigratedRef = useRef(false);
+
+  useEffect(() => {
+    const migrateGuestCart = async () => {
+      if (!session || hasMigratedRef.current) return;
+      hasMigratedRef.current = true;
+
+      const items = guestItems;
+      if (items.length === 0) return;
+
+      for (const item of items) {
+        await createCart({ productId: item.productId, quantity: item.quantity });
+      }
+      clearGuestCart();
+
+      const data = await getCart();
+      const mapped = (data ?? []).map((item: any) => ({
+        ...item,
+        id: item.id ?? item.productId,
+        productId: item.productId ?? item.id,
+      }));
+      setCartItems(mapped);
+      setLoading(false);
+    };
+
+    migrateGuestCart();
+  }, [session, guestItems, clearGuestCart]);
 
   useEffect(() => {
     const fetchCart = async () => {
+      if (!session) {
+        setCartItems(guestItems.map((i) => ({ ...i, id: i.productId })));
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       const data = await getCart();
-      setCartItems(data);
+      const mapped = (data ?? []).map((item: any) => ({
+        ...item,
+        id: item.id ?? item.productId,
+        productId: item.productId ?? item.id,
+      }));
+      setCartItems(mapped);
       setLoading(false);
     };
     fetchCart();
-  }, []);
+  }, [session, guestItems]);
 
   const handleOrder = async () => {
+    if (!session) {
+      router.push("/login?callbackUrl=/cart");
+      return;
+    }
     if (!form.name.trim()) { toast.error("নাম দিন"); return; }
     if (!form.mobile.trim()) { toast.error("মোবাইল নম্বর দিন"); return; }
     if (!form.address.trim()) { toast.error("ঠিকানা দিন"); return; }
@@ -81,7 +127,14 @@ export default function CartPage() {
 
       if (res?.data?.id) {
         toast.success("অর্ডার সফলভাবে হয়েছে! 🎉");
-        clearCart();
+        if (!session) {
+          clearGuestCart();
+        } else {
+          for (const item of cartItems) {
+            await removeFromCart(item.id);
+          }
+        }
+        setCartItems([]);
         router.push("/orders");
       } else {
         toast.error(res?.message ?? "অর্ডার হয়নি");
@@ -93,27 +146,43 @@ export default function CartPage() {
     }
   };
 
-  const updateQty = async (id: number, delta: number) => {
-    const item = cartItems.find((i) => i.id === id);
+  const updateQty = async (productId: number, delta: number) => {
+    const item = cartItems.find((i) => i.productId === productId);
     if (!item) return;
     const newQty = Math.max(1, item.quantity + delta);
 
     setCartItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity: newQty } : i))
+      prev.map((i) => (i.productId === productId ? { ...i, quantity: newQty } : i))
     );
-    await updateCartQuantity(id, newQty);
-    router.refresh();
+    if (!session) {
+      updateGuestQty(productId, newQty);
+    } else {
+      await updateCartQuantity(item.id, newQty);
+      router.refresh();
+    }
   };
 
-  const removeItem = async (id: number) => {
-    setCartItems((prev) => prev.filter((i) => i.id !== id));
-    const res = await removeFromCart(id);
-    router.refresh();
-    if (!res?.success) toast.error("মুছতে পারেনি, আবার চেষ্টা করুন");
-    else toast.success("কার্ট থেকে সরানো হয়েছে");
+  const removeItem = async (productId: number) => {
+    setCartItems((prev) => prev.filter((i) => i.productId !== productId));
+    if (!session) {
+      removeGuestItem(productId);
+    } else {
+      const cartItem = cartItems.find((i) => i.productId === productId);
+      if (cartItem) {
+        const res = await removeFromCart(cartItem.id);
+        router.refresh();
+        if (!res?.success) toast.error("মুছতে পারেনি, আবার চেষ্টা করুন");
+        else toast.success("কার্ট থেকে সরানো হয়েছে");
+      }
+    }
   };
 
-  const clearCart = () => setCartItems([]);
+  const clearCart = () => {
+    if (!session) {
+      clearGuestCart();
+    }
+    setCartItems([]);
+  };
 
   const { netTotal, shippingCost, grandTotal, totalItems, totalSavings } = useMemo(() => {
     const items = cartItems.reduce((s, i) => s + i.quantity, 0);
@@ -292,7 +361,7 @@ export default function CartPage() {
                 <ul className="divide-y divide-slate-100">
                   {cartItems.map((item, i) => (
                     <li
-                      key={item.id}
+                      key={item.productId}
                       className="px-5 sm:px-6 py-4 flex gap-4 items-start group hover:bg-emerald-50/30 transition-colors"
                     >
                       {/* index pill */}
@@ -331,33 +400,33 @@ export default function CartPage() {
                         {/* Stepper + remove */}
                         <div className="flex items-center justify-between gap-3 mt-3">
                           <div className="inline-flex items-center border border-slate-200 rounded-lg bg-white overflow-hidden">
-                            <button
-                              onClick={() => updateQty(item.id, -1)}
-                              aria-label="Decrease"
-                              className="w-8 h-8 flex items-center justify-center text-slate-500
-                                         hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
-                            >
-                              <Minus size={12} />
-                            </button>
-                            <span
-                              className="w-9 text-center text-[13px] font-bold text-slate-800
-                                         border-x border-slate-200 py-1.5 tabular-nums"
-                              data-numeric="true"
-                            >
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() => updateQty(item.id, 1)}
-                              aria-label="Increase"
-                              className="w-8 h-8 flex items-center justify-center text-slate-500
-                                         hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
-                            >
-                              <Plus size={12} />
-                            </button>
+                              <button
+                                onClick={() => updateQty(item.productId, -1)}
+                                aria-label="Decrease"
+                                className="w-8 h-8 flex items-center justify-center text-slate-500
+                                           hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                              >
+                                <Minus size={12} />
+                              </button>
+                              <span
+                                className="w-9 text-center text-[13px] font-bold text-slate-800
+                                           border-x border-slate-200 py-1.5 tabular-nums"
+                                data-numeric="true"
+                              >
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => updateQty(item.productId, 1)}
+                                aria-label="Increase"
+                                className="w-8 h-8 flex items-center justify-center text-slate-500
+                                           hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                              >
+                                <Plus size={12} />
+                              </button>
                           </div>
 
                           <button
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeItem(item.productId)}
                             aria-label="Remove from cart"
                             className="inline-flex items-center gap-1 text-[12px] font-semibold
                                        text-slate-500 hover:text-rose-600 transition-colors
@@ -387,83 +456,85 @@ export default function CartPage() {
             </section>
 
             {/* Customer form */}
-            <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_4px_20px_-6px_rgba(15,23,42,0.06)]">
-              <div className="relative h-1" style={{ background: BORDER_GRAD }} />
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center gap-2.5 mb-5">
-                  <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
-                  <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
-                    কাস্টমার ইনফরমেশন
-                  </h2>
-                </div>
+            {session && (
+              <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_4px_20px_-6px_rgba(15,23,42,0.06)]">
+                <div className="relative h-1" style={{ background: BORDER_GRAD }} />
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2.5 mb-5">
+                    <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
+                    <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
+                      কাস্টমার ইনফরমেশন
+                    </h2>
+                  </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                      আপনার নাম <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      placeholder="আপনার নাম লিখুন"
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
-                                 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                      আপনার মোবাইল <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      placeholder="+88 ছাড়া ১১ সংখ্যার মোবাইল"
-                      value={form.mobile}
-                      onChange={(e) => setForm({ ...form, mobile: e.target.value })}
-                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
-                                 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                      আপনার ই-মেইল <span className="text-slate-300 font-normal">(Optional)</span>
-                    </Label>
-                    <Input
-                      type="email"
-                      placeholder="you@example.com"
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
-                                 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                      ডেলিভারি এরিয়া <span className="text-rose-500">*</span>
-                    </Label>
-                    <Select value={area} onValueChange={setArea}>
-                      <SelectTrigger className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="dhaka">ঢাকার ভেতরে — ৳60</SelectItem>
-                        <SelectItem value="outside">ঢাকার বাইরে — ৳110</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                      আপনার ঠিকানা <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      placeholder="বাড়ি/ফ্ল্যাট, রোড, এলাকা, শহর"
-                      value={form.address}
-                      onChange={(e) => setForm({ ...form, address: e.target.value })}
-                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
-                                 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                        আপনার নাম <span className="text-rose-500">*</span>
+                      </Label>
+                      <Input
+                        placeholder="আপনার নাম লিখুন"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
+                                   focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                        আপনার মোবাইল <span className="text-rose-500">*</span>
+                      </Label>
+                      <Input
+                        placeholder="+88 ছাড়া ১১ সংখ্যার মোবাইল"
+                        value={form.mobile}
+                        onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+                        className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
+                                   focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                        আপনার ই-মেইল <span className="text-slate-300 font-normal">(Optional)</span>
+                      </Label>
+                      <Input
+                        type="email"
+                        placeholder="you@example.com"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
+                                   focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                        ডেলিভারি এরিয়া <span className="text-rose-500">*</span>
+                      </Label>
+                      <Select value={area} onValueChange={setArea}>
+                        <SelectTrigger className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="dhaka">ঢাকার ভেতরে — ৳60</SelectItem>
+                          <SelectItem value="outside">ঢাকার বাইরে — ৳110</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
+                        আপনার ঠিকানা <span className="text-rose-500">*</span>
+                      </Label>
+                      <Input
+                        placeholder="বাড়ি/ফ্ল্যাট, রোড, এলাকা, শহর"
+                        value={form.address}
+                        onChange={(e) => setForm({ ...form, address: e.target.value })}
+                        className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
+                                   focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
           </div>
 
           {/* ── Right: Sticky order summary ── */}
@@ -483,7 +554,7 @@ export default function CartPage() {
                 {cartItems.length > 0 && (
                   <ul className="space-y-2.5 mb-4 max-h-44 overflow-y-auto pr-1">
                     {cartItems.slice(0, 4).map((item) => (
-                      <li key={item.id} className="flex items-center gap-2.5">
+                      <li key={item.productId} className="flex items-center gap-2.5">
                         <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 flex-shrink-0">
                           <Image
                             src={item.product.image}

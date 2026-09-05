@@ -13,15 +13,11 @@ export default withAuth({
                 return token?.role === "ADMIN";
             }
 
-            if (path.startsWith("/cart")) {
-                return !!token;
-            }
-
             return true;
         }
     }
 });
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/cart/:path*"]
+    matcher: ["/dashboard/:path*"]
 };

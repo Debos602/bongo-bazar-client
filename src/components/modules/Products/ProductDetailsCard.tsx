@@ -16,6 +16,7 @@ import {
 import { createCart } from "@/actions/cart";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useCart } from "@/providers/CartProvider";
 import { toast } from "sonner";
 
 /* ─── Theme tokens (Tailwind utility classes for the emerald palette) ─── */
@@ -77,11 +78,11 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
   const [activeImg, setActiveImg] = useState(0);
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "reviews">("desc");
 
-  const { data: session } = useSession();
-  const router = useRouter();
-
   const [cartAdded, setCartAdded] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
+  const { data: session } = useSession();
+  const { addItem } = useCart();
+  const router = useRouter();
 
   /* ── empty state ── */
   if (!product) {
@@ -108,12 +109,21 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
     !product.stock ? "out" : product.stock < 10 ? "low" : "in";
 
   const handleAddToCart = async (productId: number) => {
-    if (!session) {
-      router.push(`/login?callbackUrl=/products`);
-      return;
-    }
     setCartLoading(true);
     try {
+      if (!session) {
+        addItem({
+          id: productId,
+          name: product.name,
+          price: Number(product.price ?? 0),
+          image: product.images?.[0] || product.image || "/logo.png",
+        });
+        setCartAdded(true);
+        toast.success("কার্টে যোগ করা হয়েছে");
+        setTimeout(() => setCartAdded(false), 1500);
+        setCartLoading(false);
+        return;
+      }
       const res = await createCart({ productId, quantity: 1 });
       if (res?.id || res?.success) {
         setCartAdded(true);
@@ -128,7 +138,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
     } catch {
       toast.error("Something went wrong");
     } finally {
-      setCartLoading(false);
+      if (session) setCartLoading(false);
     }
   };
 
