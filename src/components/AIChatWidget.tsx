@@ -15,7 +15,7 @@ export default function AIChatWidget() {
     {
       role: "assistant",
       content:
-        "স্বাগতম! আমি Bongo Bazar-এর AI assistant। Product, দাম, stock বা order সম্পর্কে যেকোনো প্রশ্ন করুন।",
+        "Welcome! I'm Bongo Bazar's AI assistant. Ask me anything about products, prices, stock, or orders.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -68,10 +68,10 @@ export default function AIChatWidget() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "দুঃখিত, এই মুহূর্তে সংযোগ করতে পারছি না। একটু পরে আবার চেষ্টা করুন।",
-        },
+{
+      role: "assistant",
+      content: "Sorry, I couldn't connect right now. Please try again later.",
+    },
       ]);
     } finally {
       setLoading(false);
@@ -90,7 +90,7 @@ export default function AIChatWidget() {
       {
         role: "assistant",
         content:
-          "স্বাগতম! আমি Bongo Bazar-এর AI assistant। Product, দাম, stock বা order সম্পর্কে যেকোনো প্রশ্ন করুন।",
+          "Welcome! I'm Bongo Bazar's AI assistant. Ask me anything about products, prices, stock, or orders.",
       },
     ]);
   };
@@ -101,7 +101,7 @@ export default function AIChatWidget() {
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
-        aria-label="AI Chat খুলুন"
+        aria-label="Open AI Chat"
       >
         {isOpen ? (
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,15 +128,15 @@ export default function AIChatWidget() {
               </div>
               <div>
                 <p className="text-white font-semibold text-sm">Bongo Bazar AI</p>
-                <p className="text-orange-100 text-xs">সবসময় সাহায্যের জন্য আছি</p>
+                <p className="text-orange-100 text-xs">Always here to help</p>
               </div>
             </div>
             <button
               onClick={clearChat}
               className="text-orange-100 hover:text-white text-xs underline"
-              title="নতুন চ্যাট শুরু করুন"
+              title="Start New Chat"
             >
-              নতুন চ্যাট
+              New Chat
             </button>
           </div>
 
@@ -186,9 +186,9 @@ export default function AIChatWidget() {
           {messages.length === 1 && (
             <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex gap-2 overflow-x-auto">
               {[
-                "Featured products দেখাও",
-                "সব category দেখাও",
-                "সস্তা product খুঁজছি",
+                "Show featured products",
+                "Show all categories",
+                "I'm looking for cheap products",
               ].map((suggestion) => (
                 <button
                   key={suggestion}
@@ -212,7 +212,7 @@ export default function AIChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="প্রশ্ন করুন..."
+              placeholder="Ask a question..."
               disabled={loading}
               className="flex-1 text-sm border border-gray-200 rounded-full px-4 py-2 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-200 disabled:opacity-50 transition-colors"
             />

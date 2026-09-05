@@ -77,7 +77,7 @@ export default function AuthShell({
                 className="text-[16px] font-extrabold leading-none"
                 style={{ color: "#a7f3d0" }}
               >
-                বব
+                BB
               </span>
             </div>
 

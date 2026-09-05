@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "text" },
                 password: { label: "Password", type: "password" }
             },
-            // ✅ এখানে বসবে
+            // Authorization logic goes here
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) return null;
                 try {
@@ -51,7 +51,7 @@ export const authOptions: NextAuthOptions = {
                     const result = await res.json();
                     if (!res.ok || !result.success) return null;
 
-                    // ✅ Cookie থেকে accessToken বের করো
+                    // Extract accessToken from cookie
                     const setCookieHeader = res.headers.get("set-cookie");
                     console.log("Cookies >>>", setCookieHeader);
 
@@ -64,11 +64,11 @@ export const authOptions: NextAuthOptions = {
 
                     if (!accessToken) return null;
 
-                    // ✅ Token দিয়ে user info আনো
+                    // Fetch user info using token
                     const profileRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/me`, {
                         headers: {
                             Authorization: `Bearer ${accessToken}`,
-                            Cookie: `accessToken=${accessToken}`, // backend cookie based হলে
+                            Cookie: `accessToken=${accessToken}`, // for cookie-based backend
                         },
                     });
 
@@ -85,7 +85,7 @@ export const authOptions: NextAuthOptions = {
                         name: userData.name,
                         image: userData.image ?? null,
                         role: userData.role,
-                        // ✅ token ও save করো পরে use করতে
+                        // Save token for future use
                         accessToken,
                     };
 
@@ -102,9 +102,9 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
-                token.accessToken = user.accessToken; // ✅ Google login এ এটা undefined!
+                token.accessToken = user.accessToken; // This is undefined for Google login!
             }
-            // ✅ Google OAuth token থেকে নিতে হলে:
+            // For Google OAuth, get token from here:
             if (account?.access_token) {
                 token.accessToken = account.access_token;
             }
@@ -114,7 +114,7 @@ export const authOptions: NextAuthOptions = {
             if (session?.user) {
                 session.user.id = token.id as string;
                 session.user.role = token.role as string;
-                session.user.accessToken = token.accessToken as string; // ✅ needed for server use
+                session.user.accessToken = token.accessToken as string; // needed for server use
             }
             return session;
         },

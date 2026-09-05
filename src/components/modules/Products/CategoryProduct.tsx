@@ -59,10 +59,10 @@ export default async function CategoryProductPage({
         title="Shop by"
         subtitle={
           productCount > 0
-            ? `${productCount}টি পণ্য পাওয়া যাচ্ছে`
-            : "এই ক্যাটাগরির পণ্যগুলি দেখুন"
+            ? `${productCount} products found`
+            : "View products in this category"
         }
-        ctaLabel={showAll ? undefined : "সবগুলো দেখুন"}
+        ctaLabel={showAll ? undefined : "See All"}
         ctaHref={showAll ? undefined : `/category/${slug}`}
         accent="emerald"
         className={showAll ? "" : ""}

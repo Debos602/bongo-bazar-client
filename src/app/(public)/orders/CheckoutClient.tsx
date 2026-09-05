@@ -20,10 +20,10 @@ const BORDER_GRAD =
   "linear-gradient(90deg,#34d399,#10b981 50%,#047857)";
 
 const PAYMENT_METHODS = [
-  { id: "CASH_ON_DELIVERY", label: "ক্যাশ অন ডেলিভারি", desc: "পণ্য পেয়ে পেমেন্ট", icon: "💵" },
-  { id: "BKASH", label: "বিকাশ", desc: "মোবাইল ওয়ালেট", icon: "📱" },
-  { id: "NAGAD", label: "নগদ", desc: "মোবাইল ওয়ালেট", icon: "💳" },
-  { id: "STRIPE", label: "কার্ড পেমেন্ট", desc: "ভিসা / মাস্টারকার্ড", icon: "🏦" },
+  { id: "CASH_ON_DELIVERY", label: "Cash on Delivery", desc: "Pay on Delivery", icon: "💵" },
+  { id: "BKASH", label: "bKash", desc: "Mobile Wallet", icon: "📱" },
+  { id: "NAGAD", label: "Nagad", desc: "Mobile Wallet", icon: "💳" },
+  { id: "STRIPE", label: "Card Payment", desc: "Visa / Mastercard", icon: "🏦" },
 ];
 
 const DELIVERY_FEE = 968;
@@ -58,17 +58,17 @@ export default function CheckoutClient({ order }: { order: Order; }) {
   }, [currentOrder, promoApplied]);
 
   const handlePayment = async () => {
-    if (!selectedMethod) { toast.error("পেমেন্ট পদ্ধতি সিলেক্ট করুন"); return; }
+    if (!selectedMethod) { toast.error("Select Payment Method"); return; }
     setPayingId(currentOrder.id);
     try {
       await axiosInstance.post(`/payment/${currentOrder.id}`, { method: selectedMethod });
-      toast.success("পেমেন্ট সফল হয়েছে! 🎉");
+      toast.success("Payment Successful! 🎉");
       setCurrentOrder((prev) => ({
         ...prev,
         payment: { status: "PAID", method: selectedMethod },
       }));
     } catch {
-      toast.error("পেমেন্ট হয়নি, আবার চেষ্টা করুন");
+      toast.error("Payment failed, please try again");
     } finally {
       setPayingId(null);
     }
@@ -108,7 +108,7 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                   Checkout
                 </span>
               </h1>
-              <p className="text-white/70 text-sm mt-1">অর্ডার যাচাই করে পেমেন্ট সম্পন্ন করুন</p>
+              <p className="text-white/70 text-sm mt-1">Verify order and complete payment</p>
             </div>
 
             <div className="flex items-center gap-2 text-white/80 text-sm">
@@ -230,7 +230,7 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                       Package {currentOrder.items.length > 0 ? 1 : 0} of 1
                     </h2>
                     <span className="text-[11px] font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full tabular-nums">
-                      {totalItems} আইটেম
+                      {totalItems} Items
                     </span>
                   </div>
                   <span className="text-[11.5px] font-semibold text-slate-500 flex items-center gap-1.5">
@@ -339,9 +339,9 @@ export default function CheckoutClient({ order }: { order: Order; }) {
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2.5 mb-4">
                   <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
-                  <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
-                    পেমেন্ট পদ্ধতি
-                  </h2>
+<h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
+                      Payment Method
+                    </h2>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -414,9 +414,9 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                     </div>
                     <button
                       onClick={() => {
-                        if (!promoCode.trim()) { toast.error("কোড দিন"); return; }
+                        if (!promoCode.trim()) { toast.error("Enter code"); return; }
                         setPromoApplied(true);
-                        toast.success("প্রমো কোড প্রয়োগ হয়েছে!");
+                        toast.success("Promo code applied!");
                       }}
                       className="px-4 h-9 rounded-lg text-[12px] font-extrabold text-white tracking-wide
                                  hover:-translate-y-px active:scale-[0.98]
@@ -440,7 +440,7 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                   <dl className="space-y-2.5 text-[13px]">
                     <div className="flex justify-between items-center text-slate-600">
                       <dt className="font-semibold">
-                        Items Total <span className="text-slate-400 font-normal">({currentOrder.items.length} আইটেম)</span>
+                        Items Total <span className="text-slate-400 font-normal">({currentOrder.items.length} Items)</span>
                       </dt>
                       <dd className="font-bold text-slate-800 tabular-nums" data-numeric="true">
                         ৳ {itemsTotal.toLocaleString()}
@@ -503,7 +503,7 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                     {isPaying ? (
                       <>
                         <Loader2 size={16} className="animate-spin" />
-                        প্রসেস হচ্ছে...
+                        Processing...
                       </>
                     ) : (
                       <>
@@ -521,7 +521,7 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                       <Check size={16} className="text-white" />
                     </span>
                     <div>
-                      <p className="text-[13px] font-bold text-emerald-700">পেমেন্ট সম্পন্ন</p>
+                      <p className="text-[13px] font-bold text-emerald-700">Payment Complete</p>
                       <p className="text-[11.5px] text-slate-500">{currentOrder.payment?.method}</p>
                     </div>
                   </div>
@@ -535,9 +535,9 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                 {/* Trust strip */}
                 <div className="grid grid-cols-3 gap-2 mt-5 pt-5 border-t border-dashed border-slate-200">
                   {[
-                    { icon: ShieldCheck, label: "নিরাপদ" },
-                    { icon: Truck, label: "দ্রুত ডেলিভারি" },
-                    { icon: Receipt, label: "ইনভয়েস" },
+                    { icon: ShieldCheck, label: "Secure" },
+                    { icon: Truck, label: "Fast Delivery" },
+                    { icon: Receipt, label: "Invoice" },
                   ].map((f) => {
                     const Icon = f.icon;
                     return (

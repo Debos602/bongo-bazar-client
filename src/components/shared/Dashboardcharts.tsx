@@ -67,7 +67,7 @@ const tooltipStyle = {
 };
 
 function formatTaka(value: number) {
-  return "৳" + (value / 1000).toFixed(0) + "k";
+  return "$" + (value / 1000).toFixed(0) + "k";
 }
 
 function formatRevenue(value: unknown): [string, string] {
@@ -77,7 +77,7 @@ function formatRevenue(value: unknown): [string, string] {
       ? Number(value)
       : undefined;
   return numericValue !== undefined
-    ? ["৳" + numericValue.toLocaleString("en-BD"), "Revenue"]
+    ? ["$" + numericValue.toLocaleString("en-US"), "Revenue"]
     : [String(value ?? ""), "Revenue"];
 }
 

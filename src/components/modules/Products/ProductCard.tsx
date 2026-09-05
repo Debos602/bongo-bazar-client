@@ -24,7 +24,7 @@ const DEFAULT_TAG_STYLE = "linear-gradient(135deg, #6b7280, #4b5563)";
 
 export default function ProductCard({ post }: { post: Product }) {
   const imageSrc = post.image || post.thumbnail || "/logo.png";
-  const altText = (post.name || post.title || "প্রোডাক্ট") as string;
+  const altText = (post.name || post.title || "Product") as string;
 
   const idStr = String(post.id ?? "");
   const idSum = idStr
@@ -59,11 +59,11 @@ export default function ProductCard({ post }: { post: Product }) {
       if (!session) {
         addItem({
           id: Number(post.id),
-          name: post.name || post.title || "প্রোডাক্ট",
+          name: post.name || post.title || "Product",
           price: Number(post.price ?? 0),
           image: post.image || post.thumbnail || "/logo.png",
         });
-        toast.success("কার্টে যোগ করা হয়েছে");
+        toast.success("Added to cart");
         setAdding(false);
         return;
       }
@@ -72,7 +72,7 @@ export default function ProductCard({ post }: { post: Product }) {
         toast.success("Cart added successfully");
         router.refresh();
       } else {
-        toast.error("কার্টে যোগ করা যায়নি");
+        toast.error("Could not add to cart");
       }
     } catch {
       toast.error("Something went wrong");

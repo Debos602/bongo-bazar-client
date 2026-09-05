@@ -16,7 +16,7 @@ export interface User {
     status: UserStatus;
     updatedAt: Date;
     role: Role;
-    posts: Product[]; // Post interface আলাদা করে define করতে হবে
+    posts: Product[]; // Post interface should be defined separately
 }
 
 
@@ -30,8 +30,8 @@ export interface Product {
     tags?: string[];
     views?: number;
     authorId?: number;
-    createdAt?: string;   // চাইলে Date ব্যবহার করতে পারো
-    updatedAt?: string;   // চাইলে Date ব্যবহার করতে পারো
+    createdAt?: string;   // Use Date if preferred
+    updatedAt?: string;   // Use Date if preferred
     author?: User;
 
     // Product-style fields

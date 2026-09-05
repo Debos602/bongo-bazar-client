@@ -67,7 +67,7 @@ export default function Hero({ categories = [] }: HeroProps) {
             style={{ background: "var(--grad-hero)" }}
           >
             <ShoppingBag className="w-4 h-4" />
-            সব ক্যাটেগরি
+            All Categories
           </div>
 
           {categories.map((cat) => (

@@ -41,7 +41,7 @@ export default function CartButton() {
           {count}
         </Badge>
       )}
-      <span className="hidden sm:inline text-sm font-semibold pr-0.5">কার্ট</span>
+      <span className="hidden sm:inline text-sm font-semibold pr-0.5">Cart</span>
     </Link>
   );
 }

@@ -194,7 +194,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               <span className="text-xs font-bold text-gray-800 leading-tight max-w-[90px] truncate">
                 {user?.name}
               </span>
-              <span className="text-[10px] text-gray-400">অ্যাকাউন্ট</span>
+              <span className="text-[10px] text-gray-400">Account</span>
             </div>
           )}
 
@@ -233,7 +233,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                   : "bg-emerald-100 text-emerald-800"
               )}
             >
-              {user?.role === "ADMIN" ? "অ্যাডমিন" : "কাস্টমার"}
+              {user?.role === "ADMIN" ? "Admin" : "Customer"}
             </span>
           </div>
         </DropdownMenuLabel>
@@ -248,7 +248,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
             >
               <Link href="/dashboard" className="flex items-center gap-2.5 px-3 py-2">
                 <LayoutDashboard className="w-4 h-4" />
-                <span className="text-sm font-medium">ড্যাশবোর্ড</span>
+                <span className="text-sm font-medium">Dashboard</span>
               </Link>
             </DropdownMenuItem>
           )}
@@ -259,7 +259,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
           >
             <Link href="/profile" className="flex items-center gap-2.5 px-3 py-2">
               <User className="w-4 h-4" />
-              <span className="text-sm font-medium">প্রোফাইল</span>
+              <span className="text-sm font-medium">Profile</span>
             </Link>
           </DropdownMenuItem>
 
@@ -269,7 +269,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
           >
             <Link href="/orders" className="flex items-center gap-2.5 px-3 py-2">
               <Package className="w-4 h-4" />
-              <span className="text-sm font-medium">আমার অর্ডার</span>
+              <span className="text-sm font-medium">My Orders</span>
             </Link>
           </DropdownMenuItem>
 
@@ -279,7 +279,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
           >
             <Link href="/settings" className="flex items-center gap-2.5 px-3 py-2">
               <Settings className="w-4 h-4" />
-              <span className="text-sm font-medium">সেটিংস</span>
+              <span className="text-sm font-medium">Settings</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -292,7 +292,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         >
           <div className="flex items-center gap-2.5 px-3 py-2 w-full">
             <LogOut className="w-4 h-4" />
-            <span className="text-sm font-medium">লগ আউট</span>
+            <span className="text-sm font-medium">Log Out</span>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -310,7 +310,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         >
           <Link href="/login">
             <LogIn className="w-4 h-4" />
-            সাইন ইন
+            Sign In
           </Link>
         </Button>
         <Button
@@ -320,7 +320,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         >
           <Link href="/register">
             <UserPlus className="w-4 h-4" />
-            সাইন আপ
+            Sign Up
           </Link>
         </Button>
       </div>
@@ -334,7 +334,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         >
           <Link href="/login">
             <LogIn className="w-4 h-4" />
-            সাইন ইন
+            Sign In
           </Link>
         </Button>
         <Button
@@ -345,7 +345,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         >
           <Link href="/register">
             <UserPlus className="w-4 h-4" />
-            সাইন আপ
+            Sign Up
           </Link>
         </Button>
       </div>
@@ -387,7 +387,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
           >
             <Link href="/login">
               <LogIn className="w-3 h-3 mr-1" />
-              সাইন ইন
+              Sign In
             </Link>
           </Button>
           <Button
@@ -398,7 +398,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
           >
             <Link href="/register">
               <UserPlus className="w-3 h-3 mr-1" />
-              সাইন আপ
+              Sign Up
             </Link>
           </Button>
         </div>
@@ -445,15 +445,15 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                 className="flex items-center gap-1.5 hover:text-emerald-300 transition-colors"
               >
                 <Phone className="w-3 h-3 text-emerald-400" />
-                হটলাইনঃ
-                <span className="text-emerald-300 font-semibold ml-0.5">০১৬৪১-৭৫৪৭৯৪</span>
+                Hotline:
+                <span className="text-emerald-300 font-semibold ml-0.5">01834491602</span>
               </a>
               <a
                 href="mailto:info@bongobazar.com"
                 className="hidden sm:flex items-center gap-1.5 hover:text-emerald-200 transition-colors"
               >
                 <Mail className="w-3 h-3 text-emerald-300/80" />
-                <span className="text-emerald-200 font-semibold">info@bongobazar.com</span>
+                <span className="text-emerald-200 font-semibold">Debos.das.02@gmail.com</span>
               </a>
           </div>
         </div>
@@ -475,9 +475,9 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
             className="flex items-center gap-1 text-emerald-300 font-semibold flex-shrink-0 text-[11px]"
           >
             <Phone className="w-3 h-3 flex-shrink-0" />
-            <span className="hidden xs:inline">০১৬৪১-৭৫৪৭৯৪</span>
+            <span className="hidden xs:inline">01834491602</span>
             {/* Fallback for very narrow screens (< ~360 px) */}
-            <span className="xs:hidden">কল</span>
+            <span className="xs:hidden">Call</span>
           </a>
           <div className="flex-shrink-0">{renderMobileTopBar()}</div>
         </div>
@@ -533,7 +533,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                 }}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
-                placeholder="প্রোডাক্ট সার্চ করুন..."
+placeholder="Search for products..."
                 className="rounded-r-none border-2 border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-11 text-sm transition-colors"
                 style={{ borderColor: searchFocused ? "#10b981" : "#d1d5db" }}
               />
@@ -548,7 +548,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                 }}
               >
                 <Search className="w-4 h-4" />
-                <span className="text-sm hidden lg:inline">খুঁজুন</span>
+                <span className="text-sm hidden lg:inline">Search</span>
               </button>
             </div>
 
@@ -560,25 +560,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
             */}
             <div className="ml-auto flex items-center gap-1 md:gap-2">
               {/* Wishlist — desktop only */}
-              <Link
-                href="/wishlist"
-                className="hidden md:flex items-center gap-1.5 text-gray-600 hover:text-emerald-700 transition-colors p-2 rounded-xl hover:bg-emerald-50 relative group"
-              >
-                <Heart className="w-6 h-6" />
-                <span className="text-sm font-medium hidden lg:inline">উইশলিস্ট</span>
-                <Badge className="absolute -top-1 -right-1 h-[16px] w-[16px] flex items-center justify-center p-0 text-[9px] font-bold border-2 border-white bg-emerald-600 text-white">
-                  3
-                </Badge>
-              </Link>
-
-              {/* Notification bell — desktop only */}
-              <button
-                type="button"
-                className="hidden md:flex items-center p-2 rounded-xl text-gray-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors relative"
-              >
-                <Bell className="w-6 h-6" />
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white" />
-              </button>
+             
 
               {/* Desktop auth */}
               <div className="hidden md:flex items-center ml-1">
@@ -644,7 +626,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleSearch(true);
                       }}
-                      placeholder="সার্চ করুন..."
+                      placeholder="Search..."
                       className="rounded-r-none text-sm border-2 border-r-0 focus-visible:ring-0 h-10 min-w-0"
                       style={{ borderColor: "#10b981" }}
                     />
@@ -661,9 +643,9 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                   {/* Quick links */}
                   <div className="grid grid-cols-3 gap-2 p-3 border-b">
                     {[
-                      { icon: Home, label: "হোম", href: "/" },
-                      { icon: Heart, label: "উইশলিস্ট", href: "/wishlist" },
-                      { icon: Bell, label: "নোটিফিকেশন", href: "/notifications" },
+                      { icon: Home, label: "Home", href: "/" },
+                      // { icon: Heart, label: "Wishlist", href: "/wishlist" },
+                      // { icon: Bell, label: "Notifications", href: "/notifications" },
                     ].map(({ icon: Icon, label, href }) => (
                       <Link
                         key={href}
@@ -678,7 +660,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
 
                   {/* Categories heading */}
                   <p className="text-[10px] font-bold text-gray-400 uppercase px-4 pt-4 pb-1.5 tracking-widest">
-                    ক্যাটেগরীজ
+                    Categories
                   </p>
 
                   {/* Category list */}
@@ -737,7 +719,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSearch();
               }}
-              placeholder="প্রোডাক্ট সার্চ করুন..."
+              placeholder="Search for products..."
               className="rounded-r-none border-2 border-r-0 focus-visible:ring-0 text-sm h-10 min-w-0 flex-1"
               style={{ borderColor: "#10b981" }}
             />
@@ -770,7 +752,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                 style={{ background: catOpen ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)" }}
               >
                 <LayoutGrid className="w-4 h-4" />
-                ক্যাটেগরীজ
+                Categories
                 <ChevronDown
                   className={cn(
                     "w-3.5 h-3.5 transition-transform duration-200",
@@ -840,7 +822,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                 )}
               >
                 <Tag className="w-3.5 h-3.5" />
-                সব প্রোডাক্ট
+                All Products
               </Link>
             </div>
           </div>

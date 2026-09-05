@@ -119,7 +119,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
           image: product.images?.[0] || product.image || "/logo.png",
         });
         setCartAdded(true);
-        toast.success("কার্টে যোগ করা হয়েছে");
+        toast.success("Added to cart");
         setTimeout(() => setCartAdded(false), 1500);
         setCartLoading(false);
         return;
@@ -133,7 +133,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
           setCartAdded(false);
         }, 500);
       } else {
-        toast.error("কার্টে যোগ করা যায়নি");
+        toast.error("Could not add to cart");
       }
     } catch {
       toast.error("Something went wrong");

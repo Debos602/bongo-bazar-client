@@ -37,23 +37,23 @@ export default function CountdownTimer({ endsAt }: CountdownTimerProps) {
     return (
       <div className="inline-flex items-center gap-2 rounded-full bg-emerald-900/80 text-emerald-100 px-4 py-2 text-sm font-semibold">
         <Flame className="w-4 h-4" />
-        নতুন ডিল শীঘ্রই আসছে
+        New deal coming soon
       </div>
     );
   }
 
   const cells = [
-    { label: 'দিন', value: pad(t?.days ?? 0) },
-    { label: 'ঘন্টা', value: pad(t?.hours ?? 0) },
-    { label: 'মিনিট', value: pad(t?.minutes ?? 0) },
-    { label: 'সেকেন্ড', value: pad(t?.seconds ?? 0) },
+    { label: 'Days', value: pad(t?.days ?? 0) },
+    { label: 'Hours', value: pad(t?.hours ?? 0) },
+    { label: 'Minutes', value: pad(t?.minutes ?? 0) },
+    { label: 'Seconds', value: pad(t?.seconds ?? 0) },
   ];
 
   return (
     <div className="inline-flex items-center gap-2 sm:gap-3">
       <span className="hidden sm:inline-flex items-center gap-1.5 text-white/80 text-xs font-semibold uppercase tracking-wider">
         <Flame className="w-3.5 h-3.5 text-emerald-200" />
-        শেষ হচ্ছে
+        Ending
       </span>
       <div className="flex items-center gap-1.5 sm:gap-2">
         {cells.map((c, i) => (

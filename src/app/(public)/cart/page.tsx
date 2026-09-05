@@ -110,10 +110,10 @@ export default function CartPage() {
       router.push("/login?callbackUrl=/cart");
       return;
     }
-    if (!form.name.trim()) { toast.error("নাম দিন"); return; }
-    if (!form.mobile.trim()) { toast.error("মোবাইল নম্বর দিন"); return; }
-    if (!form.address.trim()) { toast.error("ঠিকানা দিন"); return; }
-    if (cartItems.length === 0) { toast.error("কার্ট খালি"); return; }
+    if (!form.name.trim()) { toast.error("Enter name"); return; }
+    if (!form.mobile.trim()) { toast.error("Enter mobile number"); return; }
+    if (!form.address.trim()) { toast.error("Enter address"); return; }
+    if (cartItems.length === 0) { toast.error("Cart is empty"); return; }
 
     setOrderLoading(true);
     try {
@@ -126,7 +126,7 @@ export default function CartPage() {
       });
 
       if (res?.data?.id) {
-        toast.success("অর্ডার সফলভাবে হয়েছে! 🎉");
+        toast.success("Order placed successfully! 🎉");
         if (!session) {
           clearGuestCart();
         } else {
@@ -137,10 +137,10 @@ export default function CartPage() {
         setCartItems([]);
         router.push("/orders");
       } else {
-        toast.error(res?.message ?? "অর্ডার হয়নি");
+        toast.error(res?.message ?? "Order failed");
       }
     } catch {
-      toast.error("কিছু একটা ভুল হয়েছে");
+      toast.error("Something went wrong");
     } finally {
       setOrderLoading(false);
     }
@@ -171,8 +171,8 @@ export default function CartPage() {
       if (cartItem) {
         const res = await removeFromCart(cartItem.id);
         router.refresh();
-        if (!res?.success) toast.error("মুছতে পারেনি, আবার চেষ্টা করুন");
-        else toast.success("কার্ট থেকে সরানো হয়েছে");
+        if (!res?.success) toast.error("Could not delete, try again");
+        else toast.success("Removed from cart");
       }
     }
   };
@@ -216,10 +216,10 @@ export default function CartPage() {
         <div className="relative max-w-7xl mx-auto px-4 py-6 sm:py-8">
           <nav className="text-[12.5px] text-white/70 mb-4 flex items-center gap-1.5 flex-wrap">
             <Link href="/" className="hover:text-white transition-colors font-medium">
-              হোম
+              Home
             </Link>
             <ChevronRight size={12} className="text-white/40" />
-            <span className="text-white font-semibold">কার্ট</span>
+            <span className="text-white font-semibold">Cart</span>
           </nav>
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -229,20 +229,20 @@ export default function CartPage() {
                 Step 1 of 4
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                আপনার{" "}
+                Your{" "}
                 <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 bg-clip-text text-transparent">
-                  শপিং কার্ট
+                  Shopping Cart
                 </span>
               </h1>
             </div>
             <div className="flex items-center gap-2 text-white/80 text-sm">
               <Receipt size={14} />
               <span className="tabular-nums">
-                <span className="text-white font-bold">{totalItems}</span> আইটেম
+                <span className="text-white font-bold">{totalItems}</span> Items
               </span>
               <span className="w-1 h-1 rounded-full bg-white/30" />
               <span className="tabular-nums">
-                <span className="text-white font-bold">৳{netTotal.toLocaleString()}</span> সাবটোটাল
+                <span className="text-white font-bold">৳{netTotal.toLocaleString()}</span> Subtotal
               </span>
             </div>
           </div>
@@ -313,10 +313,10 @@ export default function CartPage() {
                 <div className="flex items-center gap-2.5">
                   <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
                   <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
-                    পণ্যের তালিকা
+                    Product List
                   </h2>
                   <span className="text-[11px] font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full tabular-nums">
-                    {cartItems.length} আইটেম
+                    {cartItems.length} Items
                   </span>
                 </div>
                 {cartItems.length > 0 && (
@@ -324,7 +324,7 @@ export default function CartPage() {
                     onClick={clearCart}
                     className="text-[11.5px] font-bold text-slate-500 hover:text-rose-600 transition-colors inline-flex items-center gap-1"
                   >
-                    <X size={12} /> সব মুছুন
+                    <X size={12} /> Clear All
                   </button>
                 )}
               </header>
@@ -333,7 +333,7 @@ export default function CartPage() {
               {loading && (
                 <div className="px-5 sm:px-6 py-12 text-center text-slate-400">
                   <Loader2 className="animate-spin mx-auto" size={24} />
-                  <p className="text-sm mt-2">কার্ট লোড হচ্ছে…</p>
+                  <p className="text-sm mt-2">Loading cart…</p>
                 </div>
               )}
 
@@ -343,14 +343,14 @@ export default function CartPage() {
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 mb-3">
                     <Package size={28} className="text-emerald-600" />
                   </div>
-                  <p className="text-sm font-semibold text-slate-800 mb-1">আপনার কার্ট খালি</p>
-                  <p className="text-[12.5px] text-slate-500 mb-4">আমাদের পণ্য থেকে পছন্দের জিনিস যোগ করুন</p>
+                  <p className="text-sm font-semibold text-slate-800 mb-1">Your cart is empty</p>
+                  <p className="text-[12.5px] text-slate-500 mb-4">Add something you like from our products</p>
                   <Link href="/products">
                     <Button
                       className="h-10 rounded-xl px-5 font-bold gap-2 text-white shadow-md shadow-emerald-900/20"
                       style={{ background: NAV_GRAD }}
                     >
-                      <ShoppingBag size={14} /> পণ্য দেখুন
+                      <ShoppingBag size={14} /> View Products
                     </Button>
                   </Link>
                 </div>
@@ -463,17 +463,17 @@ export default function CartPage() {
                   <div className="flex items-center gap-2.5 mb-5">
                     <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
                     <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
-                      কাস্টমার ইনফরমেশন
+                      Customer Information
                     </h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                        আপনার নাম <span className="text-rose-500">*</span>
+                        Your Name <span className="text-rose-500">*</span>
                       </Label>
                       <Input
-                        placeholder="আপনার নাম লিখুন"
+                        placeholder="Enter your name"
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
                         className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
@@ -482,10 +482,10 @@ export default function CartPage() {
                     </div>
                     <div>
                       <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                        আপনার মোবাইল <span className="text-rose-500">*</span>
+                        Your Mobile <span className="text-rose-500">*</span>
                       </Label>
                       <Input
-                        placeholder="+88 ছাড়া ১১ সংখ্যার মোবাইল"
+                        placeholder="11-digit mobile number (without +88)"
                         value={form.mobile}
                         onChange={(e) => setForm({ ...form, mobile: e.target.value })}
                         className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
@@ -494,7 +494,7 @@ export default function CartPage() {
                     </div>
                     <div>
                       <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                        আপনার ই-মেইল <span className="text-slate-300 font-normal">(Optional)</span>
+                        Your Email <span className="text-slate-300 font-normal">(Optional)</span>
                       </Label>
                       <Input
                         type="email"
@@ -507,24 +507,24 @@ export default function CartPage() {
                     </div>
                     <div>
                       <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                        ডেলিভারি এরিয়া <span className="text-rose-500">*</span>
+                        Delivery Area <span className="text-rose-500">*</span>
                       </Label>
                       <Select value={area} onValueChange={setArea}>
                         <SelectTrigger className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 rounded-xl h-11">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="dhaka">ঢাকার ভেতরে — ৳60</SelectItem>
-                          <SelectItem value="outside">ঢাকার বাইরে — ৳110</SelectItem>
+                          <SelectItem value="dhaka">Inside Dhaka — ৳60</SelectItem>
+                          <SelectItem value="outside">Outside Dhaka — ৳110</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="md:col-span-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 mb-1.5 block">
-                        আপনার ঠিকানা <span className="text-rose-500">*</span>
+                        Your Address <span className="text-rose-500">*</span>
                       </Label>
                       <Input
-                        placeholder="বাড়ি/ফ্ল্যাট, রোড, এলাকা, শহর"
+                        placeholder="House/Flat, Road, Area, City"
                         value={form.address}
                         onChange={(e) => setForm({ ...form, address: e.target.value })}
                         className="bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white
@@ -545,9 +545,9 @@ export default function CartPage() {
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2.5 mb-5">
                   <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
-                  <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
-                    অর্ডার সামারি
-                  </h2>
+<h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em]">
+                      Order Summary
+                    </h2>
                 </div>
 
                 {/* Mini item list */}
@@ -583,7 +583,7 @@ export default function CartPage() {
                     ))}
                     {cartItems.length > 4 && (
                       <li className="text-[11.5px] font-semibold text-slate-500 text-center pt-1">
-                        + {cartItems.length - 4} আরো আইটেম
+                        + {cartItems.length - 4} more items
                       </li>
                     )}
                   </ul>
@@ -593,7 +593,7 @@ export default function CartPage() {
                 <div className="flex items-center gap-2.5 bg-emerald-50/70 border border-emerald-100 rounded-xl px-3 py-2.5 mb-5">
                   <Tag size={14} className="text-emerald-700 flex-shrink-0" />
                   <span className="text-[12px] text-slate-600 leading-snug">
-                    কোড <strong className="text-emerald-700 font-bold tracking-wide">BONGO10</strong> ব্যবহার করুন, ১০% ছাড়!
+                    Use code <strong className="text-emerald-700 font-bold tracking-wide">BONGO10</strong> for 10% off!
                   </span>
                 </div>
 
@@ -653,12 +653,12 @@ export default function CartPage() {
                   {orderLoading ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
-                      অর্ডার হচ্ছে...
+                      Placing order...
                     </>
                   ) : (
                     <>
                       <Check size={16} />
-                      অর্ডার কনফার্ম করুন
+                      Confirm Order
                     </>
                   )}
                 </Button>
@@ -670,16 +670,16 @@ export default function CartPage() {
                                hover:bg-slate-100 hover:border-slate-300
                                font-bold gap-2 h-10"
                   >
-                    <ArrowLeft size={14} /> আরো শপিং করুন
+                    <ArrowLeft size={14} /> Continue Shopping
                   </Button>
                 </Link>
 
                 {/* Trust strip */}
                 <div className="grid grid-cols-3 gap-2 mt-5 pt-5 border-t border-dashed border-slate-200">
                   {[
-                    { icon: ShieldCheck, label: "নিরাপদ" },
-                    { icon: Truck, label: "দ্রুত ডেলিভারি" },
-                    { icon: MapPin, label: "সারাদেশে" },
+                    { icon: ShieldCheck, label: "Secure" },
+                    { icon: Truck, label: "Fast Delivery" },
+                    { icon: MapPin, label: "Nationwide" },
                   ].map((f) => {
                     const Icon = f.icon;
                     return (

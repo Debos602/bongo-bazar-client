@@ -40,42 +40,42 @@ const ACCENT_GRAD =
 const uspItems = [
   {
     icon: Truck,
-    title: "ফ্রি ডেলিভারি",
-    sub: "৳৯৯৯+ অর্ডারে",
+    title: "Free Delivery",
+    sub: "On ৳999+ orders",
   },
   {
     icon: ShieldCheck,
-    title: "নিরাপদ পেমেন্ট",
-    sub: "১০০% নিরাপদ ও সুরক্ষিত",
+    title: "Secure Payment",
+    sub: "100% Safe & Secure",
   },
   {
     icon: RefreshCcw,
-    title: "সহজ রিটার্ন",
-    sub: "৭ দিনের মধ্যে",
+    title: "Easy Returns",
+    sub: "Within 7 days",
   },
   {
     icon: HeadphonesIcon,
-    title: "২৪/৭ সাপোর্ট",
-    sub: "সর্বদা আপনার পাশে",
+    title: "24/7 Support",
+    sub: "Always here for you",
   },
 ];
 
 const quickLinks = [
-  { href: "/", label: "হোম" },
-  { href: "/hot-deals", label: "হট ডিল" },
-  { href: "/products", label: "সব প্রোডাক্ট" },
-  { href: "/events", label: "ইভেন্টস" },
-  { href: "/about", label: "আমাদের সম্পর্কে" },
-  { href: "/contact", label: "যোগাযোগ" },
+  { href: "/", label: "Home" },
+  { href: "/hot-deals", label: "Hot Deals" },
+  { href: "/products", label: "All Products" },
+  { href: "/events", label: "Events" },
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact" },
 ];
 
 const customerLinks = [
-  { href: "/account", label: "আমার একাউন্ট" },
-  { href: "/orders", label: "অর্ডার ট্র্যাক" },
-  { href: "/wishlist", label: "উইশলিস্ট" },
-  { href: "/returns", label: "রিটার্ন পলিসি" },
+  { href: "/account", label: "My Account" },
+  { href: "/orders", label: "Order Tracking" },
+  { href: "/wishlist", label: "Wishlist" },
+  { href: "/returns", label: "Return Policy" },
   { href: "/faq", label: "FAQ" },
-  { href: "/seller", label: "বিক্রেতা হন" },
+  { href: "/seller", label: "Become a Seller" },
 ];
 
 const policyLinks = [
@@ -196,7 +196,7 @@ export default function Footer() {
                       color: "transparent",
                     }}
                   >
-                    বব
+                    BB
                   </span>
                 </div>
               </div>
@@ -238,9 +238,9 @@ export default function Footer() {
 
             <p className="max-w-[260px] text-[13px] font-normal leading-[1.7] text-slate-400">
               <strong className="font-semibold text-white">
-                বাংলাদেশের বিশ্বস্ত অনলাইন মার্কেটপ্লেস
+                Bangladesh's trusted online marketplace
               </strong>{" "}
-              — সারাদেশে ক্রেতা ও বিক্রেতাদের একটি প্ল্যাটফর্মে সংযুক্ত করছে।
+              — Connecting buyers and sellers across the nation.
             </p>
 
             <div className="flex flex-col items-center gap-2.5 sm:items-start">
@@ -251,7 +251,7 @@ export default function Footer() {
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/12 text-emerald-300 border border-emerald-400/15">
                   <Phone size={12} strokeWidth={2.5} />
                 </span>
-                ০১৬৪১-৭৫৪৭৯৪
+                01641-754794
               </a>
               <a
                 href="mailto:info@bongobazar.com"
@@ -266,13 +266,13 @@ export default function Footer() {
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/12 text-emerald-300 border border-emerald-400/15">
                   <MapPin size={12} strokeWidth={2.5} />
                 </span>
-                ঢাকা, বাংলাদেশ
+                Dhaka, Bangladesh
               </span>
               <span className="flex items-center gap-2.5 text-[13px] text-slate-300">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/12 text-emerald-300 border border-emerald-400/15">
                   <Clock size={12} strokeWidth={2.5} />
                 </span>
-                শনি–বৃহস্পতি, সকাল ৯টা – রাত ৯টা
+                Sat–Thu, 9am – 9pm
               </span>
             </div>
           </div>
@@ -281,7 +281,7 @@ export default function Footer() {
           <nav aria-label="Quick links">
             <FooterHeading>
               <span className="inline-flex items-center gap-1.5">
-                <ShoppingBag size={11} className="text-emerald-300" /> কুইক লিংক
+                <ShoppingBag size={11} className="text-emerald-300" /> Quick Links
               </span>
             </FooterHeading>
             <ul className="flex flex-col gap-px">
@@ -308,7 +308,7 @@ export default function Footer() {
           <nav aria-label="Customer service">
             <FooterHeading>
               <span className="inline-flex items-center gap-1.5">
-                <HeadphonesIcon size={11} className="text-emerald-300" /> কাস্টমার কেয়ার
+                <HeadphonesIcon size={11} className="text-emerald-300" /> Customer Care
               </span>
             </FooterHeading>
             <ul className="flex flex-col gap-px">
@@ -336,12 +336,12 @@ export default function Footer() {
             <div>
               <FooterHeading>
                 <span className="inline-flex items-center gap-1.5">
-                  <Send size={11} className="text-emerald-300" /> নিউজলেটার
+                  <Send size={11} className="text-emerald-300" /> Newsletter
                 </span>
               </FooterHeading>
               <p className="text-[13px] leading-[1.6] text-slate-400">
-                <strong className="font-semibold text-white">অফার ও নতুন প্রোডাক্ট</strong>{" "}
-                সবার আগে পেতে সাবস্ক্রাইব করুন।
+                <strong className="font-semibold text-white">Offers & New Products</strong>{" "}
+                Subscribe to get them first.
               </p>
               <div className="mt-3 flex flex-col gap-2">
                 <div
@@ -354,8 +354,8 @@ export default function Footer() {
                   </div>
                   <input
                     type="email"
-                    placeholder="আপনার ইমেইল লিখুন..."
-                    aria-label="নিউজলেটার সাবস্ক্রাইব"
+                    placeholder="Enter your email..."
+                    aria-label="Subscribe to newsletter"
                     className="min-w-0 flex-1 bg-transparent py-2.5 pr-2 text-[13px] text-white outline-none placeholder:text-slate-500"
                   />
                   <button
@@ -364,12 +364,12 @@ export default function Footer() {
                     style={{ background: NAV_GRAD }}
                   >
                     <Send size={12} />
-                    যান
+                    Go
                   </button>
                 </div>
                 <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
                   <CheckCircle2 size={12} className="shrink-0 text-emerald-400" />
-                  স্প্যাম নেই। যেকোনো সময় আনসাবস্ক্রাইব করুন।
+                  No spam. Unsubscribe anytime.
                 </div>
               </div>
             </div>
@@ -378,7 +378,7 @@ export default function Footer() {
             <div>
               <FooterHeading>
                 <span className="inline-flex items-center gap-1.5">
-                  <Sparkles size={11} className="text-emerald-300" /> আমাদের অনুসরণ করুন
+                  <Sparkles size={11} className="text-emerald-300" /> Follow Us
                 </span>
               </FooterHeading>
               <div className="flex flex-wrap gap-2">
@@ -413,7 +413,7 @@ export default function Footer() {
             <div>
               <FooterHeading>
                 <span className="inline-flex items-center gap-1.5">
-                  <CreditCard size={11} className="text-emerald-300" /> পেমেন্ট পদ্ধতি
+                  <CreditCard size={11} className="text-emerald-300" /> Payment Methods
                 </span>
               </FooterHeading>
               <div className="flex flex-wrap gap-1.5">

@@ -40,7 +40,7 @@ interface RecentOrder {
 const STAT_CARDS: StatCardData[] = [
   {
     title: "Total revenue",
-    value: "৳8,42,350",
+    value: "$8,42,350",
     change: "+12.5% from last month",
     changeType: "up",
     icon: <TrendingUp size={20} />,
@@ -115,7 +115,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function formatCurrency(amount: number) {
-  return "৳" + amount.toLocaleString("en-BD");
+  return "$" + amount.toLocaleString("en-US");
 }
 
 // ─── Page (server component) ──────────────────────────────

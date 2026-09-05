@@ -3,7 +3,7 @@ import { getBlogById } from "@/services/PostServices";
 import { Post } from "@/types";
 
 interface PageProps {
-    params: Promise<{ productId: string; }>; // ✅ Next.js 15-এ Promise
+    params: Promise<{ productId: string; }>; // Promise in Next.js 15
 }
 
 export const generateStaticParams = async () => {
@@ -12,18 +12,18 @@ export const generateStaticParams = async () => {
             `${process.env.NEXT_PUBLIC_BASE_API}/product?page=1&limit=100`
         );
 
-        if (!res.ok) return []; // ✅ API fail করলে empty return
+        if (!res.ok) return []; // return empty on API failure
 
         const { data: products } = await res.json();
 
-        if (!products || !Array.isArray(products)) return []; // ✅ null check
+        if (!products || !Array.isArray(products)) return []; // null check
 
         return products.slice(0, 2).map((p: Post) => ({
             productId: String(p.id),
         }));
     } catch (error) {
         console.error("generateStaticParams failed:", error);
-        return []; // ✅ crash না করে empty return
+        return []; // return empty instead of crashing
     }
 };
 
@@ -37,7 +37,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ productId
 };
 
 export default async function ProductDetailsPage({ params }: PageProps) {
-    const { productId } = await params; // ✅ await করতে হবে
+    const { productId } = await params; // needs to be awaited
 
     const product = await getBlogById(productId);
 

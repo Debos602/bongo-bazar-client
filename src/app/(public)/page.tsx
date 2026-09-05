@@ -29,7 +29,7 @@ const getDiscountValue = (p: Product): number => {
 };
 
 export default async function HomePage() {
-  // ✅ Products fetch (আগের মতোই)
+  // Products fetch (as before)
   let products: Product[] = [];
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/product`, {
@@ -43,7 +43,7 @@ export default async function HomePage() {
     console.error("Failed to fetch products:", error);
   }
 
-  // ✅ getCategory service দিয়ে categories fetch
+  // Fetch categories via getCategory service
   let categories: Category[] = [];
   try {
     const data = await getCategoryBasic();
@@ -146,22 +146,21 @@ export default async function HomePage() {
             <div className="flex-1">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-xs font-semibold mb-3">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
-                সীমিত সময়ের অফার
+                Limited Time Offer
               </div>
               <div className="flex items-center gap-3 mb-2">
                 <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 shadow-lg shadow-emerald-900/30">
                   <Flame className="w-6 h-6 text-white" />
                 </span>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
-                  হট{" "}
+                  Hot{" "}
                   <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 bg-clip-text text-transparent">
-                    ডিলস
+                    Deals
                   </span>
                 </h2>
               </div>
               <p className="text-white/80 text-sm sm:text-[15px] max-w-xl mb-4">
-                বাছাই করা পণ্যে সর্বোচ্চ ছাড়। স্টক সীমিত — শেষ হওয়ার আগেই
-                অর্ডার করুন।
+                Maximum discount on selected products. Limited stock — order before it ends.
               </p>
               <div className="flex flex-wrap items-center gap-3 sm:gap-5">
                 <div>
@@ -172,7 +171,7 @@ export default async function HomePage() {
                     {topDiscount > 0 ? `${topDiscount}%` : "—"}
                   </div>
                   <div className="text-[10px] uppercase tracking-wider text-white/70 font-semibold">
-                    সর্বোচ্চ ছাড়
+                    Maximum Discount
                   </div>
                 </div>
                 <span className="w-px h-9 bg-white/20" />
@@ -181,7 +180,7 @@ export default async function HomePage() {
                     {hotDeals.length}
                   </div>
                   <div className="text-[10px] uppercase tracking-wider text-white/70 font-semibold">
-                    ডিল চলছে
+                    Deals Running
                   </div>
                 </div>
               </div>
@@ -190,7 +189,7 @@ export default async function HomePage() {
             <div className="lg:flex-shrink-0">
               <div className="rounded-2xl bg-white/5 backdrop-blur-md border border-white/15 p-4 sm:p-5 shadow-2xl">
                 <div className="text-[10px] uppercase tracking-widest text-emerald-200/90 font-semibold mb-2.5 text-center">
-                  অফার শেষ হওয়ার বাকি
+                  Offer ends in
                 </div>
                 <CountdownTimer />
               </div>
@@ -198,7 +197,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* হট ডিল Section */}
+        {/* Hot Deals Section */}
         <section>
           <SectionHeader
             pill="Limited time"
@@ -217,18 +216,18 @@ export default async function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="px-4 text-slate-500 text-sm">এখন কোনো ডিল নেই।</p>
+            <p className="px-4 text-slate-500 text-sm">No deals right now.</p>
           )}
         </section>
 
-        {/* সবচেয়ে জনপ্রিয় Section */}
+        {/* Most Popular Section */}
         <section>
           <SectionHeader
             pill="Most loved"
             gradientWord="Popular"
-            title="সবচেয়ে জনপ্রিয়"
-            subtitle="কাস্টমারদের পছন্দের পণ্যগুলি"
-            ctaLabel="সবগুলো দেখুন"
+            title="Most Popular"
+            subtitle="Customer favorite products"
+            ctaLabel="See All"
             ctaHref="/products"
             accent="emerald"
             icon={false}
@@ -271,16 +270,16 @@ export default async function HomePage() {
                 Exclusive offers
               </div>
               <h3 className="text-xl sm:text-2xl font-bold mb-1">
-                নতুন অফার সবার আগে পেতে চান?
+                Want to get new offers first?
               </h3>
               <p className="text-white/75 text-sm sm:text-[15px]">
-                ইমেইল দিন, আমরা সেরা ডিল আপনার কাছে পৌঁছে দেব।
+                Enter your email and we'll bring the best deals to you.
               </p>
             </div>
             <form className="flex w-full md:w-auto items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full p-1.5">
               <input
                 type="email"
-                placeholder="আপনার ইমেইল"
+                placeholder="Your Email"
                 className="bg-transparent text-white placeholder-white/60 text-sm px-4 py-2 flex-1 md:w-72 outline-none"
               />
               <button

@@ -13,15 +13,15 @@ import CountdownTimer from '@/components/modules/HotDeals/CountdownTimer';
 import { Product } from '@/types';
 
 export const metadata: Metadata = {
-  title: 'হট ডিলস | Bongo Bazar',
+  title: 'Hot Deals | Bongo Bazar',
   description:
-    'সীমিত সময়ের অফার — সেরা পণ্যে সর্বোচ্চ ছাড় এখনই কিনুন।',
+    'Limited time offer — grab the best products at maximum discount now.',
 };
 
 const FEATURES = [
-  { icon: Tag, title: 'সর্বোচ্চ ৭০% ছাড়', desc: 'প্রতিদিন নতুন অফার' },
-  { icon: Truck, title: 'ফ্রি ডেলিভারি', desc: '৳৯৯৯+ অর্ডারে' },
-  { icon: ShieldCheck, title: 'নিরাপদ পেমেন্ট', desc: '১০০% গ্যারান্টিসহ' },
+  { icon: Tag, title: 'Up to 70% off', desc: 'New offers daily' },
+  { icon: Truck, title: 'Free Delivery', desc: 'On ৳999+ orders' },
+  { icon: ShieldCheck, title: 'Secure Payment', desc: '100% Guaranteed' },
 ];
 
 const getDiscountValue = (p: Product): number => {
@@ -101,7 +101,7 @@ export default async function HotDealsPage() {
             <div className="flex-1 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-xs sm:text-sm font-semibold mb-4">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
-                সীমিত সময়ের অফার
+                Limited Time Offer
               </div>
 
               <div className="flex items-center gap-3 mb-3">
@@ -109,16 +109,15 @@ export default async function HotDealsPage() {
                   <Flame className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </span>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
-                  হট{' '}
+                  Hot{' '}
                   <span className="bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 bg-clip-text text-transparent">
-                    ডিলস
+                    Deals
                   </span>
                 </h1>
               </div>
 
               <p className="text-white/80 text-sm sm:text-base md:text-lg max-w-xl mb-6">
-                বাছাই করা পণ্যে সর্বোচ্চ ছাড়। স্টক সীমিত — শেষ হওয়ার আগেই
-                অর্ডার করুন।
+                Maximum discount on selected products. Limited stock — order before it ends.
               </p>
 
               {/* Stats */}
@@ -128,7 +127,7 @@ export default async function HotDealsPage() {
                     {topDiscount > 0 ? `${topDiscount}%` : '—'}
                   </div>
                   <div className="text-[11px] uppercase tracking-wider text-white/70 font-semibold">
-                    সর্বোচ্চ ছাড়
+                    Maximum Discount
                   </div>
                 </div>
                 <span className="w-px h-10 bg-white/20" />
@@ -137,7 +136,7 @@ export default async function HotDealsPage() {
                     {hotDeals.length}
                   </div>
                   <div className="text-[11px] uppercase tracking-wider text-white/70 font-semibold">
-                    ডিল চলছে
+                    Deals Running
                   </div>
                 </div>
                 <span className="w-px h-10 bg-white/20" />
@@ -146,7 +145,7 @@ export default async function HotDealsPage() {
                     ৳{totalSavings.toLocaleString()}
                   </div>
                   <div className="text-[11px] uppercase tracking-wider text-white/70 font-semibold">
-                    সম্ভাব্য সাশ্রয়
+                    Possible Savings
                   </div>
                 </div>
               </div>
@@ -179,7 +178,7 @@ export default async function HotDealsPage() {
             <div className="md:flex-shrink-0 md:w-auto">
               <div className="rounded-2xl bg-white/5 backdrop-blur-md border border-white/15 p-5 sm:p-6 shadow-2xl">
                 <div className="text-[11px] uppercase tracking-widest text-emerald-200/90 font-semibold mb-3 text-center">
-                  অফার শেষ হওয়ার বাকি
+                  Offer ends in
                 </div>
                 <CountdownTimer />
               </div>
@@ -204,15 +203,15 @@ export default async function HotDealsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <nav className="text-sm text-slate-500">
             <Link href="/" className="hover:text-emerald-700">
-              হোম
+              Home
             </Link>
             <span className="mx-2 text-slate-300">/</span>
-            <span className="text-slate-800 font-semibold">হট ডিলস</span>
+            <span className="text-slate-800 font-semibold">Hot Deals</span>
           </nav>
 
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
             <Flame className="w-3.5 h-3.5" />
-            {hotDeals.length} টি ডিল চলছে
+            {hotDeals.length} deals running
           </div>
         </div>
       </div>
@@ -231,16 +230,16 @@ export default async function HotDealsPage() {
               <Flame className="w-7 h-7 text-emerald-600" />
             </div>
             <h3 className="text-lg font-bold text-slate-800 mb-1">
-              এখন কোনো হট ডিল নেই
+              No hot deals right now
             </h3>
             <p className="text-sm text-slate-500 mb-5">
-              খুব শীঘ্রই নতুন অফার আসছে — চোখ রাখুন!
+              New offers coming very soon — stay tuned!
             </p>
             <Link
               href="/products"
               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition"
             >
-              সব প্রোডাক্ট দেখুন
+              View All Products
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -260,17 +259,17 @@ export default async function HotDealsPage() {
             />
             <div className="relative">
               <h3 className="text-xl sm:text-2xl font-bold mb-1">
-                আরো পণ্য দেখতে চান?
+                Want to see more products?
               </h3>
               <p className="text-white/75 text-sm sm:text-[15px]">
-                পুরো ক্যাটালগ ঘুরে দেখুন — সেরা দামে সেরা পণ্য।
+                Browse the full catalog — best products at best prices.
               </p>
             </div>
             <Link
               href="/products"
               className="relative inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white text-emerald-700 text-sm font-bold hover:bg-emerald-50 transition shadow-lg"
             >
-              সব প্রোডাক্ট
+              All Products
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

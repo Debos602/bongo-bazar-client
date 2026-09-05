@@ -30,7 +30,7 @@ export const getCategoryBasic = async () => {
         return [];
     }
 };
-// ✅ নতুন function — slug দিয়ে category fetch
+// New function — fetch category by slug
 export const getCategoryBySlug = async (slug: string) => {
     try {
         const res = await axiosInstance.get(`/category/slug/${slug}`);

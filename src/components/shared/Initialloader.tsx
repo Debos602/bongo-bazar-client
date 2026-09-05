@@ -27,7 +27,7 @@ export default function InitialLoader() {
                         className="text-3xl font-extrabold bg-gradient-to-r from-red-500 via-orange-400 to-emerald-600 bg-clip-text text-transparent tracking-tight"
                         style={{ animation: "fadeUp 0.6s ease forwards" }}
                     >
-                        বঙ্গ বাজার
+                        Bongo Bazar
                     </h1>
                     <span
                         className="text-[10px] tracking-[4px] uppercase text-neutral-400"
@@ -63,7 +63,7 @@ export default function InitialLoader() {
                 <p
                     className="text-xs text-neutral-400 animate-pulse tracking-wide"
                 >
-                    লোড হচ্ছে...
+                    Loading...
                 </p>
             </div>
 

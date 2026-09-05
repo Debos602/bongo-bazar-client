@@ -12,7 +12,7 @@ export const getAuthToken = async () => {
 
     if (!sessionToken) return null;
 
-    // ✅ এখানে unknown দিয়ে cast করা হয়েছে (TypeScript নিজেই এটাই সাজেস্ট করেছে)
+    // Cast using unknown here (TypeScript itself suggested this approach)
     const token = await getToken({
         req: {
             cookies: {
