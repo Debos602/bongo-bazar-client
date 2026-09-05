@@ -273,7 +273,7 @@ export default async function HomePage() {
                 Want to get new offers first?
               </h3>
               <p className="text-white/75 text-sm sm:text-[15px]">
-                Enter your email and we'll bring the best deals to you.
+                Enter your email and we&apos;ll bring the best deals to you.
               </p>
             </div>
             <form className="flex w-full md:w-auto items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full p-1.5">

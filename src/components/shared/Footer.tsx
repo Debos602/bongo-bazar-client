@@ -4,24 +4,16 @@ import {
   Mail,
   MapPin,
   Clock,
-  Home,
-  CalendarDays,
-  Info,
-  MessageCircle,
   ShoppingBag,
-  Tag,
-  Flame,
   Truck,
   ShieldCheck,
   RefreshCcw,
   HeadphonesIcon,
-  Star,
   CreditCard,
   Banknote,
   Smartphone,
   Wallet,
   Heart,
-  Globe,
   ChevronRight,
   Facebook,
   Instagram,
@@ -238,7 +230,7 @@ export default function Footer() {
 
             <p className="max-w-[260px] text-[13px] font-normal leading-[1.7] text-slate-400">
               <strong className="font-semibold text-white">
-                Bangladesh's trusted online marketplace
+                Bangladesh&apos;s trusted online marketplace
               </strong>{" "}
               — Connecting buyers and sellers across the nation.
             </p>

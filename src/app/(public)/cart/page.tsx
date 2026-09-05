@@ -30,6 +30,7 @@ const BORDER_GRAD =
 const SHIPPING_COSTS = { dhaka: 60, outside: 110 };
 
 type CartItem = {
+  id: number;
   productId: number;
   quantity: number;
   product: {
@@ -39,6 +40,21 @@ type CartItem = {
     image: string;
   };
 };
+
+type CartResponseItem = {
+  id?: number;
+  productId?: number;
+  quantity: number;
+  product: CartItem["product"];
+};
+
+const normalizeCartItems = (items: CartResponseItem[]): CartItem[] =>
+  items.flatMap((item) => {
+    const id = item.id ?? item.productId;
+    return id === undefined
+      ? []
+      : [{ ...item, id, productId: item.productId ?? id }];
+  });
 
 const STEPS = [
   { id: 1, label: "Cart", icon: ShoppingCart, current: true },
@@ -73,12 +89,7 @@ export default function CartPage() {
       clearGuestCart();
 
       const data = await getCart();
-      const mapped = (data ?? []).map((item: any) => ({
-        ...item,
-        id: item.id ?? item.productId,
-        productId: item.productId ?? item.id,
-      }));
-      setCartItems(mapped);
+      setCartItems(normalizeCartItems(data ?? []));
       setLoading(false);
     };
 
@@ -94,12 +105,7 @@ export default function CartPage() {
       }
       setLoading(true);
       const data = await getCart();
-      const mapped = (data ?? []).map((item: any) => ({
-        ...item,
-        id: item.id ?? item.productId,
-        productId: item.productId ?? item.id,
-      }));
-      setCartItems(mapped);
+      setCartItems(normalizeCartItems(data ?? []));
       setLoading(false);
     };
     fetchCart();

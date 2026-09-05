@@ -6,8 +6,6 @@ import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getCartCount } from "@/actions/cart";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/helpers/authOptions";
 import { useSession } from "next-auth/react";
 import { useCart } from "@/providers/CartProvider";
 
