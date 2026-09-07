@@ -80,6 +80,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
 
   const [cartAdded, setCartAdded] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
+  const [buyNowLoading, setBuyNowLoading] = useState(false);
   const { data: session } = useSession();
   const { addItem } = useCart();
   const router = useRouter();
@@ -139,6 +140,26 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
       toast.error("Something went wrong");
     } finally {
       if (session) setCartLoading(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!session) {
+      router.push(`/login?callbackUrl=/products/${product.id}`);
+      return;
+    }
+    setBuyNowLoading(true);
+    try {
+      const res = await createCart({ productId: product.id, quantity: qty });
+      if (res?.id || res?.success) {
+        router.push("/cart");
+      } else {
+        toast.error("Could not proceed to checkout");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setBuyNowLoading(false);
     }
   };
 
@@ -628,7 +649,8 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
               </button>
 
               <button
-                disabled={!product.stock}
+                disabled={!product.stock || buyNowLoading}
+                onClick={handleBuyNow}
                 className="h-12 rounded-xl font-bold text-[13px] tracking-wide text-white
                            flex items-center justify-center gap-2
                            shadow-md shadow-emerald-200/50
@@ -642,7 +664,13 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                   fontFamily: "var(--font-inter), system-ui, sans-serif",
                 }}
               >
-                <Zap size={16} /> Buy Now
+                {buyNowLoading ? (
+                  "Processing..."
+                ) : (
+                  <>
+                    <Zap size={16} /> Buy Now
+                  </>
+                )}
               </button>
             </div>
 
