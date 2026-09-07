@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CategoryPage({ params }: Props) {
     const { slug } = await params;
     return (
-        <div className="container mx-auto py-6">
+        <div className="max-w-7xl mx-auto px-4 py-6">
             <CategoryProductPage slug={slug} showAll={true} />
         </div>
     );

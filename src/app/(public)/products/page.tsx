@@ -41,8 +41,8 @@ const AllProductsPage = async ({
     };
 
     return (
-        <div className="min-h-screen bg-[#fdf8f0] py-10 px-4">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-[#EDEEEF] py-6">
+            <div className="max-w-7xl mx-auto px-4">
                 {/* Section Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#e8ddd0] relative">
                     {/* Gradient underline accent */}

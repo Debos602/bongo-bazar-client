@@ -26,7 +26,7 @@ export function SkeletonCard() {
 
 export default function Loading() {
     return (
-        <div className="container mx-auto my-8">
+        <div className="max-w-7xl mx-auto px-4 my-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
                 <SkeletonCard />
                 <SkeletonCard />

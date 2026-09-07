@@ -44,13 +44,14 @@ export default function AIChatWidget() {
     setInput("");
     setLoading(true);
 
+    console.log("[AI Chat] Sending to:", `${API_URL}/ai/chat`, { message: text });
+
     try {
       const res = await fetch(`${API_URL}/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          // Send only last 8 messages as history (skip first welcome message)
           history: updatedMessages.slice(1, -1).slice(-8),
         }),
       });
@@ -63,15 +64,19 @@ export default function AIChatWidget() {
           { role: "assistant", content: data.data.reply },
         ]);
       } else {
-        throw new Error(data.error);
+        const errorMsg = data.error || "Unknown error from server";
+        console.error("AI chat error:", errorMsg);
+        throw new Error(errorMsg);
       }
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      console.error("AI chat failed:", message);
       setMessages((prev) => [
         ...prev,
-{
-      role: "assistant",
-      content: "Sorry, I couldn't connect right now. Please try again later.",
-    },
+        {
+          role: "assistant",
+          content: `Sorry, I couldn't connect right now. (${message})`,
+        },
       ]);
     } finally {
       setLoading(false);
@@ -100,7 +105,7 @@ export default function AIChatWidget() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-brand-green-600 hover:bg-brand-green-700 text-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
         aria-label="Open AI Chat"
       >
         {isOpen ? (
@@ -117,9 +122,9 @@ export default function AIChatWidget() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 h-[480px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100">
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 h-[480px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-100">
           {/* Header */}
-          <div className="bg-orange-500 px-4 py-3 flex items-center justify-between">
+          <div className="bg-brand-green-700 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -128,12 +133,12 @@ export default function AIChatWidget() {
               </div>
               <div>
                 <p className="text-white font-semibold text-sm">Bongo Bazar AI</p>
-                <p className="text-orange-100 text-xs">Always here to help</p>
+                <p className="text-brand-green-100 text-xs">Always here to help</p>
               </div>
             </div>
             <button
               onClick={clearChat}
-              className="text-orange-100 hover:text-white text-xs underline"
+              className="text-brand-green-100 hover:text-white text-xs underline"
               title="Start New Chat"
             >
               New Chat
@@ -141,22 +146,22 @@ export default function AIChatWidget() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 bg-gray-50">
+          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 bg-slate-50">
             {messages.map((msg, i) => (
               <div
                 key={i}
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 {msg.role === "assistant" && (
-                  <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
-                    <span className="text-orange-600 text-xs font-bold">B</span>
+                  <div className="w-6 h-6 rounded-full bg-brand-green-100 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                    <span className="text-brand-green-700 text-xs font-bold">B</span>
                   </div>
                 )}
                 <div
                   className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                     msg.role === "user"
-                      ? "bg-orange-500 text-white rounded-tr-sm"
-                      : "bg-white text-gray-800 rounded-tl-sm shadow-sm border border-gray-100"
+                      ? "bg-brand-green-600 text-white rounded-tr-sm"
+                      : "bg-white text-slate-800 rounded-tl-sm shadow-sm border border-slate-100"
                   }`}
                 >
                   {msg.content}
@@ -167,14 +172,14 @@ export default function AIChatWidget() {
             {/* Loading indicator */}
             {loading && (
               <div className="flex justify-start">
-                <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
-                  <span className="text-orange-600 text-xs font-bold">B</span>
+                <div className="w-6 h-6 rounded-full bg-brand-green-100 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                  <span className="text-brand-green-700 text-xs font-bold">B</span>
                 </div>
-                <div className="bg-white px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100">
+                <div className="bg-white px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100">
                   <div className="flex gap-1 items-center">
-                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="w-2 h-2 bg-brand-green-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-2 h-2 bg-brand-green-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-2 h-2 bg-brand-green-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
               </div>
@@ -184,7 +189,7 @@ export default function AIChatWidget() {
 
           {/* Quick suggestions */}
           {messages.length === 1 && (
-            <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex gap-2 overflow-x-auto">
+            <div className="px-3 py-2 bg-slate-50 border-t border-slate-100 flex gap-2 overflow-x-auto">
               {[
                 "Show featured products",
                 "Show all categories",
@@ -196,7 +201,7 @@ export default function AIChatWidget() {
                     setInput(suggestion);
                     setTimeout(() => sendMessage(), 0);
                   }}
-                  className="text-xs bg-orange-50 text-orange-600 border border-orange-200 rounded-full px-3 py-1 whitespace-nowrap hover:bg-orange-100 transition-colors"
+                  className="text-xs bg-brand-green-50 text-brand-green-700 border border-brand-green-200 rounded-full px-3 py-1 whitespace-nowrap hover:bg-brand-green-100 transition-colors"
                 >
                   {suggestion}
                 </button>
@@ -205,7 +210,7 @@ export default function AIChatWidget() {
           )}
 
           {/* Input */}
-          <div className="px-3 py-3 bg-white border-t border-gray-100 flex gap-2">
+          <div className="px-3 py-3 bg-white border-t border-slate-100 flex gap-2">
             <input
               ref={inputRef}
               type="text"
@@ -214,12 +219,12 @@ export default function AIChatWidget() {
               onKeyDown={handleKeyDown}
               placeholder="Ask a question..."
               disabled={loading}
-              className="flex-1 text-sm border border-gray-200 rounded-full px-4 py-2 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-200 disabled:opacity-50 transition-colors"
+              className="flex-1 text-sm border border-slate-200 rounded-full px-4 py-2 outline-none focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-200 disabled:opacity-50 transition-colors"
             />
             <button
               onClick={sendMessage}
               disabled={loading || !input.trim()}
-              className="w-9 h-9 rounded-full bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-colors flex-shrink-0"
+              className="w-9 h-9 rounded-full bg-brand-green-600 hover:bg-brand-green-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-colors flex-shrink-0"
             >
               <svg className="w-4 h-4 text-white rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
