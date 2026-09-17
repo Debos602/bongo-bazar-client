@@ -16,12 +16,20 @@ export default function CartButton() {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
+  const fetchCount = () => {
+    if (session) getCartCount().then(setServerCount);
+  };
+
   useEffect(() => {
     setMounted(true);
-    if (session) {
-      getCartCount().then(setServerCount);
-    }
+    fetchCount();
   }, [session, pathname]);
+
+  useEffect(() => {
+    const onUpdated = () => fetchCount();
+    window.addEventListener("cart-updated", onUpdated);
+    return () => window.removeEventListener("cart-updated", onUpdated);
+  }, [session]);
 
   const count = mounted ? (session ? serverCount : guestCount) : 0;
 

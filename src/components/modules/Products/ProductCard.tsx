@@ -70,6 +70,7 @@ export default function ProductCard({ post }: { post: Product }) {
       const res = await createCart({ productId: Number(post.id), quantity: 1 });
       if (res?.id || res?.success) {
         toast.success("Cart added successfully");
+        window.dispatchEvent(new Event("cart-updated"));
         router.refresh();
       } else {
         toast.error("Could not add to cart");
