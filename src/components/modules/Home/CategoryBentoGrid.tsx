@@ -49,7 +49,7 @@ export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps
   
 
       {/* Bento Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 md:auto-rows-[200px] gap-3 sm:gap-4 px-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 md:auto-rows-[200px] gap-3 sm:gap-4">
         {displayCategories.map((category, index) => {
           // Layout pattern (6 cards in a 4-col grid):
           // 0: hero   — col-span 2, row-span 2 (top-left big)

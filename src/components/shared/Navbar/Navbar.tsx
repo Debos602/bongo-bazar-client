@@ -1,5 +1,7 @@
 "use client";
 
+import WishlistButton from "@/components/wishlist/WishlistButton";
+import { Heart } from "lucide-react";
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -225,12 +227,12 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
             <span
               className={cn(
                 "text-[10px] font-bold px-2 py-0.5 rounded-full",
-                user?.role === "ADMIN"
+                user?.role === "ADMIN" || user?.role === "SUPER_ADMIN"
                   ? "bg-teal-100 text-teal-800"
                   : "bg-emerald-100 text-emerald-800"
               )}
             >
-              {user?.role === "ADMIN" ? "Admin" : "Customer"}
+              {user?.role === "ADMIN" || user?.role === "SUPER_ADMIN" ? "Admin" : user?.role === "VENDOR" ? "Vendor" : "Customer"}
             </span>
           </div>
         </DropdownMenuLabel>
@@ -238,8 +240,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
         <DropdownMenuSeparator className="bg-gray-100" />
 
         <DropdownMenuGroup>
-          {user?.role === "ADMIN" && (
-            <DropdownMenuItem
+                      <DropdownMenuItem
               asChild
               className="rounded-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700"
             >
@@ -248,13 +249,12 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
                 <span className="text-sm font-medium">Dashboard</span>
               </Link>
             </DropdownMenuItem>
-          )}
 
           <DropdownMenuItem
             asChild
             className="rounded-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700"
           >
-            <Link href="/profile" className="flex items-center gap-2.5 px-3 py-2">
+            <Link href="/dashboard/user/profile" className="flex items-center gap-2.5 px-3 py-2">
               <User className="w-4 h-4" />
               <span className="text-sm font-medium">Profile</span>
             </Link>
@@ -264,7 +264,7 @@ export default function Navbar({ cartButton }: { cartButton?: ReactNode }) {
             asChild
             className="rounded-lg cursor-pointer hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700"
           >
-            <Link href="/orders" className="flex items-center gap-2.5 px-3 py-2">
+            <Link href="/dashboard/user/orders" className="flex items-center gap-2.5 px-3 py-2">
               <Package className="w-4 h-4" />
               <span className="text-sm font-medium">My Orders</span>
             </Link>
@@ -551,14 +551,10 @@ placeholder="Search for products..."
 
             {/* 
               Right-side actions:
-              FIX: on mobile, only show cart + hamburger (no wishlist/bell clutter).
-              Desktop keeps wishlist + bell + auth.
+              Wishlist and cart stay visible on every screen size.
               gap is tighter on mobile.
             */}
             <div className="ml-auto flex items-center gap-1 md:gap-2">
-              {/* Wishlist — desktop only */}
-             
-
               {/* Desktop auth */}
               <div className="hidden md:flex items-center ml-1">
                 {renderDesktopAuth()}
@@ -566,6 +562,7 @@ placeholder="Search for products..."
 
               {/* Cart button (passed in as prop — always visible) */}
               {/* FIX: wrap in a flex-shrink-0 span so it never gets crushed */}
+              <WishlistButton />
               <span className="flex-shrink-0">{cartButton}</span>
 
               {/* Mobile hamburger */}
@@ -641,7 +638,7 @@ placeholder="Search for products..."
                   <div className="grid grid-cols-3 gap-2 p-3 border-b">
                     {[
                       { icon: Home, label: "Home", href: "/" },
-                      // { icon: Heart, label: "Wishlist", href: "/wishlist" },
+                      { icon: Heart, label: "Wishlist", href: "/wishlist" },
                       // { icon: Bell, label: "Notifications", href: "/notifications" },
                     ].map(({ icon: Icon, label, href }) => (
                       <Link

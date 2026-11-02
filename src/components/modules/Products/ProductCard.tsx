@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+import WishlistHeart from "@/components/wishlist/WishlistHeart";
 import { Product } from "@/types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -11,29 +12,12 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useCart } from "@/providers/CartProvider";
 
-const TAG_STYLES: Record<string, string> = {
-  "BEST SELLER": "var(--grad-secondary)",
-  HOT: "var(--grad-cta)",
-  NEW: "var(--grad-secondary)",
-  SALE: "var(--grad-cta)",
-  TRENDING: "linear-gradient(135deg, #f59e0b, #d97706)",
-};
-
-const DEFAULT_TAGS = ["NEW", "HOT", "BEST SELLER", "TRENDING"];
-const DEFAULT_TAG_STYLE = "linear-gradient(135deg, #6b7280, #4b5563)";
-
 export default function ProductCard({ post }: { post: Product }) {
   const imageSrc = post.image || post.thumbnail || "/logo.png";
   const altText = (post.name || post.title || "Product") as string;
 
-  const idStr = String(post.id ?? "");
-  const idSum = idStr
-    .split("")
-    .reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-  const fallbackTag = DEFAULT_TAGS[idSum % DEFAULT_TAGS.length];
-
-  const badgeTag = post.tags?.[0] || fallbackTag;
-  const badgeStyle = TAG_STYLES[badgeTag.toUpperCase()] || DEFAULT_TAG_STYLE;
+  // Only a badge the seller actually set.
+  const badgeTag = post.badgeType ?? null;
 
   const price = post.price ?? null;
   const originalPrice = (post as { oldPrice?: number; regularPrice?: number }).oldPrice
@@ -92,7 +76,7 @@ export default function ProductCard({ post }: { post: Product }) {
           {badgeTag && (
             <div
               className="absolute top-3 left-3 z-10 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white shadow-md"
-              style={{ background: badgeStyle as string }}
+              style={{ background: "var(--grad-cta)" }}
             >
               {badgeTag}
             </div>
@@ -108,15 +92,10 @@ export default function ProductCard({ post }: { post: Product }) {
             </div>
           )}
 
-          {/* Wishlist hint */}
-          <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            aria-label="Add to wishlist"
-            className="absolute bottom-3 right-3 z-10 w-10 h-10 rounded-full bg-white/95 backdrop-blur-sm border border-neutral-200 flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:text-brand-red-600 text-neutral-500"
-          >
-            <Heart className="w-4 h-4" />
-          </button>
+          <WishlistHeart
+            product={{ productId: Number(post.id), name: altText, price: Number(post.price ?? 0), oldPrice: originalPrice, image: imageSrc, stock: post.stock, shopName: post.vendor?.shopName }}
+            className="absolute bottom-3 right-3 z-10 size-10"
+          />
 
           <Image
             src={imageSrc}
@@ -133,6 +112,7 @@ export default function ProductCard({ post }: { post: Product }) {
             <h3 className="text-[15px] font-semibold text-neutral-900 mb-2 line-clamp-2 leading-snug min-h-[2.6em]">
               {altText}
             </h3>
+            {post.vendor?.shopName && <p className="-mt-1 mb-2 truncate text-xs text-neutral-500">{post.vendor.shopName}</p>}
             <div className="flex items-baseline gap-2 flex-wrap">
               {currentPrice !== null && currentPrice !== undefined && (
                 <span className="text-xl font-extrabold text-brand-green-700 tabular-nums" data-numeric="true">

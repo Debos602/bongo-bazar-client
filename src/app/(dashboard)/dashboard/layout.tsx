@@ -1,20 +1,13 @@
-import Sidebar from "@/components/shared/Sidebar";
-import DashboardHeader from "@/components/shared/DashboardHeader";
+import { redirect } from "next/navigation";
+import Shell from "@/components/dashboard/Shell";
+import { apiGet } from "@/lib/serverApi";
+import type { Me } from "@/types/dashboard";
 
-export default function DashboardLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <main className="min-h-dvh">
-      <Sidebar />
-      <div className="flex-1 flex flex-col" style={{ marginLeft: 256 }}>
-        <DashboardHeader />
-        <div className="flex-1" style={{ paddingTop: 64 }}>
-          {children}
-        </div>
-      </div>
-    </main>
-  );
+// Role comes from the API rather than the login session, so a vendor approved after
+// signing in gets the vendor dashboard without logging in again.
+export default async function DashboardLayout({ children }: { children: React.ReactNode; }) {
+  const me = await apiGet<Me>("/auth/me");
+  if (!me.data) redirect("/login");
+
+  return <Shell role={me.data.role} name={me.data.name} email={me.data.email}>{children}</Shell>;
 }

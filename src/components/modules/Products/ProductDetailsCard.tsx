@@ -14,6 +14,7 @@ import {
   Facebook, Send, Link as LinkIcon,
 } from "lucide-react";
 import { createCart } from "@/actions/cart";
+import WishlistHeart from "@/components/wishlist/WishlistHeart";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCart } from "@/providers/CartProvider";
@@ -74,7 +75,6 @@ function SectionHeading({ children }: { children: React.ReactNode; }) {
 ═══════════════════════════════════════════════════════════════ */
 export default function ProductDetailsCard({ product }: { product: any; }) {
   const [qty, setQty] = useState(1);
-  const [wished, setWished] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "reviews">("desc");
 
@@ -305,19 +305,11 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
 
             {/* Action buttons */}
             <div className="absolute top-3 right-3 flex flex-col gap-2">
-              <button
-                onClick={() => setWished((v) => !v)}
-                aria-label="Add to wishlist"
-                className={`w-9 h-9 rounded-full flex items-center justify-center
-                            backdrop-blur-sm border shadow-sm
-                            transition-all duration-200 hover:scale-110 active:scale-95
-                            ${wished
-                              ? "bg-emerald-50 border-emerald-200 text-emerald-600"
-                              : "bg-white/90 border-slate-200 text-slate-400 hover:text-emerald-600"
-                            }`}
-              >
-                <Heart size={15} fill={wished ? "currentColor" : "none"} />
-              </button>
+              <WishlistHeart
+                product={{ productId: Number(product.id), name: product.name, price: Number(product.price ?? 0), oldPrice: product.oldPrice, image: product.image, stock: product.stock, shopName: product.vendor?.shopName }}
+                size={15}
+                className="h-9 w-9 backdrop-blur-sm"
+              />
               <button
                 aria-label="Share product"
                 className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm
@@ -400,20 +392,17 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                   fontFamily: "var(--font-inter), system-ui, sans-serif",
                 }}
               >
-                {(product.vendorName ?? product.store ?? "S")[0].toUpperCase()}
+                {(product.vendor?.shopName ?? "S")[0].toUpperCase()}
               </div>
               <div>
                 <p
                   className="text-[14px] font-semibold text-slate-800 tracking-tight"
                   style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
                 >
-                  {product.vendorName ?? product.store ?? "Official Store"}
+                  {product.vendor ? <Link href={`/shops/${product.vendor.slug}`} className="hover:underline">{product.vendor.shopName}</Link> : "Bongo Bazar seller"}
                 </p>
                 <p className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-                  <Stars rating={4.9} size={10} />
-                  <span className="text-emerald-700 font-semibold tabular-nums">4.9</span>
-                  <span className="text-slate-300">·</span>
-                  <span>Verified Seller</span>
+                  <span>Sold and shipped by this shop</span>
                 </p>
               </div>
             </div>
@@ -703,7 +692,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
               {[
                 { k: "SKU", v: product.sku ?? "—" },
                 { k: "Category", v: product.category ?? "—" },
-                { k: "Vendor", v: product.vendorId ?? "—" },
+                { k: "Sold by", v: product.vendor?.shopName ?? "—" },
               ].map(({ k, v }) => (
                 <div key={k}>
                   <p
@@ -802,7 +791,7 @@ export default function ProductDetailsCard({ product }: { product: any; }) {
                     ["SKU", product.sku ?? "—"],
                     ["Category", product.category ?? "—"],
                     ["Stock", product.stock ?? 0],
-                    ["Vendor ID", product.vendorId ?? "—"],
+                    ["Sold by", product.vendor?.shopName ?? "—"],
                   ]).map(([k, v]: [string, any], i: number) => (
                     <tr
                       key={k}

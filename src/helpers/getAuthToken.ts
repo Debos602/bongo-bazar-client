@@ -23,7 +23,5 @@ export const getAuthToken = async () => {
         } as unknown as Parameters<typeof getToken>[0]["req"],
         secret: process.env.NEXTAUTH_SECRET!,
     });
-
-    console.log("accessToken from JWT >>>", token?.accessToken);
     return (token?.accessToken as string) ?? null;
-};
+};

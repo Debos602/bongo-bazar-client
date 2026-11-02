@@ -53,14 +53,11 @@ export const authOptions: NextAuthOptions = {
 
                     // Extract accessToken from cookie
                     const setCookieHeader = res.headers.get("set-cookie");
-                    console.log("Cookies >>>", setCookieHeader);
 
                     const accessToken = setCookieHeader
                         ?.split(";")
                         .find((c) => c.trim().startsWith("accessToken="))
                         ?.split("=")[1];
-
-                    console.log("AccessToken >>>", accessToken);
 
                     if (!accessToken) return null;
 
@@ -73,7 +70,6 @@ export const authOptions: NextAuthOptions = {
                     });
 
                     const profile = await profileRes.json();
-                    console.log("Profile >>>", profile);
 
                     const userData = profile?.data ?? profile;
 
@@ -124,4 +120,4 @@ export const authOptions: NextAuthOptions = {
     pages: {
         signIn: "/login"
     }
-};
+};

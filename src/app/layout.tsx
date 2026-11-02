@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Hind_Siliguri, Inter } from "next/font/google";
 import "./global.css";
 import AuthProvider from "@/providers/AuthProvider";
 import { CartProvider } from "@/providers/CartProvider";
+import { WishlistProvider } from "@/providers/WishlistProvider";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import InitialLoader from "@/components/shared/Initialloader";
@@ -45,11 +46,13 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
       >
         <AuthProvider>
           <CartProvider>
+            <WishlistProvider>
             <Toaster richColors position="top-center" />
             <Suspense fallback={<InitialLoader />}>
               {children}
               <AIChatWidget />
             </Suspense>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

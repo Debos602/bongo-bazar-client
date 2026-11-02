@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCart } from "@/providers/CartProvider";
 import { createOrderWithAddress } from "@/actions/order";
+import { apiAction } from "@/actions/api";
 
 /* ─── Theme tokens (match navbar / hot-deals / home) ─── */
 const NAV_GRAD =
@@ -27,7 +28,6 @@ const NAV_GRAD =
 const BORDER_GRAD =
   "linear-gradient(90deg,#34d399,#10b981 50%,#047857)";
 
-const SHIPPING_COSTS = { dhaka: 60, outside: 110 };
 
 type CartItem = {
   id: number;
@@ -69,6 +69,20 @@ export default function CartPage() {
   const [area, setArea] = useState("outside");
   const [form, setForm] = useState({ name: "", mobile: "", email: "", address: "" });
   const [orderLoading, setOrderLoading] = useState<boolean>(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState<{ code: string; discount: number; } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const applyCoupon = async () => {
+    if (!session) { toast.error("Log in to use a coupon"); return; }
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    const res = await apiAction("POST", "/coupon/validate", { code: couponInput.trim() });
+    setCouponLoading(false);
+    if (!res.success || !res.data) { setCoupon(null); toast.error(res.message); return; }
+    setCoupon({ code: String(res.data.code), discount: Number(res.data.discount) });
+    toast.success("Coupon applied");
+  };
   const router = useRouter();
   const { data: session } = useSession();
   const { items: guestItems, updateQuantity: updateGuestQty, removeItem: removeGuestItem, clearCart: clearGuestCart } = useCart();
@@ -129,6 +143,7 @@ export default function CartPage() {
         city: area === "dhaka" ? "Dhaka" : "Outside Dhaka",
         area: area,
         address: form.address,
+        couponCode: coupon?.code,
       });
 
       if (res?.data?.id) {
@@ -190,18 +205,16 @@ export default function CartPage() {
     setCartItems([]);
   };
 
-  const { netTotal, shippingCost, grandTotal, totalItems, totalSavings } = useMemo(() => {
+  const { netTotal, grandTotal, totalItems, totalSavings } = useMemo(() => {
     const items = cartItems.reduce((s, i) => s + i.quantity, 0);
     const net = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-    const ship = SHIPPING_COSTS[area as keyof typeof SHIPPING_COSTS] ?? 110;
     return {
       totalItems: items,
       netTotal: net,
-      shippingCost: ship,
-      grandTotal: net + ship,
+      grandTotal: net - (coupon?.discount ?? 0),
       totalSavings: 0,
     };
-  }, [cartItems, area]);
+  }, [cartItems, coupon]);
 
   return (
     <div className="min-h-screen bg-[#EDEEEF]">
@@ -595,12 +608,27 @@ export default function CartPage() {
                   </ul>
                 )}
 
-                {/* Promo banner */}
-                <div className="flex items-center gap-2.5 bg-emerald-50/70 border border-emerald-100 rounded-xl px-3 py-2.5 mb-5">
-                  <Tag size={14} className="text-emerald-700 flex-shrink-0" />
-                  <span className="text-[12px] text-slate-600 leading-snug">
-                    Use code <strong className="text-emerald-700 font-bold tracking-wide">BONGO10</strong> for 10% off!
-                  </span>
+                {/* Coupon */}
+                <div className="mb-5 flex gap-2">
+                  <label htmlFor="coupon" className="sr-only">Coupon code</label>
+                  <div className="flex flex-1 items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-2">
+                    <Tag size={14} className="flex-shrink-0 text-emerald-700" aria-hidden />
+                    <input
+                      id="coupon"
+                      value={couponInput}
+                      onChange={(e) => { setCouponInput(e.target.value); setCoupon(null); }}
+                      placeholder="Coupon code"
+                      className="min-w-0 flex-1 bg-transparent text-[12.5px] uppercase outline-none placeholder:normal-case placeholder:text-slate-400"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={applyCoupon}
+                    disabled={couponLoading}
+                    className="rounded-xl bg-emerald-800 px-4 text-[12px] font-bold text-white hover:bg-emerald-900 disabled:opacity-50"
+                  >
+                    Apply
+                  </button>
                 </div>
 
                 {/* Totals */}
@@ -611,12 +639,12 @@ export default function CartPage() {
                       ৳{netTotal.toLocaleString()}
                     </dd>
                   </div>
-                  <div className="flex justify-between text-slate-600">
-                    <dt className="font-semibold">Shipping</dt>
-                    <dd className="font-bold text-slate-800 tabular-nums" data-numeric="true">
-                      ৳{shippingCost}
-                    </dd>
-                  </div>
+                  {coupon && (
+                    <div className="flex justify-between text-emerald-700">
+                      <dt className="font-semibold">Coupon ({coupon.code})</dt>
+                      <dd className="font-bold tabular-nums" data-numeric="true">−৳{coupon.discount.toLocaleString()}</dd>
+                    </div>
+                  )}
                   {totalSavings > 0 && (
                     <div className="flex justify-between text-emerald-700">
                       <dt className="font-semibold">You Save</dt>

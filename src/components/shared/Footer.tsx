@@ -62,12 +62,12 @@ const quickLinks = [
 ];
 
 const customerLinks = [
-  { href: "/account", label: "My Account" },
-  { href: "/orders", label: "Order Tracking" },
+  { href: "/dashboard", label: "My Account" },
+  { href: "/dashboard/user/orders", label: "Order Tracking" },
   { href: "/wishlist", label: "Wishlist" },
   { href: "/returns", label: "Return Policy" },
   { href: "/faq", label: "FAQ" },
-  { href: "/seller", label: "Become a Seller" },
+  { href: "/dashboard/user/sell", label: "Become a Seller" },
 ];
 
 const policyLinks = [

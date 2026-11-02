@@ -1,7 +1,7 @@
 export type UserStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
 // তোমার enum অনুযায়ী adjust করবে
 
-export type Role = "USER" | "ADMIN";
+export type Role = "USER" | "VENDOR" | "ADMIN" | "SUPER_ADMIN";
 // তোমার enum অনুযায়ী adjust করবে
 
 export interface User {
@@ -47,6 +47,8 @@ export interface Product {
     reviewCount?: number;
     isPublished?: boolean;
     vendorId?: number;
+    badgeType?: string | null;
+    vendor?: { id: number; shopName: string; slug: string; };
 }
 
 export type Post = Product;
@@ -75,6 +77,9 @@ export type OrderItem = {
 };
 export type Order = {
     id: number;
+    subtotal?: number;
+    discount?: number;
+    couponCode?: string | null;
     total: number;
     status: string;
     createdAt: string;

@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    // Product photos pass through a server action on their way to the API.
+    serverActions: { bodySizeLimit: "6mb" },
+  },
   images: {
     remotePatterns: [
       {

@@ -1,12 +1,5 @@
-import CreateBlogForm from "@/components/modules/Products/CreateProductForm";
-import React from "react";
+import { redirect } from "next/navigation";
 
-const CreateProduct = () => {
-    return (
-        <div className="w-full flex justify-center items-center">
-            <CreateBlogForm></CreateBlogForm>
-        </div>
-    );
-};
-
-export default CreateProduct;
+export default function CreateProduct() {
+  redirect("/dashboard/vendor/products/new");
+}

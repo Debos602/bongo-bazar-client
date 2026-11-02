@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 type Message = {
   role: "user" | "assistant";
@@ -10,6 +12,8 @@ type Message = {
 const API_URL = process.env.NEXT_PUBLIC_BASE_API || "http://localhost:5000";
 
 export default function AIChatWidget() {
+  const { data: session } = useSession();
+  const hidden = usePathname()?.startsWith("/dashboard"); // would cover dashboard controls
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -44,12 +48,13 @@ export default function AIChatWidget() {
     setInput("");
     setLoading(true);
 
-    console.log("[AI Chat] Sending to:", `${API_URL}/ai/chat`, { message: text });
-
     try {
       const res = await fetch(`${API_URL}/ai/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.user?.accessToken ? { Authorization: `Bearer ${session.user.accessToken}` } : {}),
+        },
         body: JSON.stringify({
           message: text,
           history: updatedMessages.slice(1, -1).slice(-8),
@@ -99,6 +104,8 @@ export default function AIChatWidget() {
       },
     ]);
   };
+
+  if (hidden) return null;
 
   return (
     <>
@@ -235,4 +242,4 @@ export default function AIChatWidget() {
       )}
     </>
   );
-}
+}

@@ -6,11 +6,11 @@ import Link from "next/link";
 import {
   Phone, User, Pencil,
   CheckCircle2, Truck, CreditCard, Loader2,
-  Tag, ChevronRight, ShieldCheck, BadgePercent, Home,
+  ChevronRight, ShieldCheck, Home,
   ShoppingCart, Sparkles, Check, Receipt, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
-import axiosInstance from "@/lib/axiosInstance";
+import { choosePayment } from "@/actions/order";
 import { Order } from "@/types";
 
 /* ─── Theme tokens (match navbar / hot-deals / home / cart) ─── */
@@ -21,13 +21,8 @@ const BORDER_GRAD =
 
 const PAYMENT_METHODS = [
   { id: "CASH_ON_DELIVERY", label: "Cash on Delivery", desc: "Pay on Delivery", icon: "💵" },
-  { id: "BKASH", label: "bKash", desc: "Mobile Wallet", icon: "📱" },
-  { id: "NAGAD", label: "Nagad", desc: "Mobile Wallet", icon: "💳" },
   { id: "STRIPE", label: "Card Payment", desc: "Visa / Mastercard", icon: "🏦" },
 ];
-
-const DELIVERY_FEE = 968;
-const DELIVERY_DISCOUNT = 110;
 
 const STEPS = [
   { id: 1, label: "Cart", icon: ShoppingCart },
@@ -37,41 +32,37 @@ const STEPS = [
 ];
 
 export default function CheckoutClient({ order }: { order: Order; }) {
-  const [currentOrder, setCurrentOrder] = useState<Order>(order);
+  const currentOrder = order;
   const [payingId, setPayingId] = useState<number | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string>("");
-  const [promoCode, setPromoCode] = useState("");
-  const [promoApplied, setPromoApplied] = useState(false);
+  const [codConfirmed, setCodConfirmed] = useState(false);
 
   const isPaid = currentOrder.payment?.status === "PAID";
   const isPaying = payingId === currentOrder.id;
 
-  const { itemsTotal, promoDiscount, total, totalItems } = useMemo(() => {
-    const items = currentOrder.items.reduce((s, i) => s + i.price * i.quantity, 0);
-    const promo = promoApplied ? Math.floor(items * 0.05) : 0;
-    return {
-      itemsTotal: items,
-      promoDiscount: promo,
-      total: items + DELIVERY_FEE - DELIVERY_DISCOUNT - promo,
-      totalItems: currentOrder.items.reduce((s, i) => s + i.quantity, 0),
-    };
-  }, [currentOrder, promoApplied]);
+  const { itemsTotal, total, totalItems, discount } = useMemo(() => ({
+    itemsTotal: currentOrder.items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+    total: currentOrder.total,
+    discount: currentOrder.discount ?? 0,
+    totalItems: currentOrder.items.reduce((sum, i) => sum + i.quantity, 0),
+  }), [currentOrder]);
 
   const handlePayment = async () => {
     if (!selectedMethod) { toast.error("Select Payment Method"); return; }
     setPayingId(currentOrder.id);
-    try {
-      await axiosInstance.post(`/payment/${currentOrder.id}`, { method: selectedMethod });
-      toast.success("Payment Successful! 🎉");
-      setCurrentOrder((prev) => ({
-        ...prev,
-        payment: { status: "PAID", method: selectedMethod },
-      }));
-    } catch {
-      toast.error("Payment failed, please try again");
-    } finally {
+    const res = await choosePayment(currentOrder.id, selectedMethod);
+    if (!res.success) {
+      toast.error(res.message);
       setPayingId(null);
+      return;
     }
+    if (res.checkoutUrl) {
+      window.location.href = res.checkoutUrl;
+      return;
+    }
+    setCodConfirmed(true);
+    setPayingId(null);
+    toast.success("Order confirmed. Pay when it arrives.");
   };
 
   return (
@@ -249,31 +240,11 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                     />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span
-                        className="text-[15px] font-extrabold tabular-nums"
-                        style={{
-                          backgroundImage: "linear-gradient(135deg,#047857,#10b981)",
-                          WebkitBackgroundClip: "text",
-                          backgroundClip: "text",
-                          color: "transparent",
-                        }}
-                        data-numeric="true"
-                      >
-                        ৳ {(DELIVERY_FEE - DELIVERY_DISCOUNT).toLocaleString()}
-                      </span>
-                      <span className="text-[12px] line-through text-slate-400 tabular-nums" data-numeric="true">
-                        ৳ {DELIVERY_FEE}
-                      </span>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-full">
-                        -৳{DELIVERY_DISCOUNT}
-                      </span>
-                    </div>
                     <div className="flex items-center gap-1.5 mt-1">
                       <Truck size={11} className="text-emerald-600" />
                       <span className="text-[12px] font-semibold text-slate-700">Standard Delivery</span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">Get by 22–31 Mar</p>
+                    <p className="text-[11px] text-slate-500 mt-1">Each shop ships its own items</p>
                   </div>
                 </div>
 
@@ -394,40 +365,6 @@ export default function CheckoutClient({ order }: { order: Order; }) {
               <div className="relative h-1" style={{ background: BORDER_GRAD }} />
 
               <div className="p-5 sm:p-6">
-                {/* Promotion */}
-                <div className="mb-5">
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <span className="h-4 w-1 rounded-full" style={{ background: BORDER_GRAD }} />
-                    <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.18em] flex items-center gap-1.5">
-                      <BadgePercent size={12} className="text-emerald-600" /> Promotion
-                    </h3>
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-500/15 transition-all">
-                      <Tag size={12} className="text-slate-400 flex-shrink-0" />
-                      <input
-                        value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value)}
-                        placeholder="Enter promo code"
-                        className="flex-1 text-[12.5px] outline-none text-slate-700 placeholder:text-slate-400 bg-transparent"
-                      />
-                    </div>
-                    <button
-                      onClick={() => {
-                        if (!promoCode.trim()) { toast.error("Enter code"); return; }
-                        setPromoApplied(true);
-                        toast.success("Promo code applied!");
-                      }}
-                      className="px-4 h-9 rounded-lg text-[12px] font-extrabold text-white tracking-wide
-                                 hover:-translate-y-px active:scale-[0.98]
-                                 transition-all shadow-sm shadow-emerald-900/20"
-                      style={{ background: NAV_GRAD }}
-                    >
-                      APPLY
-                    </button>
-                  </div>
-                </div>
-
                 {/* Order Summary */}
                 <div>
                   <div className="flex items-center gap-2.5 mb-4">
@@ -446,23 +383,11 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                         ৳ {itemsTotal.toLocaleString()}
                       </dd>
                     </div>
-                    <div className="flex justify-between items-center text-slate-600">
-                      <dt className="font-semibold">Delivery Fee</dt>
-                      <dd className="font-bold text-slate-800 tabular-nums" data-numeric="true">
-                        ৳ {DELIVERY_FEE.toLocaleString()}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between items-center text-emerald-700">
-                      <dt className="font-semibold">Delivery Discount</dt>
-                      <dd className="font-bold tabular-nums" data-numeric="true">
-                        −৳ {DELIVERY_DISCOUNT}
-                      </dd>
-                    </div>
-                    {promoApplied && (
+                    {discount > 0 && (
                       <div className="flex justify-between items-center text-emerald-700">
-                        <dt className="font-semibold">Promo Discount</dt>
+                        <dt className="font-semibold">Coupon{currentOrder.couponCode ? ` (${currentOrder.couponCode})` : ""}</dt>
                         <dd className="font-bold tabular-nums" data-numeric="true">
-                          −৳ {promoDiscount.toLocaleString()}
+                          −৳ {discount.toLocaleString()}
                         </dd>
                       </div>
                     )}
@@ -487,7 +412,13 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                 </div>
 
                 {/* Pay button */}
-                {!isPaid ? (
+                {codConfirmed ? (
+                  <div className="mt-5 border border-emerald-200 bg-emerald-50/60 rounded-xl px-4 py-3">
+                    <p className="text-[13px] font-bold text-emerald-700">Order confirmed</p>
+                    <p className="text-[11.5px] text-slate-600">Pay ৳ {total.toLocaleString()} in cash on delivery.</p>
+                    <Link href="/dashboard/user/orders" className="mt-1 inline-block text-[12px] font-semibold text-emerald-800 hover:underline">Track your order</Link>
+                  </div>
+                ) : !isPaid ? (
                   <button
                     onClick={handlePayment}
                     disabled={isPaying || !selectedMethod}
@@ -508,7 +439,7 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                     ) : (
                       <>
                         <ShieldCheck size={16} />
-                        Proceed to Pay
+                        {selectedMethod === "CASH_ON_DELIVERY" ? "Confirm Order" : "Proceed to Pay"}
                       </>
                     )}
                   </button>
@@ -522,7 +453,7 @@ export default function CheckoutClient({ order }: { order: Order; }) {
                     </span>
                     <div>
                       <p className="text-[13px] font-bold text-emerald-700">Payment Complete</p>
-                      <p className="text-[11.5px] text-slate-500">{currentOrder.payment?.method}</p>
+                      <p className="text-[11.5px] text-slate-500">{currentOrder.payment?.method?.replaceAll("_", " ")}</p>
                     </div>
                   </div>
                 )}

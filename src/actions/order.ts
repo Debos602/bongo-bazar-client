@@ -3,6 +3,7 @@
 import axiosInstance from "@/lib/axiosInstance";
 import { AxiosError } from "axios";
 import { revalidateTag } from "next/cache";
+import { apiFetch } from "@/lib/serverApi";
 
 export const createOrderWithAddress = async (data: {
     fullName: string;
@@ -31,4 +32,12 @@ export const getUserOrder = async () => {
         const err = error as AxiosError<{ message?: string; }>;
         return { success: false, message: err.response?.data?.message ?? "error" };
     }
+};
+
+export const choosePayment = async (orderId: number, method: string) => {
+    const res = await apiFetch<{ checkoutUrl: string | null; }>(`/payment/${orderId}`, {
+        method: "POST",
+        body: JSON.stringify({ method }),
+    });
+    return { success: res.success, message: res.message, checkoutUrl: res.data?.checkoutUrl ?? null };
 };

@@ -282,3 +282,42 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Market-stall awning: stripes with a scalloped lower edge. */
+.awning {
+  --stripe: 36px;
+  --drop: 16px;
+  --a: #fbbf24;
+  --b: #fffbeb;
+  height: calc(var(--drop) + var(--stripe) / 2);
+  background: repeating-linear-gradient(90deg, var(--a) 0 var(--stripe), var(--b) var(--stripe) calc(var(--stripe) * 2));
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% var(--drop) no-repeat,
+    radial-gradient(circle calc(var(--stripe) / 2) at calc(var(--stripe) / 2) 0, #000 98%, transparent) 0 var(--drop) / var(--stripe) calc(var(--stripe) / 2) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% var(--drop) no-repeat,
+    radial-gradient(circle calc(var(--stripe) / 2) at calc(var(--stripe) / 2) 0, #000 98%, transparent) 0 var(--drop) / var(--stripe) calc(var(--stripe) / 2) repeat-x;
+}
+.awning-sm { --stripe: 22px; --drop: 10px; position: relative; z-index: 1; }
+.awning-green { --a: #047857; --b: #ecfdf5; }
+.awning-marigold { --a: #f59e0b; --b: #fffbeb; }
+.awning-red { --a: #dc2626; --b: #fef2f2; }
+.awning-teal { --a: #0f766e; --b: #f0fdfa; }
+
+.heart-pop { animation: heart-pop 260ms ease-out; }
+@keyframes heart-pop {
+  50% { transform: scale(1.3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heart-pop { animation: none; }
+}
+
+/* Fills the active hero dot over one slide's time on screen. */
+.hero-progress { animation: hero-progress linear forwards; }
+@keyframes hero-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-progress { animation: none; }
+}
