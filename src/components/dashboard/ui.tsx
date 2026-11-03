@@ -1,16 +1,58 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  BadgePercent, ChartNoAxesCombined, FileText, Heart, LayoutDashboard, MapPin, MessageSquare, Package, ShoppingBag, Store, Tag,
+  UserRound, Users, Wallet, type LucideIcon, ChevronLeft, ChevronRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const money = (n: number | null | undefined) => `৳ ${Number(n ?? 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 export const shortDate = (d: string) => new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Dhaka" });
 
-export function PageHeader({ title, description, action }: { title: string; description?: string; action?: React.ReactNode; }) {
+export const growthHint = (pct: number | null) => {
+  if (pct === null) return "Nothing to compare with last month";
+  if (pct === 0) return "Same as this time last month";
+  return `${pct > 0 ? "Up" : "Down"} ${Math.abs(pct)}% from this time last month`;
+};
+
+const PAGE_HEADER_ICONS: Record<string, LucideIcon> = {
+  "Marketplace overview": ChartNoAxesCombined,
+  Categories: Tag,
+  Coupons: BadgePercent,
+  Orders: ShoppingBag,
+  "My orders": ShoppingBag,
+  Payouts: Wallet,
+  Earnings: Wallet,
+  Posts: FileText,
+  Products: Package,
+  "Add product": Package,
+  Reviews: MessageSquare,
+  "My reviews": MessageSquare,
+  Users,
+  Vendors: Store,
+  "Shop settings": Store,
+  "My account": UserRound,
+  Profile: UserRound,
+  Addresses: MapPin,
+  Wishlist: Heart,
+  "Sell on Bongo Bazar": Store,
+  "Your shop is open": Store,
+  "Your application": Store,
+  "Admin accounts can't open a shop": Store,
+};
+
+export function PageHeader({ title, description, action, icon }: { title: string; description?: string; action?: React.ReactNode; icon?: React.ReactNode; }) {
+  const Icon = title.startsWith("Edit ") ? Package : PAGE_HEADER_ICONS[title] ?? LayoutDashboard;
+
   return (
-    <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
-        {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
+    <header className="mb-7 flex flex-wrap items-center justify-between gap-4">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+        <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800 sm:size-12">
+          {icon ?? <Icon size={22} strokeWidth={1.8} />}
+        </span>
+        <div className="min-w-0">
+          <h1 className="break-words text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">{title}</h1>
+          {description && <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600">{description}</p>}
+        </div>
       </div>
       {action}
     </header>
@@ -22,7 +64,7 @@ export function Panel({ title, action, children, className }: { title?: string; 
     <section className={cn("rounded-xl border border-slate-200 bg-white", className)}>
       {title && (
         <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3.5">
-          <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
+          <h2 className="text-[15px] font-semibold tracking-tight text-slate-900">{title}</h2>
           {action}
         </div>
       )}
@@ -37,9 +79,9 @@ export function Stat({ label, value, hint, tone }: { label: string; value: React
       "rounded-xl border bg-white p-4",
       tone === "accent" ? "border-emerald-300 bg-emerald-50/60" : tone === "warn" ? "border-amber-300 bg-amber-50/60" : "border-slate-200",
     )}>
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-1.5 text-xl font-bold tabular-nums text-slate-900">{value}</p>
-      {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+      <p className="mt-1.5 text-xl font-bold leading-tight tracking-tight tabular-nums text-slate-950 sm:text-2xl">{value}</p>
+      {hint && <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{hint}</p>}
     </div>
   );
 }
@@ -75,7 +117,7 @@ export function Badge({ status }: { status: string; }) {
 export function Empty({ title, children }: { title: string; children?: React.ReactNode; }) {
   return (
     <div className="px-6 py-12 text-center">
-      <p className="text-sm font-medium text-slate-700">{title}</p>
+      <p className="text-[15px] font-semibold tracking-tight text-slate-800">{title}</p>
       {children && <div className="mt-2 text-sm text-slate-500">{children}</div>}
     </div>
   );
@@ -94,8 +136,8 @@ export function Table({ head, children }: { head: string[]; children: React.Reac
     <div className="overflow-x-auto">
       <table className="w-full min-w-[640px] text-left text-sm">
         <thead>
-          <tr className="border-b border-slate-100 text-xs text-slate-500">
-            {head.map((h) => <th key={h} scope="col" className="px-5 py-2.5 font-medium">{h}</th>)}
+          <tr className="border-b border-slate-100 text-[11px] uppercase tracking-[0.1em] text-slate-500">
+            {head.map((h) => <th key={h} scope="col" className="px-5 py-3 font-semibold">{h}</th>)}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 [&_td]:px-5 [&_td]:py-3 [&_td]:align-middle">{children}</tbody>
@@ -115,7 +157,7 @@ export function Tabs({ basePath, current, options }: { basePath: string; current
             href={o.value ? `${basePath}?status=${o.value}` : basePath}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+              "rounded-full px-3 py-1.5 text-[13px] font-semibold transition-colors",
               active ? "bg-emerald-800 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50",
             )}
           >

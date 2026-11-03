@@ -48,7 +48,7 @@ export default async function CategoryProductPage({
 
   // Show all products on category page, or just 5 on home page
   const displayProducts = showAll ? products : products.slice(0, 5);
-  const productCount = products.length;
+  const productCount = data._count?.products ?? products.length;
 
   return (
     <section className="mb-10">

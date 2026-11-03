@@ -41,7 +41,7 @@ export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps
   };
 
   const getProductCount = (category: Category): number =>
-    category.products?.length ?? 0;
+    category._count?.products ?? category.products?.length ?? 0;
 
   return (
     <section className="relative">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import SalesChart from "@/components/dashboard/SalesChart";
 import ApiButton from "@/components/dashboard/ApiButton";
 import { TopProducts } from "@/components/dashboard/shared";
-import { Badge, Empty, LoadError, PageHeader, Panel, Stat, Table, money, shortDate } from "@/components/dashboard/ui";
+import { Badge, Empty, LoadError, PageHeader, Panel, Stat, Table, growthHint, money, shortDate } from "@/components/dashboard/ui";
 import { apiGet } from "@/lib/serverApi";
 import type { AdminDashboard } from "@/types/dashboard";
 
@@ -16,14 +16,13 @@ export default async function AdminOverview() {
     <>
       <PageHeader title="Marketplace overview" description="Sales, vendors and what needs your attention." />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Sales" value={money(d.totals.sales)} hint="All orders not cancelled" />
-        <Stat label="Commission earned" value={money(d.totals.commissionEarned)} hint="On delivered orders" tone="accent" />
+        <Stat label="Sales today" value={money(d.periods.today.sales)} hint={`${d.periods.today.orders} ${d.periods.today.orders === 1 ? "order" : "orders"}`} />
+        <Stat label="Sales this month" value={money(d.periods.thisMonth.sales)} hint={growthHint(d.periods.thisMonth.growthPct)} />
+        <Stat label="Commission earned" value={money(d.totals.commissionEarned)} hint={`After delivery. Coupons cost ${money(d.totals.platformDiscounts)}`} tone="accent" />
         <Stat label="Orders" value={d.totals.orders} hint={`${d.ordersByStatus.PENDING ?? 0} pending`} />
-        <Stat label="Active vendors" value={d.vendorsByStatus.APPROVED ?? 0} hint={`${d.totals.products} products`} />
-        <Stat label="Customers" value={d.totals.customers} hint={`${d.totals.users} accounts in all`} />
+        <Stat label="Active vendors" value={d.vendorsByStatus.APPROVED ?? 0} hint={`${d.totals.products} products, ${d.totals.customers} customers`} />
         <Stat label="Vendor applications" value={pendingCount} tone={pendingCount ? "warn" : undefined} hint="Waiting for review" />
         <Stat label="Payouts to process" value={money(d.totals.pendingPayoutAmount)} tone={d.totals.pendingPayoutCount ? "warn" : undefined} hint={`${d.totals.pendingPayoutCount} requests`} />
-        <Stat label="Coupon cost to platform" value={money(d.totals.platformDiscounts)} hint="On delivered orders" />
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-3">

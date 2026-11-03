@@ -62,7 +62,7 @@ export default function ApiButton({ method, path, body, children, variant = "gho
       onClick={run}
       disabled={pending}
       className={cn(
-        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors disabled:opacity-50",
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold transition-colors disabled:opacity-50",
         armed ? "bg-red-700 text-white" : buttonStyles[variant],
       )}
     >

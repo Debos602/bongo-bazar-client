@@ -66,6 +66,7 @@ export interface Category {
     name: string;
     Image: string;
     slug: string;
+    _count?: { products: number; };
     products?: Array<{ productId: number; categoryId: number; product: Product; }>;
 }
 

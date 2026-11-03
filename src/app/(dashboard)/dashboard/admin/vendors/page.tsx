@@ -14,7 +14,7 @@ export default async function AdminVendors({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader title="Vendors" description="Approve applications, suspend shops and set each shop's commission." />
+      <PageHeader title="Vendors" description="Review seller applications. Approving one makes that user a vendor straight away." />
       <Tabs basePath={PATH} current={status} options={[
         { value: "", label: "All" }, { value: "PENDING", label: "Pending" }, { value: "APPROVED", label: "Approved" },
         { value: "SUSPENDED", label: "Suspended" }, { value: "REJECTED", label: "Rejected" },
@@ -24,7 +24,12 @@ export default async function AdminVendors({ searchParams }: { searchParams: Pro
           <Table head={["Shop", "Owner", "Products", "Commission", "Status", "Joined", ""]}>
             {res.data.data.map((v) => (
               <tr key={v.id}>
-                <td className="font-medium text-slate-800">{v.shopName}</td>
+                <td className="max-w-72">
+                  <span className="block font-medium text-slate-800">{v.shopName}</span>
+                  {v.description && <span className="mt-0.5 block text-xs text-slate-600">{v.description}</span>}
+                  {(v.phone || v.address) && <span className="mt-0.5 block text-xs text-slate-500">{[v.phone, v.address].filter(Boolean).join(", ")}</span>}
+                  {v.rejectionReason && <span className="mt-0.5 block text-xs text-red-700">{v.rejectionReason}</span>}
+                </td>
                 <td><span className="block text-slate-700">{v.user?.name}</span><span className="block text-xs text-slate-500">{v.user?.email}</span></td>
                 <td className="tabular-nums">{v._count?.products ?? 0}</td>
                 <td className="tabular-nums">{v.commissionRate === null || v.commissionRate === undefined ? "Default" : `${v.commissionRate}%`}</td>
@@ -32,7 +37,7 @@ export default async function AdminVendors({ searchParams }: { searchParams: Pro
                 <td className="whitespace-nowrap text-slate-500">{shortDate(v.createdAt)}</td>
                 <td>
                   <span className="flex flex-wrap justify-end gap-1.5">
-                    {v.status !== "APPROVED" && <ApiButton method="PATCH" path={`/vendor/${v.id}/status`} body={{ status: "APPROVED" }} variant="primary">Approve</ApiButton>}
+                    {v.status !== "APPROVED" && <ApiButton method="PATCH" path={`/vendor/${v.id}/status`} body={{ status: "APPROVED" }} variant="primary">{v.status === "SUSPENDED" ? "Restore shop" : "Approve and make vendor"}</ApiButton>}
                     {v.status === "PENDING" && (
                       <FormDialog trigger="Reject" title={`Reject ${v.shopName}`} variant="danger" method="PATCH" path={`/vendor/${v.id}/status`} fixed={{ status: "REJECTED" }} submitLabel="Reject application"
                         fields={[{ name: "reason", label: "Reason shown to the applicant", type: "textarea" }]} />

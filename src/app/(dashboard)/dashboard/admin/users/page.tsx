@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ApiButton from "@/components/dashboard/ApiButton";
 import { FormDialog } from "@/components/dashboard/ApiForm";
 import { Badge, Empty, LoadError, PageHeader, Pagination, Panel, Table, Tabs, shortDate } from "@/components/dashboard/ui";
@@ -32,12 +33,27 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
       <Tabs basePath={PATH} current={role} options={[{ value: "", label: "All" }, { value: "USER", label: "Customers" }, { value: "VENDOR", label: "Vendors" }, { value: "ADMIN", label: "Admins" }]} />
       <Panel>
         {res.data.length ? (
-          <Table head={["Name", "Phone", "Role", "Status", "Joined", ""]}>
+          <Table head={["Name", "Phone", "Role", "Seller application", "Status", "Joined", ""]}>
             {res.data.map((u) => (
               <tr key={u.id}>
                 <td><span className="block font-medium text-slate-800">{u.name}</span><span className="block text-xs text-slate-500">{u.email}</span></td>
                 <td>{u.phone}</td>
                 <td>{u.role.replace("_", " ")}</td>
+                <td>
+                  {u.vendor ? (
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <Link href={`/dashboard/admin/vendors?status=${u.vendor.status}`} className="text-slate-700 hover:underline">{u.vendor.shopName}</Link>
+                      <Badge status={u.vendor.status} />
+                      {u.vendor.status === "PENDING" && (
+                        <>
+                          <ApiButton method="PATCH" path={`/vendor/${u.vendor.id}/status`} body={{ status: "APPROVED" }} variant="primary">Make vendor</ApiButton>
+                          <FormDialog trigger="Reject" title={`Reject ${u.vendor.shopName}`} variant="danger" method="PATCH" path={`/vendor/${u.vendor.id}/status`} fixed={{ status: "REJECTED" }} submitLabel="Reject application"
+                            fields={[{ name: "reason", label: "Reason shown to the applicant", type: "textarea" }]} />
+                        </>
+                      )}
+                    </span>
+                  ) : <span className="text-slate-400">None</span>}
+                </td>
                 <td><Badge status={u.status} /></td>
                 <td className="whitespace-nowrap text-slate-500">{shortDate(u.createdAt)}</td>
                 <td className="text-right">

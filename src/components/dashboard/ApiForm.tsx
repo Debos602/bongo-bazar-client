@@ -117,11 +117,11 @@ export function ApiForm({ method, path, fields, initial, submitLabel, multipart,
 function FieldInput({ field: f, value }: { field: Field; value: Value; }) {
   const id = `f-${f.name}`;
   const label = (
-    <label htmlFor={id} className="mb-1 block text-xs font-medium text-slate-700">
+    <label htmlFor={id} className="mb-1 block text-[13px] font-semibold text-slate-700">
       {f.label}{f.required && <span className="text-red-600"> *</span>}
     </label>
   );
-  const help = f.help && <p className="mt-1 text-xs text-slate-500">{f.help}</p>;
+  const help = f.help && <p className="mt-1 text-xs leading-relaxed text-slate-500">{f.help}</p>;
 
   if (f.type === "checkbox") {
     return (
@@ -179,14 +179,14 @@ export function FormDialog({ trigger, title, variant = "ghost", ...form }: FormP
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={cn("whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-medium", buttonStyles[variant])}>
+      <button type="button" onClick={() => setOpen(true)} className={cn("whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold", buttonStyles[variant])}>
         {trigger}
       </button>
       {open && (
         <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 sm:p-10" onKeyDown={(e) => e.key === "Escape" && setOpen(false)}>
           <div className="w-full max-w-xl rounded-xl bg-white p-5 text-left shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+              <h2 className="text-lg font-bold tracking-tight text-slate-950">{title}</h2>
               <button type="button" aria-label="Close" onClick={() => setOpen(false)} className="rounded-md p-1 text-slate-500 hover:bg-slate-100"><X size={18} /></button>
             </div>
             <ApiForm {...form} onDone={() => setOpen(false)} />

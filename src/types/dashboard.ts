@@ -40,16 +40,20 @@ export type Vendor = {
     status: Status; rejectionReason?: string | null; commissionRate?: number | null; createdAt: string;
     user?: { id: Id; email: string; name: string; phone: string; }; _count?: { products: number; vendorOrders: number; };
 };
-export type AppUser = { id: Id; email: string; name: string; phone: string; role: string; status: Status; createdAt: string; };
+export type AppUser = { id: Id; email: string; name: string; phone: string; role: string; status: Status; createdAt: string; vendor?: { id: Id; shopName: string; status: Status; } | null; };
 export type Post = { id: Id; title: string; content: string; views: number; isFeatured: boolean; tags: string[]; createdAt: string; author?: { name: string; }; };
 
+export type Periods = { today: { sales: number; orders: number; }; thisMonth: { sales: number; orders: number; averageOrder: number; growthPct: number | null; }; };
+
 export type AdminDashboard = {
+    periods: Periods;
     totals: { users: number; customers: number; products: number; orders: number; sales: number; commissionEarned: number; platformDiscounts: number; pendingPayoutAmount: number; pendingPayoutCount: number; };
     vendorsByStatus: Record<string, number>; ordersByStatus: Record<string, number>; monthlySales: MonthlyPoint[]; topProducts: TopProduct[];
     recentOrders: { id: Id; total: number; status: Status; createdAt: string; user: { name: string; }; address: { city: string; }; }[];
     pendingVendors: { id: Id; shopName: string; createdAt: string; user: { name: string; email: string; }; }[];
 };
 export type VendorDashboard = {
+    periods: Periods;
     shop: { id: Id; shopName: string; slug: string; status: Status; commissionRate: number | null; };
     totals: { products: number; publishedProducts: number; orders: number; sales: number; averageRating: number; reviews: number; };
     balance: Balance; ordersByStatus: Record<string, number>; monthlySales: MonthlyPoint[]; topProducts: TopProduct[];
