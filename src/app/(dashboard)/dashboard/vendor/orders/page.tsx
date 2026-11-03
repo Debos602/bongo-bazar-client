@@ -1,3 +1,4 @@
+import { CheckCircle2, PackageOpen, ShoppingBag, Truck, X } from "lucide-react";
 import ApiButton from "@/components/dashboard/ApiButton";
 import { FormDialog } from "@/components/dashboard/ApiForm";
 import { Thumb } from "@/components/dashboard/shared";
@@ -36,13 +37,13 @@ export default async function VendorOrders({ searchParams }: { searchParams: Pro
                   </div>
                   <div className="flex flex-wrap items-center justify-end gap-1.5">
                     {awaitingCard && o.status !== "CANCELLED" && <span className="text-xs font-medium text-amber-700">Waiting for card payment</span>}
-                    {o.status === "PENDING" && !awaitingCard && <ApiButton method="PATCH" path={url} body={{ status: "PROCESSING" }} variant="primary">Start processing</ApiButton>}
+                    {o.status === "PENDING" && !awaitingCard && <ApiButton method="PATCH" path={url} body={{ status: "PROCESSING" }} variant="primary"><PackageOpen size={13} aria-hidden /> Start processing</ApiButton>}
                     {o.status === "PROCESSING" && (
-                      <FormDialog trigger="Mark shipped" title={`Ship order #${o.orderId}`} variant="primary" method="PATCH" path={url} fixed={{ status: "SHIPPED" }} submitLabel="Mark shipped"
+                      <FormDialog icon={<Truck size={13} aria-hidden />} trigger="Mark shipped" title={`Ship order #${o.orderId}`} variant="primary" method="PATCH" path={url} fixed={{ status: "SHIPPED" }} submitLabel="Mark shipped"
                         fields={[{ name: "trackingNumber", label: "Tracking number" }]} />
                     )}
-                    {o.status === "SHIPPED" && <ApiButton method="PATCH" path={url} body={{ status: "DELIVERED" }} variant="primary">Mark delivered</ApiButton>}
-                    {(o.status === "PENDING" || o.status === "PROCESSING") && <ApiButton method="PATCH" path={url} body={{ status: "CANCELLED" }} variant="danger" confirm="Cancel order?">Cancel</ApiButton>}
+                    {o.status === "SHIPPED" && <ApiButton method="PATCH" path={url} body={{ status: "DELIVERED" }} variant="primary"><CheckCircle2 size={13} aria-hidden /> Mark delivered</ApiButton>}
+                    {(o.status === "PENDING" || o.status === "PROCESSING") && <ApiButton method="PATCH" path={url} body={{ status: "CANCELLED" }} variant="danger" confirm="Cancel order?"><X size={13} aria-hidden /> Cancel</ApiButton>}
                   </div>
                 </div>
                 <ul className="divide-y divide-slate-100 border-t border-slate-100 text-sm">
@@ -61,7 +62,7 @@ export default async function VendorOrders({ searchParams }: { searchParams: Pro
             );
           })}
         </div>
-      ) : <Panel><Empty title="No orders here" /></Panel>}
+      ) : <Panel><Empty title="No orders here" icon={ShoppingBag} /></Panel>}
       <Pagination basePath={PATH} meta={res.meta} query={{ status }} />
     </>
   );

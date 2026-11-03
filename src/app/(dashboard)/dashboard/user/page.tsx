@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Heart, MapPin, MessageSquare, ShoppingBag, Truck, Wallet } from "lucide-react";
 import { FormDialog } from "@/components/dashboard/ApiForm";
 import { Thumb } from "@/components/dashboard/shared";
 import { Badge, Empty, LoadError, PageHeader, Panel, Stat, Table, money, shortDate } from "@/components/dashboard/ui";
@@ -21,13 +22,13 @@ export default async function UserOverview() {
         </p>
       )}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Orders in progress" value={inProgress} tone={inProgress ? "accent" : undefined} hint={`Total orders: ${d.totals.orders}`} />
-        <Stat label="Total spent" value={money(d.totals.spent)} />
-        <Stat label="Wishlist" value={d.totals.wishlist} />
-        <Stat label="Saved addresses" value={d.totals.addresses} />
+        <Stat icon={Truck} label="Orders in progress" value={inProgress} tone={inProgress ? "accent" : undefined} hint={`Total orders: ${d.totals.orders}`} />
+        <Stat icon={Wallet} label="Total spent" value={money(d.totals.spent)} />
+        <Stat icon={Heart} label="Wishlist" value={d.totals.wishlist} />
+        <Stat icon={MapPin} label="Saved addresses" value={d.totals.addresses} />
       </div>
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <Panel title="Recent orders" className="lg:col-span-2" action={<Link href="/dashboard/user/orders" className="text-xs font-medium text-emerald-800 hover:underline">View all</Link>}>
+        <Panel icon={ShoppingBag} title="Recent orders" className="lg:col-span-2" action={<Link href="/dashboard/user/orders" className="text-xs font-medium text-emerald-800 hover:underline">View all</Link>}>
           {d.recentOrders.length ? (
             <Table head={["Order", "Items", "Total", "Status", "Date"]}>
               {d.recentOrders.map((o) => (
@@ -40,9 +41,9 @@ export default async function UserOverview() {
                 </tr>
               ))}
             </Table>
-          ) : <Empty title="You haven't ordered anything yet"><Link href="/products" className="font-medium text-emerald-800 hover:underline">Browse products</Link></Empty>}
+          ) : <Empty title="You haven't ordered anything yet" icon={ShoppingBag}><Link href="/products" className="font-medium text-emerald-800 hover:underline">Browse products</Link></Empty>}
         </Panel>
-        <Panel title="Waiting for your review">
+        <Panel icon={MessageSquare} title="Waiting for your review">
           {d.toReview.length ? (
             <ul className="divide-y divide-slate-100">
               {d.toReview.map((p) => (
@@ -58,7 +59,7 @@ export default async function UserOverview() {
                 </li>
               ))}
             </ul>
-          ) : <Empty title="Nothing to review" />}
+          ) : <Empty title="Nothing to review" icon={MessageSquare} />}
         </Panel>
       </div>
     </>

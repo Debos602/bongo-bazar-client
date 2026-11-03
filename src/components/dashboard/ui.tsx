@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   BadgePercent, ChartNoAxesCombined, FileText, Heart, LayoutDashboard, MapPin, MessageSquare, Package, ShoppingBag, Store, Tag,
   UserRound, Users, Wallet, type LucideIcon, ChevronLeft, ChevronRight,
+  Ban, CheckCircle2, CircleDashed, Clock, FileEdit, Inbox, PackageOpen, RotateCcw, Truck, XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -59,12 +60,15 @@ export function PageHeader({ title, description, action, icon }: { title: string
   );
 }
 
-export function Panel({ title, action, children, className }: { title?: string; action?: React.ReactNode; children: React.ReactNode; className?: string; }) {
+export function Panel({ title, icon: Icon, action, children, className }: { title?: string; icon?: LucideIcon; action?: React.ReactNode; children: React.ReactNode; className?: string; }) {
   return (
-    <section className={cn("rounded-xl border border-slate-200 bg-white", className)}>
+    <section className={cn("min-w-0 rounded-xl border border-slate-200 bg-white", className)}>
       {title && (
         <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3.5">
-          <h2 className="text-[15px] font-semibold tracking-tight text-slate-900">{title}</h2>
+          <h2 className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-slate-900">
+            {Icon && <Icon size={17} className="text-emerald-700" aria-hidden />}
+            {title}
+          </h2>
           {action}
         </div>
       )}
@@ -73,13 +77,23 @@ export function Panel({ title, action, children, className }: { title?: string; 
   );
 }
 
-export function Stat({ label, value, hint, tone }: { label: string; value: React.ReactNode; hint?: string; tone?: "accent" | "warn"; }) {
+export function Stat({ label, value, hint, tone, icon: Icon }: { label: string; value: React.ReactNode; hint?: string; tone?: "accent" | "warn"; icon?: LucideIcon; }) {
   return (
     <div className={cn(
-      "rounded-xl border bg-white p-4",
+      "min-w-0 rounded-xl border bg-white p-4",
       tone === "accent" ? "border-emerald-300 bg-emerald-50/60" : tone === "warn" ? "border-amber-300 bg-amber-50/60" : "border-slate-200",
     )}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+        {Icon && (
+          <span className={cn(
+            "-mt-1 flex size-8 flex-shrink-0 items-center justify-center rounded-lg",
+            tone === "accent" ? "bg-emerald-100 text-emerald-800" : tone === "warn" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600",
+          )}>
+            <Icon size={16} aria-hidden />
+          </span>
+        )}
+      </div>
       <p className="mt-1.5 text-xl font-bold leading-tight tracking-tight tabular-nums text-slate-950 sm:text-2xl">{value}</p>
       {hint && <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{hint}</p>}
     </div>
@@ -106,18 +120,46 @@ const STATUS_STYLES: Record<string, string> = {
   BLOCKED: "bg-red-100 text-red-800",
 };
 
+const STATUS_ICONS: Record<string, LucideIcon> = {
+  PENDING: Clock,
+  PROCESSING: PackageOpen,
+  SHIPPED: Truck,
+  DELIVERED: CheckCircle2,
+  APPROVED: CheckCircle2,
+  PAID: CheckCircle2,
+  ACTIVE: CheckCircle2,
+  PUBLISHED: CheckCircle2,
+  CANCELLED: XCircle,
+  REFUNDED: RotateCcw,
+  INACTIVE: CircleDashed,
+  DRAFT: FileEdit,
+  REJECTED: XCircle,
+  SUSPENDED: Ban,
+  FAILED: XCircle,
+  BLOCK: Ban,
+  BLOCKED: Ban,
+};
+
+const statusLabel = (status: string) => {
+  const text = status.replaceAll("_", " ").toLowerCase();
+  return text.charAt(0).toUpperCase() + text.slice(1);
+};
+
 export function Badge({ status }: { status: string; }) {
+  const Icon = STATUS_ICONS[status];
   return (
-    <span className={cn("inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold", STATUS_STYLES[status] ?? "bg-slate-100 text-slate-700")}>
-      {status.replaceAll("_", " ")}
+    <span className={cn("inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 align-middle text-xs font-medium", STATUS_STYLES[status] ?? "bg-slate-100 text-slate-700")}>
+      {Icon && <Icon size={12} aria-hidden />}
+      {statusLabel(status)}
     </span>
   );
 }
 
-export function Empty({ title, children }: { title: string; children?: React.ReactNode; }) {
+export function Empty({ title, children, icon: Icon = Inbox }: { title: string; children?: React.ReactNode; icon?: LucideIcon; }) {
   return (
     <div className="px-6 py-12 text-center">
-      <p className="text-[15px] font-semibold tracking-tight text-slate-800">{title}</p>
+      <Icon size={26} className="mx-auto mb-2 text-slate-300" aria-hidden />
+      <p className="text-sm font-medium text-slate-700">{title}</p>
       {children && <div className="mt-2 text-sm text-slate-500">{children}</div>}
     </div>
   );

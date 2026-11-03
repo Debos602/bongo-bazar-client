@@ -1,3 +1,4 @@
+import { ArrowDownToLine, CheckCircle2, Clock, Coins, Wallet } from "lucide-react";
 import { FormDialog } from "@/components/dashboard/ApiForm";
 import { Badge, Empty, LoadError, PageHeader, Panel, Stat, Table, money, shortDate } from "@/components/dashboard/ui";
 import { apiGet } from "@/lib/serverApi";
@@ -14,7 +15,7 @@ export default async function VendorPayouts() {
         title="Earnings"
         description="You earn when an order is delivered, after commission."
         action={balance.available > 0 ? (
-          <FormDialog trigger="Withdraw" title="Request a withdrawal" variant="primary" method="POST" path="/payout" submitLabel="Request withdrawal"
+          <FormDialog icon={<ArrowDownToLine size={14} aria-hidden />} trigger="Withdraw" title="Request a withdrawal" variant="primary" method="POST" path="/payout" submitLabel="Request withdrawal"
             initial={{ amount: String(balance.available) }}
             fields={[
               { name: "amount", label: `Amount (up to ${money(balance.available)})`, type: "number", required: true, min: 1, max: balance.available, step: "0.01" },
@@ -25,12 +26,12 @@ export default async function VendorPayouts() {
         ) : undefined}
       />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Available to withdraw" value={money(balance.available)} tone="accent" />
-        <Stat label="Requested" value={money(balance.pendingPayouts)} />
-        <Stat label="Paid to you" value={money(balance.totalPaid)} />
-        <Stat label="Total earned" value={money(balance.totalEarned)} />
+        <Stat icon={Wallet} label="Available to withdraw" value={money(balance.available)} tone="accent" />
+        <Stat icon={Clock} label="Requested" value={money(balance.pendingPayouts)} />
+        <Stat icon={CheckCircle2} label="Paid to you" value={money(balance.totalPaid)} />
+        <Stat icon={Coins} label="Total earned" value={money(balance.totalEarned)} />
       </div>
-      <Panel title="Withdrawals" className="mt-5">
+      <Panel icon={ArrowDownToLine} title="Withdrawals" className="mt-5">
         {payouts.length ? (
           <Table head={["Requested", "Amount", "Sent to", "Status", "Reference"]}>
             {payouts.map((p) => (
@@ -43,7 +44,7 @@ export default async function VendorPayouts() {
               </tr>
             ))}
           </Table>
-        ) : <Empty title="No withdrawals yet" />}
+        ) : <Empty title="No withdrawals yet" icon={ArrowDownToLine} />}
       </Panel>
     </>
   );

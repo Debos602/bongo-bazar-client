@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Star } from "lucide-react";
+import { BadgePercent, Pencil, Plus, Star, Trash2, TrendingUp } from "lucide-react";
 import ApiButton from "./ApiButton";
 import { FormDialog, type Field } from "./ApiForm";
 import { Empty, Panel, Table, shortDate, Badge } from "./ui";
@@ -25,7 +25,7 @@ export function Stars({ value }: { value: number; }) {
 
 export function TopProducts({ products }: { products: TopProduct[]; }) {
   return (
-    <Panel title="Top products">
+    <Panel title="Top products" icon={TrendingUp}>
       {products.length ? (
         <ul className="divide-y divide-slate-100">
           {products.map((p) => (
@@ -36,7 +36,7 @@ export function TopProducts({ products }: { products: TopProduct[]; }) {
             </li>
           ))}
         </ul>
-      ) : <Empty title="No sales yet" />}
+      ) : <Empty title="No sales yet" icon={TrendingUp} />}
     </Panel>
   );
 }
@@ -54,7 +54,7 @@ export function CouponManager({ coupons, scopeNote }: { coupons: Coupon[]; scope
     <>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-500">{scopeNote}</p>
-        <FormDialog trigger="New coupon" title="New coupon" variant="primary" method="POST" path="/coupon" fields={couponFields} initial={{ isActive: true }} submitLabel="Create coupon" />
+        <FormDialog trigger="New coupon" title="New coupon" variant="primary" icon={<Plus size={14} aria-hidden />} method="POST" path="/coupon" fields={couponFields} initial={{ isActive: true }} submitLabel="Create coupon" />
       </div>
       <Panel>
         {coupons.length ? (
@@ -69,16 +69,16 @@ export function CouponManager({ coupons, scopeNote }: { coupons: Coupon[]; scope
                 <td>
                   <span className="flex justify-end gap-1.5">
                     <FormDialog
-                      trigger="Edit" title={`Edit ${c.code}`} method="PUT" path={`/coupon/${c.id}`} fields={couponFields} submitLabel="Save"
+                      trigger="Edit" icon={<Pencil size={13} aria-hidden />} title={`Edit ${c.code}`} method="PUT" path={`/coupon/${c.id}`} fields={couponFields} submitLabel="Save"
                       initial={{ code: c.code, discount: String(c.discount), usageLimit: c.usageLimit ? String(c.usageLimit) : "", expiresAt: c.expiresAt?.slice(0, 10) ?? "", isActive: c.isActive }}
                     />
-                    <ApiButton method="DELETE" path={`/coupon/${c.id}`} variant="danger" confirm="Delete?">Delete</ApiButton>
+                    <ApiButton method="DELETE" path={`/coupon/${c.id}`} variant="danger" confirm="Delete?"><Trash2 size={13} aria-hidden /> Delete</ApiButton>
                   </span>
                 </td>
               </tr>
             ))}
           </Table>
-        ) : <Empty title="No coupons yet" />}
+        ) : <Empty title="No coupons yet" icon={BadgePercent} />}
       </Panel>
     </>
   );
@@ -99,11 +99,11 @@ export function ReviewList({ reviews, canDelete }: { reviews: Review[]; canDelet
                 </p>
                 {r.comment && <p className="mt-1.5 text-slate-600">{r.comment}</p>}
               </div>
-              {canDelete && <ApiButton method="DELETE" path={`/review/${r.id}`} variant="danger" confirm="Delete?">Delete</ApiButton>}
+              {canDelete && <ApiButton method="DELETE" path={`/review/${r.id}`} variant="danger" confirm="Delete?"><Trash2 size={13} aria-hidden /> Delete</ApiButton>}
             </li>
           ))}
         </ul>
-      ) : <Empty title="No reviews yet" />}
+      ) : <Empty title="No reviews yet" icon={Star} />}
     </Panel>
   );
 }

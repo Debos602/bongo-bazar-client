@@ -22,6 +22,8 @@ const CATEGORY_ICON: Record<string, string> = {
   camera: '📷',
 };
 
+const MAX_CATEGORIES = 10;
+
 const getCategoryIcon = (slug: string): string =>
   CATEGORY_ICON[slug] || '🛍️';
 
@@ -30,14 +32,20 @@ export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps
     return null;
   }
 
-  const displayCategories = categories.slice(0, 6);
+  const displayCategories = categories.slice(0, MAX_CATEGORIES);
+
+  // The first card fills 4 cells, the second 2, the rest 1. Widening the last few
+  // cards fills the bottom row on the 4-column desktop grid, whatever the count.
+  const count = displayCategories.length;
+  const cells = count <= 2 ? 0 : 6 + (count - 2);
+  const spareCells = (4 - (cells % 4)) % 4;
 
   const getCategoryImage = (category: Category): string => {
     const raw =
       category.Image || category.products?.[0]?.product?.image || '';
-    return raw
-      ? `${raw}?w=1200&q=80&auto=format&fit=crop`
-      : '';
+    if (!raw) return '';
+    // Sizing options only apply to remote image hosts; a site path must stay as it is.
+    return raw.startsWith('/') ? raw : `${raw}?w=1200&q=80&auto=format&fit=crop`;
   };
 
   const getProductCount = (category: Category): number =>
@@ -59,7 +67,7 @@ export default function CategoryBentoGrid({ categories }: CategoryBentoGridProps
           // 4: normal — col-span 1, row-span 1
           // 5: normal — col-span 1, row-span 1
           const isHero = index === 0;
-          const isWide = index === 1;
+          const isWide = index === 1 || (index >= 2 && index >= count - spareCells);
           const categoryImage = getCategoryImage(category);
           const productCount = getProductCount(category);
           const icon = getCategoryIcon(category.slug);

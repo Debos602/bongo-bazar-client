@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Loader2, X } from "lucide-react";
 import { apiAction, apiUpload } from "@/actions/api";
 import { cn } from "@/lib/utils";
@@ -63,7 +64,8 @@ export function ApiForm({ method, path, fields, initial, submitLabel, multipart,
             if (file instanceof File && file.size > 0) out.set(f.name, file);
           } else {
             const value = String(raw.get(f.name) ?? "").trim();
-            if (value) out.set(f.name, value);
+            // On an edit, an emptied field is sent so that it gets cleared.
+            if (value || method !== "POST") out.set(f.name, value);
           }
         }
         // A pasted photo link is sent as the text "image" field when no file was chosen.
@@ -174,25 +176,49 @@ function FieldInput({ field: f, value }: { field: Field; value: Value; }) {
   );
 }
 
-// A form that opens in a modal from a button.
-export function FormDialog({ trigger, title, variant = "ghost", ...form }: FormProps & { trigger: string; title: string; variant?: keyof typeof buttonStyles; }) {
+// A form that opens in a modal from a button. Clicking outside does not close it,
+// so a half-filled form is not lost by accident; Esc and the X button do.
+export function FormDialog({ trigger, title, description, icon, wide, variant = "ghost", ...form }: FormProps & {
+  trigger: string;
+  title: string;
+  description?: string;
+  icon?: React.ReactNode;
+  wide?: boolean;
+  variant?: keyof typeof buttonStyles;
+}) {
   const [open, setOpen] = useState(false);
   return (
-    <>
-      <button type="button" onClick={() => setOpen(true)} className={cn("whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold", buttonStyles[variant])}>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Trigger className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-semibold", buttonStyles[variant])}>
+        {icon}
         {trigger}
-      </button>
-      {open && (
-        <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 sm:p-10" onKeyDown={(e) => e.key === "Escape" && setOpen(false)}>
-          <div className="w-full max-w-xl rounded-xl bg-white p-5 text-left shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold tracking-tight text-slate-950">{title}</h2>
-              <button type="button" aria-label="Close" onClick={() => setOpen(false)} className="rounded-md p-1 text-slate-500 hover:bg-slate-100"><X size={18} /></button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/50 p-3 data-[state=open]:animate-in data-[state=open]:fade-in-0 sm:p-8">
+          <Dialog.Content
+            aria-describedby={undefined}
+            onPointerDownOutside={(e) => e.preventDefault()}
+            onInteractOutside={(e) => e.preventDefault()}
+            className={cn(
+              "w-full rounded-xl bg-white text-left shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+              wide ? "max-w-3xl" : "max-w-xl",
+            )}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+              <div className="min-w-0">
+                <Dialog.Title className="break-words text-lg font-bold tracking-tight text-slate-950">{title}</Dialog.Title>
+                {description && <p className="mt-0.5 text-sm text-slate-600">{description}</p>}
+              </div>
+              <Dialog.Close aria-label="Close" className="flex-shrink-0 rounded-md p-1 text-slate-500 hover:bg-slate-100">
+                <X size={18} aria-hidden />
+              </Dialog.Close>
             </div>
-            <ApiForm {...form} onDone={() => setOpen(false)} />
-          </div>
-        </div>
-      )}
-    </>
+            <div className="p-5">
+              <ApiForm {...form} onDone={() => setOpen(false)} />
+            </div>
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

@@ -1,3 +1,4 @@
+import { Ban, Check, Percent, Store, X } from "lucide-react";
 import ApiButton from "@/components/dashboard/ApiButton";
 import { FormDialog } from "@/components/dashboard/ApiForm";
 import { Badge, Empty, LoadError, PageHeader, Pagination, Panel, Table, Tabs, shortDate } from "@/components/dashboard/ui";
@@ -37,16 +38,16 @@ export default async function AdminVendors({ searchParams }: { searchParams: Pro
                 <td className="whitespace-nowrap text-slate-500">{shortDate(v.createdAt)}</td>
                 <td>
                   <span className="flex flex-wrap justify-end gap-1.5">
-                    {v.status !== "APPROVED" && <ApiButton method="PATCH" path={`/vendor/${v.id}/status`} body={{ status: "APPROVED" }} variant="primary">{v.status === "SUSPENDED" ? "Restore shop" : "Approve and make vendor"}</ApiButton>}
+                    {v.status !== "APPROVED" && <ApiButton method="PATCH" path={`/vendor/${v.id}/status`} body={{ status: "APPROVED" }} variant="primary"><Check size={13} aria-hidden /> {v.status === "SUSPENDED" ? "Restore shop" : "Approve and make vendor"}</ApiButton>}
                     {v.status === "PENDING" && (
-                      <FormDialog trigger="Reject" title={`Reject ${v.shopName}`} variant="danger" method="PATCH" path={`/vendor/${v.id}/status`} fixed={{ status: "REJECTED" }} submitLabel="Reject application"
+                      <FormDialog icon={<X size={13} aria-hidden />} trigger="Reject" title={`Reject ${v.shopName}`} variant="danger" method="PATCH" path={`/vendor/${v.id}/status`} fixed={{ status: "REJECTED" }} submitLabel="Reject application"
                         fields={[{ name: "reason", label: "Reason shown to the applicant", type: "textarea" }]} />
                     )}
                     {v.status === "APPROVED" && (
-                      <FormDialog trigger="Suspend" title={`Suspend ${v.shopName}`} variant="danger" method="PATCH" path={`/vendor/${v.id}/status`} fixed={{ status: "SUSPENDED" }} submitLabel="Suspend shop"
+                      <FormDialog icon={<Ban size={13} aria-hidden />} trigger="Suspend" title={`Suspend ${v.shopName}`} variant="danger" method="PATCH" path={`/vendor/${v.id}/status`} fixed={{ status: "SUSPENDED" }} submitLabel="Suspend shop"
                         fields={[{ name: "reason", label: "Reason", type: "textarea" }]} />
                     )}
-                    <FormDialog trigger="Commission" title={`Commission for ${v.shopName}`} method="PATCH" path={`/vendor/${v.id}/commission`} submitLabel="Save"
+                    <FormDialog icon={<Percent size={13} aria-hidden />} trigger="Commission" title={`Commission for ${v.shopName}`} method="PATCH" path={`/vendor/${v.id}/commission`} submitLabel="Save"
                       initial={{ commissionRate: v.commissionRate?.toString() ?? "" }}
                       fields={[{ name: "commissionRate", label: "Commission %", type: "number", min: 0, max: 100, step: "0.1", help: "Leave empty to use the platform default" }]} />
                   </span>
@@ -54,7 +55,7 @@ export default async function AdminVendors({ searchParams }: { searchParams: Pro
               </tr>
             ))}
           </Table>
-        ) : <Empty title="No vendors here" />}
+        ) : <Empty title="No vendors here" icon={Store} />}
         <Pagination basePath={PATH} meta={res.data.pagination} query={{ status }} />
       </Panel>
     </>
